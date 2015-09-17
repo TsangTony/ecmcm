@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions">
+<head>
+<meta charset="UTF-8" />
+<title>IBM Migration Manager</title>
+</head>
+<body>
+	<h1>Import Document Instances</h1>
+	<h:form id="importForm" enctype="multipart/form-data"> 
+		<table>
+			<tr>
+				<td>CSV file</td>
+				<td><p:fileUpload value="#{fileUpload.file}" mode="simple" /></td>
+			</tr>
+			<tr>
+				<td>Document</td>
+				<td>
+					<h:selectOneMenu value="#{fileUpload.document}" converter="omnifaces.SelectItemsConverter">
+						<f:selectItems value="#{documents.documents}"></f:selectItems>
+					</h:selectOneMenu>
+				</td>
+			</tr>
+			<tr>
+				<td>Source</td>
+				<td>
+
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					Increment/ Replacement
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					Remove PDF files
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					Include all files where the document instances linked to 
+				</td>
+			</tr>
+		</table>
+    	
+    	<p:commandButton value="Submit" ajax="false" action="#{fileUpload.upload}" update="importForm" />
+    	<p:growl id="messages" for="messages" showDetail="true" />
+	</h:form>
+</body>
+</html>
