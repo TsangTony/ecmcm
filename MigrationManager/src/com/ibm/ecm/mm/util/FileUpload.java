@@ -10,8 +10,10 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import javax.annotation.Resource;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.sql.DataSource;
 
 import org.primefaces.model.UploadedFile;
 
@@ -21,6 +23,9 @@ import com.ibm.ecm.mm.model.Document;
 public class FileUpload {
 	private UploadedFile file;
 	private Document document;
+	
+	@Resource(name="jdbc/migrationmanager")
+	private DataSource ds;
 	
     public UploadedFile getFile() {
         return file;
@@ -44,7 +49,7 @@ public class FileUpload {
 				BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputstream()));
 				String line;
 				
-				Connection conn = MSSQLConnection.getConnection();
+				Connection conn = ds.getConnection();
 				
 				//TODO: validate document instance
 				
@@ -99,8 +104,6 @@ public class FileUpload {
 				e.printStackTrace();
 			} catch (ParseException e) {
 				e.printStackTrace();
-			} finally {
-				MSSQLConnection.close();
 			}
         }
     }

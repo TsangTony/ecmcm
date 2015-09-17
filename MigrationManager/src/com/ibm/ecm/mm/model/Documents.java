@@ -6,23 +6,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import javax.annotation.Resource;
-import javax.sql.DataSource;
-
 import com.ibm.ecm.mm.util.MSSQLConnection;
 
 public class Documents {
 	private ArrayList<Document> documents;
 	
-	@Resource(name="jdbc/migrationmanager")
-	private DataSource ds;
-	
 	public Documents() {
 		this.setDocuments(new ArrayList<Document>());		
 			
-		try {
-
-			Connection conn = ds.getConnection();	
+		try {			
+			
+			Connection conn = MSSQLConnection.getConnection();	
 			String query = "SELECT id, name FROM Document order by id ASC";
 			
 			Statement stmt = conn.createStatement();
@@ -35,7 +29,8 @@ public class Documents {
 				getDocuments().add(document);
 			}
 			
-		} catch (SQLException e) {
+		}
+		catch (SQLException e) {
 			e.printStackTrace();
 		}
 		finally {

@@ -1,7 +1,0 @@
-<Context>
-  <Resource name="jdbc/migrationmanager" auth="Container" type="javax.sql.DataSource"
-               maxActive="50" maxIdle="30" maxWait="10000"
-               username="sa" password="P@ssw0rd" 
-               driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-               url="jdbc:sqlserver://127.0.0.1:1433;database=MigrationDataR1"/>
-</Context>

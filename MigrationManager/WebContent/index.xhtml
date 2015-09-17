@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:h="http://java.sun.com/jsf/html">
+<html xmlns:h="http://java.sun.com/jsf/html"   
+	  xmlns:p="http://primefaces.org/ui">
 <head>
 <meta charset="UTF-8" />
 <title>IBM Migration Manager</title>
 </head>
 <body>
 	<h1>IBM Migration Manager</h1>
-	<h:form>
-			<h:link value="Import CSV" outcome="importcsv" /><br />
-			<h:link value="Manage Documents" outcome="managedoc" /><br />
-			<h:link value="Extract Metadata" outcome="extractmetadata" /><br />
-			<h:link value="Manage Duplicates" outcome="manageduplicates" /><br />
-	</h:form>
+	
+	<p:menubar>
+        <p:submenu label="Manage Master Data" icon="ui-icon-document">
+            <p:menuitem value="Manage Snapshot" url="#" />
+            <p:menuitem value="Manage Document" url="#" />
+        </p:submenu>
+        <p:menuitem value="Identification" url="#" />
+        <p:menuitem value="Metadata Extraction" url="#" />             
+	</p:menubar>
+	
 </body>
 </html>
