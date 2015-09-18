@@ -91,6 +91,9 @@
 		<h:commandButton value="Preview" action="#{metadataExtraction.preview}" ajax="true" update="preview">
 		</h:commandButton>
 		
+		<h:commandButton value="Save Rules">
+		</h:commandButton>
+		
 		<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}">
 		    <p:column headerText="File Path">
 		        <h:outputText value="#{identifiedDocInstance.path}" />
