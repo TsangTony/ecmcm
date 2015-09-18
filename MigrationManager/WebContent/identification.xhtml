@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:h="http://java.sun.com/jsf/html"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"  >
+	<head>
+		<meta charset="UTF-8" />
+		<title>IBM Migration Manager</title>
+	</head>
+	<body>
+		<h1>Identification Rules</h1>
+		
+		<table>
+			<tr>
+				<td>Document ID:</td>
+				<td>
+					<h:selectOneMenu id="document" value="identification.selectedDocument" converter="omnifaces.SelectItemsConverter">
+						<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
+						<f:selectItems value="#{documents.documents}" />
+				</h:selectOneMenu>
+				</td>
+			</tr>
+			<tr><td>__________</td></tr>
+			<tr>
+				<td>
+					BU Source Location
+				</td>
+				<td>
+					Actual Source Location
+				</td>
+			</tr>
+			<tr>
+				<td> L:\Simulator Training\Workshops</td>
+				<td>
+					<h:form>
+						<h:inputText value="CLKDEP14_FOP/FOP/Simulator Training/Workshops"></h:inputText>
+					</h:form>
+				</td>
+			</tr>
+			<tr>
+				<td> L:\Simulator Training\Development</td>
+				<td>
+					<h:form>
+						<h:inputText value="CLKDEP14_FOP/FOP/Simulator Training/Development"></h:inputText>
+					</h:form>
+				</td>
+			</tr>
+			<tr>
+				<td> Human Readable Rule </td>
+				<td>
+					<h:form>
+						<h:inputTextarea value="Retrieve everything within the source locations"></h:inputTextarea>
+					</h:form>
+				</td>
+			</tr>
+		</table>
+		
+		<h:form>
+		
+		
+		<table>
+			<tr>
+				
+					<td>
+						<h:selectOneMenu value="#{identification.attribute}" converter="omnifaces.SelectItemsConverter">
+							<f:selectItem itemValue="Filename"></f:selectItem>
+							<f:selectItem itemValue="Filepath"></f:selectItem>
+							<f:selectItem itemValue="Extension"></f:selectItem>
+						</h:selectOneMenu>	
+					</td>
+					<td>
+						<h:selectOneMenu value="#{identification.operator}" converter="omnifaces.SelectItemsConverter">
+							<f:selectItem itemValue="Contains"></f:selectItem>
+							<f:selectItem itemValue="Equals"></f:selectItem>
+							<f:selectItem itemValue="Not Contains"></f:selectItem>
+							<f:selectItem itemValue="Not Equals"></f:selectItem>
+						</h:selectOneMenu>	
+					</td>
+					<td>
+						<h:inputText value="#{identification.value}"></h:inputText>
+					</td>
+				
+			</tr>
+		</table>
+		
+		
+	<!-- 	<h:form>
+			<h:selectBooleanCheckbox id="pdfVersion" value="" />
+  			<h:outputLabel value="Remove pdf version" for="pdfVersion" />
+		</h:form> -->
+
+		<h:commandButton value="Test" type="submit" action="#{identification.testIdentificationRule()}" />
+		
+	    <h:commandButton value="Confirm" type="button" onclick="alert('h:commandButton');" />	
+	</h:form>
+</body>
+</html>
