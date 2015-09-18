@@ -9,7 +9,7 @@ import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.util.MSSQLConnection;
 
-public class identification {
+public class Identification {
 	
 	private Document selectedDocument;
 	private CommencePath selectedCommencePath;
