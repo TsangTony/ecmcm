@@ -18,6 +18,10 @@
         <p:menuitem value="Identification" url="#" />
         <p:menuitem value="Metadata Extraction" url="#" />             
 	</p:menubar>
+	
+	<br />
+	<br />
+	
 	<h:form id="metadataextraction">
 	<table>
 		<tr>
@@ -48,7 +52,43 @@
 				</h:selectOneMenu>
 			</td>
 		</tr>
+		<tr>
+			<td>Use Default Rule</td>
+			<td>
+				<h:selectBooleanCheckbox id="useDefaultRule" value="#{metadataExtraction.useDefaultRule}">
+				    <p:ajax event="change" update="metadataExtractionRules" />
+				</h:selectBooleanCheckbox>
+				
+			</td>
+		</tr>
 	</table>
+	
+	<p:panelGrid id="metadataExtractionRules">
+		<p:row rendered="#{!metadataExtraction.useDefaultRule}" >
+			<p:column>
+				Human Readable Rule
+			</p:column>
+			<p:column colspan="3">
+				<h:inputTextarea value="#{metadataExtraction.humanReadableRule}" cols="60" rows="3"></h:inputTextarea>
+			</p:column>
+		</p:row>
+		<p:row rendered="#{!metadataExtraction.useDefaultRule}" >
+			<p:column>
+				Regular Expression
+			</p:column>
+			<p:column>
+				<h:inputText value="#{metadataExtraction.regex}" size="50"></h:inputText>
+			</p:column>
+			<p:column>
+				Capturing Group
+			</p:column>
+			<p:column>
+				<h:inputText value="#{metadataExtraction.capGroup}" size="10"></h:inputText>
+			</p:column>
+		</p:row>
+		</p:panelGrid>	
+	
+		<h:commandButton  value="Submit" action="#{metadataExtraction.submit}"></h:commandButton>
 	</h:form>
 </body>
 </html>
