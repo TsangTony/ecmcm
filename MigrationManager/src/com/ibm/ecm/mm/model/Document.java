@@ -29,6 +29,7 @@ public class Document {
 	}
 	
 	public List<CommencePath> getCommencePaths() {
+		System.out.println("Getting commencePaths");
 		return commencePaths;
 	}
 

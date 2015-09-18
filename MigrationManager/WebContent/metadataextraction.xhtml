@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions">
+<h:head>
+<meta charset="UTF-8" />
+<title>IBM Migration Manager | Metadata Extraction</title>
+</h:head>
+<body>
+	<h1>IBM Migration Manager</h1>
+	<p:menubar>
+        <p:submenu label="Manage Master Data" icon="ui-icon-document">
+            <p:menuitem value="Manage Snapshot" url="#" />
+            <p:menuitem value="Manage Document" url="#" />
+        </p:submenu>
+        <p:menuitem value="Identification" url="#" />
+        <p:menuitem value="Metadata Extraction" url="#" />             
+	</p:menubar>
+	<table>
+		<tr>
+			<td>Document</td>
+			<td>
+				<h:selectOneMenu id="document" value="metadataExtraction.selectedDocument" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
+					<f:selectItems value="#{documents.documents}" />
+					<p:ajax update="source_location" />
+				</h:selectOneMenu>
+			</td>
+		</tr>
+		<tr>
+			<td>Source Location</td>
+			<td>
+				<h:selectOneMenu id="source_location" value="metadataExtraction.selectedCommencePath" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemLabel="Select Source Location" noSelectionOption="true" />
+					<f:selectItems value="#{metadataExtraction.selectedDocument.commencePaths}"></f:selectItems>
+				</h:selectOneMenu>
+			</td>
+		</tr>
+	</table>
+
+</body>
+</html>

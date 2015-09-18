@@ -3,7 +3,7 @@ package com.ibm.ecm.mm.model;
 public class CommencePath {
 	private int id;
 	private String path;
-	private String  buPath;
+	private String buPath;
 
 	public int getId() {
 		return id;
@@ -22,5 +22,10 @@ public class CommencePath {
 	}
 	public void setBuPath(String buPath) {
 		this.buPath = buPath;
+	}
+	
+	@Override
+	public String toString() {
+		return getPath();
 	}
 }
