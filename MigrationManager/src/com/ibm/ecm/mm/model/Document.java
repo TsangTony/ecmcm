@@ -7,12 +7,12 @@ import java.util.List;
 public class Document {
 	private int id;
 	private String name;
+	private List<MetadataProperty> metadataProperties;
 	private List<CommencePath> commencePaths;
-	private List<MetadataExtractionRules> metadataExtractionRulesList;
 	
 	public Document() {
 		this.commencePaths = new ArrayList<CommencePath>();
-		this.metadataExtractionRulesList = new ArrayList<MetadataExtractionRules>();
+		this.metadataProperties = new ArrayList<MetadataProperty>();
 	}
 	
 	public int getId() {
@@ -26,27 +26,30 @@ public class Document {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	
+	}	
 	public List<CommencePath> getCommencePaths() {
-		System.out.println("Getting commencePaths");
 		return commencePaths;
 	}
-
 	public void setCommencePaths(List<CommencePath> commencePaths) {
 		this.commencePaths = commencePaths;
 	}	
-
-	public List<MetadataExtractionRules> getMetadataExtractionRulesList() {
-		return metadataExtractionRulesList;
+	public List<MetadataProperty> getMetadataProperties() {
+		return metadataProperties;
 	}
-	public void setMetadataExtractionRulesList(List<MetadataExtractionRules> metadataExtractionRulesList) {
-		this.metadataExtractionRulesList = metadataExtractionRulesList;
+	public void setMetadataProperties(List<MetadataProperty> metadataProperties) {
+		this.metadataProperties = metadataProperties;
+	}
+
+	public void addCommencePath(CommencePath commencePathToAdd) {
+		for (CommencePath commencePath : getCommencePaths()) {
+			if (commencePath.getId() == commencePathToAdd.getId())
+				return;
+		}
+		getCommencePaths().add(commencePathToAdd);
 	}
 	
 	@Override
 	public String toString() {
 		return "DOC-" + String.valueOf(getId()) + " " + getName();
 	}
-
 }

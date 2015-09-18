@@ -18,27 +18,37 @@
         <p:menuitem value="Identification" url="#" />
         <p:menuitem value="Metadata Extraction" url="#" />             
 	</p:menubar>
+	<h:form id="metadataextraction">
 	<table>
 		<tr>
 			<td>Document</td>
 			<td>
-				<h:selectOneMenu id="document" value="metadataExtraction.selectedDocument" converter="omnifaces.SelectItemsConverter">
+				<h:selectOneMenu id="document" value="#{metadataExtraction.document}" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
 					<f:selectItems value="#{documents.documents}" />
-					<p:ajax update="source_location" />
+					<p:ajax update="@this,source_location,metadata_property" />
 				</h:selectOneMenu>
 			</td>
 		</tr>
 		<tr>
 			<td>Source Location</td>
 			<td>
-				<h:selectOneMenu id="source_location" value="metadataExtraction.selectedCommencePath" converter="omnifaces.SelectItemsConverter">
+				<h:selectOneMenu id="source_location" value="#{metadataExtraction.commencePath}" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemLabel="Select Source Location" noSelectionOption="true" />
-					<f:selectItems value="#{metadataExtraction.selectedDocument.commencePaths}"></f:selectItems>
+					<f:selectItems value="#{metadataExtraction.document.commencePaths}"></f:selectItems>
+				</h:selectOneMenu>
+			</td>
+		</tr>
+		<tr>
+			<td>Metadata Property</td>
+			<td>
+				<h:selectOneMenu id="metadata_property" value="#{metadataExtraction.metadataProperty}" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemLabel="Select Metadata Property" noSelectionOption="true" />
+					<f:selectItems value="#{metadataExtraction.document.metadataProperties}"></f:selectItems>
 				</h:selectOneMenu>
 			</td>
 		</tr>
 	</table>
-
+	</h:form>
 </body>
 </html>

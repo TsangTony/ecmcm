@@ -4,7 +4,6 @@ import java.util.List;
 
 public class MetadataExtractionRules {
 	private String metadataName;
-	private int commencePathId;
 	private List<MetadataExtractionRule> metadataExtractionRules;
 
 	public MetadataExtractionRules() {
@@ -27,14 +26,8 @@ public class MetadataExtractionRules {
 		this.metadataExtractionRules = metadataExtractionRules;
 	}
 
-	public int getCommencePathId() {
-		return commencePathId;
+	public String toString() {
+		return metadataName;
 	}
-
-	public void setCommencePathId(int commencePathId) {
-		this.commencePathId = commencePathId;
-	}
-
-
 	
 }

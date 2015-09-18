@@ -1,10 +1,18 @@
 package com.ibm.ecm.mm.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CommencePath {
 	private int id;
 	private String path;
 	private String buPath;
+	private List<MetadataExtractionRules> metadataExtractionRulesList;
 
+	public CommencePath() {
+		setMetadataExtractionRulesList(new ArrayList<MetadataExtractionRules>());
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -22,6 +30,12 @@ public class CommencePath {
 	}
 	public void setBuPath(String buPath) {
 		this.buPath = buPath;
+	}
+	public List<MetadataExtractionRules> getMetadataExtractionRulesList() {
+		return metadataExtractionRulesList;
+	}
+	public void setMetadataExtractionRulesList(List<MetadataExtractionRules> metadataExtractionRulesList) {
+		this.metadataExtractionRulesList = metadataExtractionRulesList;
 	}
 	
 	@Override

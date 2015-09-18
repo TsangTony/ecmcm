@@ -12,44 +12,55 @@ public class Documents {
 	private ArrayList<Document> documents;
 	
 	public Documents() {
-		this.setDocuments(new ArrayList<Document>());		
+		this.documents = new ArrayList<Document>();		
 			
 		try {			
 			
 			Connection conn = MSSQLConnection.getConnection();	
-			String query = "SELECT Document.id, Document.name, Commence_Path.id, Commence_Path.path"
-					     + "  FROM Document, Commence_Path "
-					     + " WHERE Document.id = Commence_Path.document_id"
-					     + " ORDER By Document.id ";
+			String query = "SELECT Document.id, Document.name, Metadata_Property.id, Metadata_Property.name, Commence_Path.id, Commence_Path.path"
+						 + "  FROM Document, Commence_Path, Document_Class, [DC-MP], Metadata_Property"
+                         + " WHERE Document.id = Commence_Path.document_id"
+        				 + "   AND Document.document_class_id = Document_Class.id"
+        				 + "   AND Document_Class.id = [DC-MP].document_class_id"
+        				 + "   AND [DC-MP].metadata_property_id = Metadata_Property.id"
+        				 + " ORDER BY Document.id, Metadata_Property.id";
 			
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			
 			int preDocumentId = 0;
+			int preMetadataPropertyId = 0;
 			
 			Document document = null;
-			ArrayList<CommencePath> commencePaths = null;
 			
 			while (rs.next()) {	
 				
 				int documentId = rs.getInt(1);
+				int metadataPropertyId = rs.getInt(3);
 				
 				if (preDocumentId == 0 || documentId != preDocumentId) {
 					document = new Document();
-					document.setId(rs.getInt(1));
-					document.setName(rs.getString(2));
+					document.setId(documentId);
+					document.setName(rs.getString(2));				
 					
-					commencePaths = new ArrayList<CommencePath>();
-					document.setCommencePaths(commencePaths);
+					getDocuments().add(document);
 				}
 				
+				if (preMetadataPropertyId == 0 || metadataPropertyId != preMetadataPropertyId) {
+					MetadataProperty metadataProperty = new MetadataProperty();
+					metadataProperty.setId(metadataPropertyId);
+					metadataProperty.setName(rs.getString(4));
+					document.getMetadataProperties().add(metadataProperty);
+				}				
+				
 				CommencePath commencePath = new CommencePath();
-				commencePath.setId(rs.getInt(3));
-				commencePath.setPath(rs.getString(4));
+				commencePath.setId(rs.getInt(5));
+				commencePath.setPath(rs.getString(6));
 				
-				commencePaths.add(commencePath);				
+				document.addCommencePath(commencePath);
 				
-				getDocuments().add(document);
+				preDocumentId = documentId;
+				preMetadataPropertyId = metadataPropertyId; 
 			}
 			
 		}
