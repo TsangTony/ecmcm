@@ -88,7 +88,23 @@
 		</p:row>
 		</p:panelGrid>	
 	
-		<h:commandButton  value="Submit" action="#{metadataExtraction.submit}"></h:commandButton>
+		<h:commandButton value="Preview" action="#{metadataExtraction.preview}" ajax="true" update="preview">
+		</h:commandButton>
+		
+		<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}">
+		    <p:column headerText="File Path">
+		        <h:outputText value="#{identifiedDocInstance.path}" />
+		    </p:column>
+		 
+		    <p:column headerText="File Name">
+		        <h:outputText value="#{identifiedDocInstance.name}" />
+		    </p:column>
+		 
+		    <p:column headerText="Metadata Value">
+		        <h:outputText value="#{identifiedDocInstance.metadataValue}" />
+		    </p:column>
+		</p:dataTable>
+		
 	</h:form>
 </body>
 </html>

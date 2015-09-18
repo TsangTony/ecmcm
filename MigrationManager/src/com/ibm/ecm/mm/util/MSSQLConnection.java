@@ -7,18 +7,14 @@ import java.sql.SQLException;
 public class MSSQLConnection {
 	static Connection conn;
 	static String connectionString;
-	
-	static {
-		conn = null;
+		
+	public static Connection getConnection() {
 		connectionString = "jdbc:sqlserver://127.0.0.1:1433;database=ECMCM;user=sa;password=P@ssw0rd"; 
 		try {
 			conn = DriverManager.getConnection(connectionString);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static Connection getConnection() {
 		return conn;
 	}
 	

@@ -1,8 +1,17 @@
 package com.ibm.ecm.mm.bean;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.Document;
+import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.MetadataProperty;
+import com.ibm.ecm.mm.util.MSSQLConnection;
+import com.ibm.ecm.mm.util.Util;
 
 public class MetadataExtraction {
 	
@@ -13,9 +22,11 @@ public class MetadataExtraction {
 	private String humanReadableRule;
 	private String regex;
 	private String capGroup;
+	private ArrayList<IdentifiedDocInstance> identifiedDocInstances;
 	
 	public MetadataExtraction() {
-		setDocument(new Document());
+		this.document = new Document();
+		this.identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
 	}
 	
 	public Document getDocument() {
@@ -71,8 +82,44 @@ public class MetadataExtraction {
 		this.capGroup = capGroup;
 	}
 	
-	public void submit() {
+
+	public ArrayList<IdentifiedDocInstance> getIdentifiedDocInstances() {
+		return identifiedDocInstances;
+	}
+
+	public void setIdentifiedDocInstances(ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		this.identifiedDocInstances = identifiedDocInstances;
+	}
+	
+	public void preview() {
+		
+		Connection conn = MSSQLConnection.getConnection();	
+		
+		try {
+			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement("SELECT RIGHT(volume, LEN(volume) - CHARINDEX(':', volume)) + '/' + path AS path, name from Identified_Doc_Instance where document_id = ? and RIGHT(volume, LEN(volume) - CHARINDEX(':', volume)) + '/' + path like ?");
+			selectIdentifiedDocumentInstanceStmt.setInt(1, getDocument().getId());
+			selectIdentifiedDocumentInstanceStmt.setString(2, getCommencePath().getPath() + "%");
+			
+			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();
+			
+			while (rs.next()) {
+				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
+				identifiedDocInstance.setPath(rs.getString(1));
+				identifiedDocInstance.setName(rs.getString(2));		
+				String metadataValue = Util.findRegex(rs.getString(2), getRegex(), "LAST");
+				identifiedDocInstance.setMetadataValue(metadataValue);
+				
+				getIdentifiedDocInstances().add(identifiedDocInstance);
+			}
+		
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+		}
+		
+		
 		
 	}
+
 	
 }
