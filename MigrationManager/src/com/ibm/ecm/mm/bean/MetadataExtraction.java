@@ -106,7 +106,7 @@ public class MetadataExtraction {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				identifiedDocInstance.setPath(rs.getString(1));
 				identifiedDocInstance.setName(rs.getString(2));		
-				String metadataValue = Util.findRegex(rs.getString(2), getRegex(), "LAST");
+				String metadataValue = Util.findRegex(rs.getString(2), getRegex(), Integer.valueOf(getCapGroup()), "LAST");
 				identifiedDocInstance.setMetadataValue(metadataValue);
 				
 				getIdentifiedDocInstances().add(identifiedDocInstance);
