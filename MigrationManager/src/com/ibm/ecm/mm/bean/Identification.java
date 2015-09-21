@@ -4,18 +4,28 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.Document;
+import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.util.MSSQLConnection;
 
 public class Identification {
 	
 	private Document selectedDocument;
-	private CommencePath selectedCommencePath;
+	private CommencePath commencePath;
 	private String attribute;
 	private String operator;
 	private String value;
+	private ArrayList<IdentifiedDocInstance> identifiedDocInstances;
+
+
+	public Identification() {
+		
+		this.identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
+	}
+	
 	
 	public Document getSelectedDocument() {
 		System.out.println("Getting selectedDocument");
@@ -24,11 +34,11 @@ public class Identification {
 	public void setSelectedDocument(Document selectedDocument) {
 		this.selectedDocument = selectedDocument;
 	}
-	public CommencePath getSelectedCommencePath() {
-		return selectedCommencePath;
+	public CommencePath getcommencePath() {
+		return commencePath;
 	}
-	public void setSelectedCommencePath(CommencePath selectedCommencePath) {
-		this.selectedCommencePath = selectedCommencePath;
+	public void setCommencePath(CommencePath commencePath) {
+		this.commencePath = commencePath;
 	}
 	
 	public String getAttribute() {
@@ -52,8 +62,18 @@ public class Identification {
 		this.value = value;
 	}
 	
+	public ArrayList<IdentifiedDocInstance> getIdentifiedDocInstances() {
+		return identifiedDocInstances;
+	}
+
+	public void setIdentifiedDocInstances(ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		this.identifiedDocInstances = identifiedDocInstances;
+	}
+	
 	public void testIdentificationRule (){
 		
+		
+		identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
 		//System.out.println("This is the rule: attribute: " + attribute + ", operator: " + operator + ", value: " + value);	
 
 		//Convert the values entered by the user to SQL terms
@@ -85,7 +105,7 @@ public class Identification {
 		try {
 		
 			Connection conn = MSSQLConnection.getConnection();	
-			String query = "SELECT name FROM all_document_instance " 
+			String query = "SELECT name, path FROM all_document_instance " 
 						+ "WHERE path like 'CLKDEPT14_FOP%' "
 						+ "AND " +  sqlAttribute + " " + sqlOperator + " '" + sqlValue + "'";
 					
@@ -94,9 +114,17 @@ public class Identification {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			
+			
+			
 			while (rs.next()) {	
 				
 				System.out.println(rs.getString(1));
+				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
+				identifiedDocInstance.setPath(rs.getString(1));
+				identifiedDocInstance.setName(rs.getString(2));	
+				
+				getIdentifiedDocInstances().add(identifiedDocInstance);
+				
 				
 			}
 		} catch (SQLException e) {
