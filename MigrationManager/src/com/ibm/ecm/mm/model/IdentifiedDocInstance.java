@@ -1,9 +1,14 @@
 package com.ibm.ecm.mm.model;
 
+import java.util.ArrayList;
+
 public class IdentifiedDocInstance {
 	private String name;
 	private String path;
 	private String metadataValue;
+	
+	
+	
 	public String getName() {
 		return name;
 	}

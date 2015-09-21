@@ -32,7 +32,7 @@
 	</managed-bean>
 	<managed-bean>
 		<managed-bean-name>identification</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.bean.identification</managed-bean-class>
+		<managed-bean-class>com.ibm.ecm.mm.bean.Identification</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 

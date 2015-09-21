@@ -17,7 +17,7 @@ public class Documents {
 		try {			
 			
 			Connection conn = MSSQLConnection.getConnection();	
-			String query = "SELECT Document.id, Document.name, Metadata_Property.id, Metadata_Property.name, Commence_Path.id, Commence_Path.path"
+			String query = "SELECT Document.id, Document.name, Metadata_Property.id, Metadata_Property.name, Commence_Path.id, Commence_Path.commence_Path"
 						 + "  FROM Document, Commence_Path, Document_Class, [DC-MP], Metadata_Property"
                          + " WHERE Document.id = Commence_Path.document_id"
         				 + "   AND Document.document_class_id = Document_Class.id"

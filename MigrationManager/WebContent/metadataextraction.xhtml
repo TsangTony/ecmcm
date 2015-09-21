@@ -12,11 +12,11 @@
 	<h1>IBM Migration Manager</h1>
 	<p:menubar>
         <p:submenu label="Manage Master Data" icon="ui-icon-document">
-            <p:menuitem value="Manage Snapshot" url="#" />
-            <p:menuitem value="Manage Document" url="#" />
+            <p:menuitem value="Manage Snapshot" url="#" icon="ui-icon-image" />
+            <p:menuitem value="Manage Document" url="#" icon="ui-icon-document" />
         </p:submenu>
-        <p:menuitem value="Identification" url="#" />
-        <p:menuitem value="Metadata Extraction" url="#" />             
+        <p:menuitem value="Identification" url="#" icon="ui-icon-search" />
+        <p:menuitem value="Metadata Extraction" url="#" icon="ui-icon-gear" />             
 	</p:menubar>
 	
 	<br />
@@ -86,13 +86,18 @@
 				<h:inputText value="#{metadataExtraction.capGroup}" size="10"></h:inputText>
 			</p:column>
 		</p:row>
+		<p:row>
+			<p:column colspan="4" style="text-align: right;">
+				<p:commandButton value="Preview" action="#{metadataExtraction.preview}" ajax="true" update="preview">
+				</p:commandButton>
+				
+				<p:commandButton value="Run and Save">
+				</p:commandButton>
+			</p:column>
+		</p:row>
 		</p:panelGrid>	
 	
-		<h:commandButton value="Preview" action="#{metadataExtraction.preview}" ajax="true" update="preview">
-		</h:commandButton>
-		
-		<h:commandButton value="Save Rules">
-		</h:commandButton>
+
 		
 		<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}">
 		    <p:column headerText="File Path">

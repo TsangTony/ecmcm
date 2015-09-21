@@ -1,6 +1,6 @@
 package com.ibm.ecm.mm.model;
 
-public class identificationRule {
+public class IdentificationRule {
 	private int docId;
 	private String attribute;
 	private String operator;
