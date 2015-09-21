@@ -4,31 +4,34 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.Document;
+import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.util.MSSQLConnection;
 
 public class identification {
 	
-	private Document selectedDocument;
-	private CommencePath selectedCommencePath;
+	private Document document;
+	private CommencePath commencePath;
 	private String attribute;
 	private String operator;
 	private String value;
+	private ArrayList<IdentifiedDocInstance> identifiedDocInstances;
 	
 	public Document getSelectedDocument() {
 		System.out.println("Getting selectedDocument");
-		return selectedDocument;
+		return document;
 	}
 	public void setSelectedDocument(Document selectedDocument) {
-		this.selectedDocument = selectedDocument;
+		this.document = selectedDocument;
 	}
-	public CommencePath getSelectedCommencePath() {
-		return selectedCommencePath;
+	public CommencePath getCommencePath() {
+		return commencePath;
 	}
-	public void setSelectedCommencePath(CommencePath selectedCommencePath) {
-		this.selectedCommencePath = selectedCommencePath;
+	public void setCommencePath(CommencePath commencePath) {
+		this.commencePath = commencePath;
 	}
 	
 	public String getAttribute() {
@@ -50,6 +53,14 @@ public class identification {
 	}
 	public void setValue(String value) {
 		this.value = value;
+	}
+	
+	public ArrayList<IdentifiedDocInstance> getIdentifiedDocInstances() {
+		return identifiedDocInstances;
+	}
+
+	public void setIdentifiedDocInstances(ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		this.identifiedDocInstances = identifiedDocInstances;
 	}
 	
 	public void testIdentificationRule (){
@@ -85,7 +96,7 @@ public class identification {
 		try {
 		
 			Connection conn = MSSQLConnection.getConnection();	
-			String query = "SELECT name FROM all_document_instance " 
+			String query = "SELECT path, name FROM all_document_instance " 
 						+ "WHERE path like 'CLKDEPT14_FOP%' "
 						+ "AND " +  sqlAttribute + " " + sqlOperator + " '" + sqlValue + "'";
 					
@@ -94,9 +105,19 @@ public class identification {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			
+			identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
+			
 			while (rs.next()) {	
+								
+				System.out.println("path: " + rs.getString(1));
+				System.out.println("name: " + rs.getString(2));
 				
-				System.out.println(rs.getString(1));
+				
+				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
+				identifiedDocInstance.setPath(rs.getString(1));
+				identifiedDocInstance.setName(rs.getString(2));	
+				
+				getIdentifiedDocInstances().add(identifiedDocInstance);
 				
 			}
 		} catch (SQLException e) {

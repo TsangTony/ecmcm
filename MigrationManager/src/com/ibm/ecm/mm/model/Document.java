@@ -42,7 +42,7 @@ public class Document {
 
 	public void addCommencePath(CommencePath commencePathToAdd) {
 		for (CommencePath commencePath : getCommencePaths()) {
-			if (commencePath.getId() == commencePathToAdd.getId())
+			if (commencePath.getDocumentId() == commencePathToAdd.getDocumentId())
 				return;
 		}
 		getCommencePaths().add(commencePathToAdd);

@@ -16,6 +16,7 @@
 					<h:selectOneMenu id="document" value="identification.selectedDocument" converter="omnifaces.SelectItemsConverter">
 						<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
 						<f:selectItems value="#{documents.documents}" />
+						<p:ajax update="@this,business_path,commence_path" />
 				</h:selectOneMenu>
 				</td>
 			</tr>
@@ -29,21 +30,13 @@
 				</td>
 			</tr>
 			<tr>
-				<td> L:\Simulator Training\Workshops</td>
+				<td> 
+					<h:outputText id="business_path" value="L:\Simulator Training\Workshops"></h:outputText></td>
 				<td>
-					<h:form>
-						<h:inputText value="CLKDEP14_FOP/FOP/Simulator Training/Workshops"></h:inputText>
-					</h:form>
+					 <h:inputText id="commence_path" value="#{identification.commencePath}"></h:inputText>
 				</td>
 			</tr>
-			<tr>
-				<td> L:\Simulator Training\Development</td>
-				<td>
-					<h:form>
-						<h:inputText value="CLKDEP14_FOP/FOP/Simulator Training/Development"></h:inputText>
-					</h:form>
-				</td>
-			</tr>
+			
 			<tr>
 				<td> Human Readable Rule </td>
 				<td>
@@ -88,9 +81,20 @@
   			<h:outputLabel value="Remove pdf version" for="pdfVersion" />
 		</h:form> -->
 
-		<h:commandButton value="Test" type="submit" action="#{identification.testIdentificationRule()}" />
-		
-	    <h:commandButton value="Confirm" type="button" onclick="alert('h:commandButton');" />	
+		<h:commandButton value="Preview" action="#{identification.testIdentificationRule}" ajax="true" update="preview">
+		</h:commandButton>
+	      
+	
+	
+		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identification.identifiedDocInstances}">
+		    <p:column headerText="File Path">
+		        <h:outputText value="#{identifiedDocInstance.path}" />
+		    </p:column>
+		 
+		    <p:column headerText="File Name">
+		        <h:outputText value="#{identifiedDocInstance.name}" />
+		    </p:column>
+		</p:dataTable>
 	</h:form>
 </body>
 </html>

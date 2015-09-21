@@ -54,8 +54,8 @@ public class Documents {
 				}				
 				
 				CommencePath commencePath = new CommencePath();
-				commencePath.setId(rs.getInt(5));
-				commencePath.setPath(rs.getString(6));
+				commencePath.setDocumentId(rs.getInt(5));
+				commencePath.setBusinessPath(rs.getString(6));
 				
 				document.addCommencePath(commencePath);
 				

@@ -4,32 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommencePath {
-	private int id;
-	private String path;
-	private String buPath;
+	private int documentId;
+	private String commencePath;
+	private String businessPath;
 	private List<MetadataExtractionRules> metadataExtractionRulesList;
 
 	public CommencePath() {
 		setMetadataExtractionRulesList(new ArrayList<MetadataExtractionRules>());
 	}
 	
-	public int getId() {
-		return id;
+	public int getDocumentId() {
+		return documentId;
 	}
-	public void setId(int id) {
-		this.id = id;
+	public void setDocumentId(int documentId) {
+		this.documentId = documentId;
 	}
-	public String getPath() {
-		return path;
+	public String getCommencePath() {
+		return commencePath;
 	}
-	public void setPath(String path) {
-		this.path = path;
+	public void setCommencePath(String commencePath) {
+		this.commencePath = commencePath;
 	}
-	public String getBuPath() {
-		return buPath;
+	public String getBusinessPath() {
+		return businessPath;
 	}
-	public void setBuPath(String buPath) {
-		this.buPath = buPath;
+	public void setBusinessPath(String businessPath) {
+		this.businessPath = businessPath;
 	}
 	public List<MetadataExtractionRules> getMetadataExtractionRulesList() {
 		return metadataExtractionRulesList;
@@ -40,6 +40,6 @@ public class CommencePath {
 	
 	@Override
 	public String toString() {
-		return getPath();
+		return getBusinessPath();
 	}
 }

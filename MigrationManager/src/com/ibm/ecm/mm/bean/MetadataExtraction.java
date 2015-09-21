@@ -98,7 +98,7 @@ public class MetadataExtraction {
 		try {
 			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement("SELECT RIGHT(volume, LEN(volume) - CHARINDEX(':', volume)) + '/' + path AS path, name from Identified_Doc_Instance where document_id = ? and RIGHT(volume, LEN(volume) - CHARINDEX(':', volume)) + '/' + path like ?");
 			selectIdentifiedDocumentInstanceStmt.setInt(1, getDocument().getId());
-			selectIdentifiedDocumentInstanceStmt.setString(2, getCommencePath().getPath() + "%");
+			selectIdentifiedDocumentInstanceStmt.setString(2, getCommencePath().getBusinessPath() + "%");
 			
 			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();
 			
