@@ -2,6 +2,8 @@ package com.ibm.ecm.mm.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ibm.ecm.mm.model.Lookup;
+
 
 public class Util {
 	
@@ -32,22 +34,32 @@ public class Util {
 		return value;
 	}
 	
-	public static String findRegex(String searchString, String regex, int group, String sequence) {
+	public static String findRegex(String searchString, String regex, int capGroup, String sequence) {
 		String value = "";
-		if (group==0)
+		if (capGroup==0)
 			value = findRegex(searchString, regex, sequence);
 		else {
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(searchString);
 			if (sequence.equals("LAST")) {
 				while (matcher.find())
-					value = matcher.group(group);
+					value = matcher.group(capGroup);
 			}
 			else if (sequence.equals("FIRST")) {
 				if (matcher.find())
-					value = matcher.group(group);
+					value = matcher.group(capGroup);
 			}
 		}
+		
+		return value;
+	}
+
+	public static String findRegex(String searchString, Lookup lookup, String sequence) {
+		String value = "";
+		
+		if (!findRegex(searchString, lookup.getLookupValue(), sequence).equals(""))
+			return lookup.getReturnedValue();
+		
 		return value;
 	}
 }

@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommencePath {
-	private int documentId;
+	private int id;
 	private String commencePath;
 	private String businessPath;
-	private List<MetadataExtractionRules> metadataExtractionRulesList;
+	private ArrayList<MetadataExtractionRules> metadataExtractionRulesList;
 
 	public CommencePath() {
 		setMetadataExtractionRulesList(new ArrayList<MetadataExtractionRules>());
 	}
 	
-	public int getDocumentId() {
-		return documentId;
+	public int getId() {
+		return id;
 	}
-	public void setDocumentId(int documentId) {
-		this.documentId = documentId;
+	public void setId(int id) {
+		this.id = id;
 	}
 	public String getCommencePath() {
 		return commencePath;
@@ -34,12 +34,13 @@ public class CommencePath {
 	public List<MetadataExtractionRules> getMetadataExtractionRulesList() {
 		return metadataExtractionRulesList;
 	}
-	public void setMetadataExtractionRulesList(List<MetadataExtractionRules> metadataExtractionRulesList) {
+	public void setMetadataExtractionRulesList(ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
 		this.metadataExtractionRulesList = metadataExtractionRulesList;
-	}
+	}	
+
 	
 	@Override
 	public String toString() {
-		return getBusinessPath();
+		return getCommencePath() == null ? "" : getCommencePath();
 	}
 }

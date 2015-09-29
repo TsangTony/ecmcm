@@ -18,6 +18,6 @@ public class MetadataProperty {
 	
 	@Override
 	public String toString() {
-		return this.name;
+		return getName() == null ? "" : getName() ;
 	}
 }

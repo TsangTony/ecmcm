@@ -92,18 +92,15 @@ public class FileUpload {
 						insertIdentifiedDocInstanceStmt.addBatch();
 					}
 				    lineCount++;
-				}
+				    
+				} //end of while loop
 				insertIdentifiedDocInstanceStmt.executeBatch();
 				
 				FacesMessage message = new FacesMessage("Succesful", file.getFileName() + " is uploaded.");
 	            FacesContext.getCurrentInstance().addMessage("messages", message);
 				
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace(); //TODO: logging
 			}
         }
     }
