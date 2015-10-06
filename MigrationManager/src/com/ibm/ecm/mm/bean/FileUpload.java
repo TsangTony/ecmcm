@@ -1,4 +1,4 @@
-package com.ibm.ecm.mm.util;
+package com.ibm.ecm.mm.bean;
 
 import java.io.BufferedReader;
 import java.io.IOException;

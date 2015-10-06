@@ -4,8 +4,11 @@ public class MetadataValue {
 	private String value;
 	private MetadataExtractionRule metadataExtractionRule;
 
-	public void setValue(String value) {
+	public boolean setValue(String value) {
 		this.value = value;
+		if (value != null && value != "")
+			return true;
+		return false;
 	}
 	public String getValue() {
 		return this.value;

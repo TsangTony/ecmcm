@@ -6,11 +6,6 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
     version="2.0">
 	<managed-bean>
-		<managed-bean-name>documents</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.model.Documents</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
-	<managed-bean>
 		<managed-bean-name>fileUpload</managed-bean-name>
 		<managed-bean-class>com.ibm.ecm.mm.util.FileUpload</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
@@ -18,16 +13,6 @@
 	<managed-bean>
 		<managed-bean-name>metadataExtraction</managed-bean-name>
 		<managed-bean-class>com.ibm.ecm.mm.bean.MetadataExtraction</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
-	<managed-bean>
-		<managed-bean-name>document</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.model.Document</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
-	<managed-bean>
-		<managed-bean-name>commencePath</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.model.CommencePath</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>

@@ -1,13 +1,14 @@
 package com.ibm.ecm.mm.model;
 
-public class MetadataExtractionRule {
+public class MetadataExtractionRule extends DataTableElement {
 	private int id;
 	private int priority;
 	private String source;
-	private String rule;
+	private String regex;
 	private int capGroup;
-	private String hrRule;
+	private String blRule;
 	private String defaultValue;
+	private boolean isDefault;
 	private boolean isNew;
 	private String example;
 	private int successCount;	
@@ -24,11 +25,11 @@ public class MetadataExtractionRule {
 	public void setSource(String source) {
 		this.source = source;
 	}
-	public String getRule() {
-		return rule;
+	public String getRegex() {
+		return regex;
 	}
-	public void setRule(String rule) {
-		this.rule = rule;
+	public void setRegex(String regex) {
+		this.regex = regex;
 	}
 	public String getDefaultValue() {
 		return defaultValue;
@@ -48,11 +49,11 @@ public class MetadataExtractionRule {
 	public void setSuccessCount(int successCount) {
 		this.successCount = successCount;
 	}
-	public String getHrRule() {
-		return hrRule;
+	public String getBlRule() {
+		return blRule;
 	}
-	public void setHrRule(String hrRule) {
-		this.hrRule = hrRule;
+	public void setBlRule(String blRule) {
+		this.blRule = blRule;
 	}
 	public int getCapGroup() {
 		return capGroup;
@@ -87,6 +88,12 @@ public class MetadataExtractionRule {
 	}
 	public void setNew(boolean isNew) {
 		this.isNew = isNew;
+	}
+	public boolean isDefault() {
+		return isDefault;
+	}
+	public void setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
 	}
 	
 }

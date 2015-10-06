@@ -1,92 +1,156 @@
 <!DOCTYPE html>
-<html xmlns:h="http://java.sun.com/jsf/html"   
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
 	  xmlns:p="http://primefaces.org/ui"
-	  xmlns:f="http://java.sun.com/jsf/core"  >
-	<head>
-		<meta charset="UTF-8" />
-		<title>IBM Migration Manager</title>
-	</head>
-	<body>
-		<h1>Identification Rules</h1>
-		
-		<table>
-			<tr>
-				<td>Document ID:</td>
-				<td>
-					<h:selectOneMenu id="document" value="identification.selectedDocument" converter="omnifaces.SelectItemsConverter">
-						<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
-						<f:selectItems value="#{documents.documents}" />
-						<p:ajax update="@this,business_path,commence_path" />
-					</h:selectOneMenu>
-				</td>
-			</tr>
-			<tr><td>__________</td></tr>
-			<tr>
-				<td>
-					BU Source Location
-				</td>
-				<td>
-					Actual Source Location
-				</td>
-			</tr>
-			<tr>
-				<td> 
-					<h:outputText id="business_path" value="L:\Simulator Training\Workshops"></h:outputText></td>
-				<td>
-					 <h:inputText id="commence_path" value="#{identification.commencePath}"></h:inputText>
-				</td>
-			</tr>
-			
-			<tr>
-				<td> Human Readable Rule </td>
-				<td>
-					<h:form>
-						<h:inputTextarea value="Retrieve everything within the source locations"></h:inputTextarea>
-					</h:form>
-				</td>
-			</tr>
-		</table>
-		
-		<h:form>
-		
-		
-		<table>
-			<tr>
-				
-					<td>
-						<h:selectOneMenu value="#{identification.attribute}" converter="omnifaces.SelectItemsConverter">
-							<f:selectItem itemValue="Filename"></f:selectItem>
-							<f:selectItem itemValue="Filepath"></f:selectItem>
-							<f:selectItem itemValue="Extension"></f:selectItem>
-						</h:selectOneMenu>	
-					</td>
-					<td>
-						<h:selectOneMenu value="#{identification.operator}" converter="omnifaces.SelectItemsConverter">
-							<f:selectItem itemValue="Contains"></f:selectItem>
-							<f:selectItem itemValue="Equals"></f:selectItem>
-							<f:selectItem itemValue="Not Contains"></f:selectItem>
-							<f:selectItem itemValue="Not Equals"></f:selectItem>
-						</h:selectOneMenu>	
-					</td>
-					<td>
-						<h:inputText value="#{identification.value}"></h:inputText>
-					</td>
-				
-			</tr>
-		</table>
-		
-		
-	<!-- 	<h:form>
-			<h:selectBooleanCheckbox id="pdfVersion" value="" />
-  			<h:outputLabel value="Remove pdf version" for="pdfVersion" />
-		</h:form> -->
-
-		<h:commandButton value="Preview" action="#{identification.testIdentificationRule}" ajax="true" update="preview">
-		</h:commandButton>
-	      
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions">
+<h:head>
+	<meta charset="UTF-8" />
+	<h:outputStylesheet library="css" name="style.css"  />
+	<title>IBM Migration Manager | Identification</title>
+</h:head>
+<body>
+	<h1>IBM Migration Manager</h1>
+	<p:menubar>
+        <p:submenu label="Manage Master Data" icon="ui-icon-document">
+            <p:menuitem value="Manage Snapshot" url="#" icon="ui-icon-image" />
+            <p:menuitem value="Manage Document" url="#" icon="ui-icon-document" />
+        </p:submenu>
+        <p:menuitem value="Identification" outcome="identification" icon="ui-icon-search" />
+        <p:menuitem value="Metadata Extraction" outcome="metadataextraction" icon="ui-icon-gear" />             
+	</p:menubar>
 	
+	<br />
+	<br />
 	
-		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identification.identifiedDocInstances}">
+	<h:form id="identification">
+	
+	<p:growl id="growl" for="growl" showDetail="true" sticky="true" />  
+	
+	<p:panelGrid id="optionPanel">
+		<p:row>
+			<p:column>Document</p:column>
+			<p:column>
+				<p:selectOneMenu id="document" value="#{identification.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+					<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
+					<f:selectItems value="#{identification.documents}" />
+					<p:ajax update="@this,commencePaths,identificationRules" listener="#{identification.documentSelected}" />
+				</p:selectOneMenu>
+			</p:column>
+		</p:row>
+	</p:panelGrid>
+	
+	<br />
+	
+	<p:panel id="CommencePathPanel" header="Source Locations" toggleable="true">
+	
+		<p:dataTable id="commencePaths" var="commencePath" value="#{identification.document.commencePaths}" editable="true" editMode="cell" rowIndexVar="rowIndex">
+		    <p:column headerText="Business Source Location" style="width: 44%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{commencePath.businessPath}" /></f:facet>
+					<f:facet name="input"><p:inputText id="businessPathInput" value="#{commencePath.businessPath}" style="width:96%" /></f:facet>
+            	</p:cellEditor>
+		    </p:column>	 
+		    <p:column headerText="Actual Source Location" style="width: 44%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{commencePath.actualPath}" /></f:facet>
+					<f:facet name="input"><p:inputText id="actualPathInput" value="#{commencePath.actualPath}" style="width:96%" /></f:facet>
+            	</p:cellEditor>
+		    </p:column>
+		    <p:column style="width: 12%">    						    				
+			    <p:commandButton icon="ui-icon-closethick" action="#{identification.document.commencePaths.remove(commencePath)}" update="commencePaths" ajax="true" style="width: 2em" />			    				
+			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identification.document.commencePaths.moveUp(commencePath)}" update="commencePaths" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
+			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{identification.document.commencePaths.moveDown(commencePath)}" update="commencePaths" ajax="true" disabled="#{rowIndex eq identification.commencePathsLastIndex}" style="width: 2em" />
+			</p:column>
+			<p:ajax event="cellEdit" update="@this" />
+		</p:dataTable>
+		
+		<br />
+		<p:commandButton value="New Source Location" icon="ui-icon-plusthick" action="#{identification.document.commencePaths.addNew}" update="commencePaths" ajax="true" />
+		
+	</p:panel>
+	
+	<br />
+	
+	<p:panel id="identificationRulesPanel" header="Identification Rules" toggleable="true">
+	
+		<p:fieldset legend="Business Rule" toggleable="true" toggleSpeed="500">	
+			<p:inputTextarea value="#{identification.document.blIdentificationRule}" rows="3" style="width:100%" >
+				<p:ajax event="change" update="@this" />
+			</p:inputTextarea>
+		</p:fieldset>
+		
+		<br />
+	
+		<p:dataTable id="identificationRules" var="identificationRule" value="#{identification.document.identificationRules}" editable="true" editMode="cell" rowIndexVar="rowIndex">
+			<p:column headerText="Logical Operator" style="width: 20%">
+		    	<p:cellEditor rendered="#{rowIndex != 0}">
+					<f:facet name="output"><h:outputText value="#{identificationRule.logicalOperator}" /></f:facet>
+					<f:facet name="input">
+						<h:selectOneMenu value="#{identificationRule.logicalOperator}" style="width:100%" converter="omnifaces.SelectItemsConverter">
+			                <f:selectItem itemLabel="Select Logical Operator" noSelectionOption="true" />
+			                <f:selectItems value="#{identification.logicalOperators}" />
+		                </h:selectOneMenu>
+					</f:facet>
+            	</p:cellEditor>
+		    </p:column>
+		    <p:column headerText="Attribute" style="width: 20%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{identificationRule.attribute}" /></f:facet>
+					<f:facet name="input">
+						<h:selectOneMenu value="#{identificationRule.attribute}" style="width:100%">
+			                <f:selectItem itemLabel="Select Attribute" noSelectionOption="true" />
+			                <f:selectItems value="#{identification.attributes}" />
+		                </h:selectOneMenu>
+					</f:facet>
+            	</p:cellEditor>
+		    </p:column>
+		    <p:column headerText="Relational Operator" style="width: 20%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{identificationRule.relationalOperator}" /></f:facet>
+					<f:facet name="input">
+						<h:selectOneMenu value="#{identificationRule.relationalOperator}" style="width:100%">
+	                		<f:selectItem itemLabel="Select Operator" noSelectionOption="true" />
+			                <f:selectItems value="#{identification.relationalOperators}" />
+						</h:selectOneMenu>
+					</f:facet>
+            	</p:cellEditor>
+		    </p:column>	 
+		    <p:column headerText="Value" style="width: 30%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{identificationRule.value}" /></f:facet>
+					<f:facet name="input"><p:inputText id="valueInput" value="#{identificationRule.value}" style="width:96%" /></f:facet>
+            	</p:cellEditor>
+		    </p:column>
+		    <p:column style="width: 10%">    						    				
+			    <p:commandButton icon="ui-icon-closethick" action="#{identification.document.identificationRules.remove(identificationRule)}" update="identificationRules" ajax="true" style="width: 2em" />			    				
+			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identification.document.identificationRules.moveUp(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
+			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{identification.document.identificationRules.moveDown(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq identification.identificationRulesLastIndex}" style="width: 2em" />
+			</p:column>
+			<p:ajax event="cellEdit" update="@this" />
+		</p:dataTable>
+		
+		<br />
+		<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{identification.document.identificationRules.addNew}" update="identificationRules" ajax="true" />
+		
+	</p:panel>
+		
+	<br />
+	
+	<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
+		<h:outputText value="Identifying..." />
+	</p:dialog>
+	
+	<p:commandButton value="Preview" action="#{identification.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	<p:commandButton value="Run and Save" action="#{identification.runAndSave}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	
+	<br />
+	<br />
+	
+	<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
+	
+	<p:panel header="Preview Result" toggleable="true">	
+		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identification.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100">
 		    <p:column headerText="File Path">
 		        <h:outputText value="#{identifiedDocInstance.path}" />
 		    </p:column>
@@ -95,9 +159,7 @@
 		        <h:outputText value="#{identifiedDocInstance.name}" />
 		    </p:column>
 		</p:dataTable>
-		
-		
-		
+	</p:panel>
 		
 	</h:form>
 </body>

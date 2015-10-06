@@ -6,45 +6,43 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 
 import com.ibm.ecm.mm.model.CommencePath;
+import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.Lookup;
 import com.ibm.ecm.mm.model.MetadataExtractionRule;
 import com.ibm.ecm.mm.model.MetadataExtractionRules;
+import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.model.MetadataValue;
-import com.ibm.ecm.mm.model.Source;
-import com.ibm.ecm.mm.util.MSSQLConnection;
+import com.ibm.ecm.mm.util.ConnectionManager;
+import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.Util;
 
 public class MetadataExtraction {
 	
+	private ArrayList<Document> documents;
 	private Document document;
 	private CommencePath commencePath;
-	private boolean useDefaultRule;
 	private MetadataExtractionRules metadataExtractionRules;
-	//private ArrayList<MetadataExtractionRule> defaultMetadataExtractionRules;
-	//private ArrayList<MetadataExtractionRule> customMetadataExtractionRules;
-	//private ArrayList<MetadataExtractionRule> removedMetadataExtractionRules;
+	private boolean useDefaultRule;
 	private ArrayList<IdentifiedDocInstance> identifiedDocInstances;
-	//private ArrayList<Lookup> lookups;
-	
-	private ArrayList<String> sources;
 	
 	public MetadataExtraction() {
-		document = new Document();
+		setDocuments(DataManager.getDocuments());
 		identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
 		useDefaultRule = false;
-
-		sources = new ArrayList<String>();
-		sources.add(Source.FILE_PATH);
-		sources.add(Source.CONTENT);
-		sources.add(Source.DEFAULT);
+	}
+	
+	public ArrayList<Document> getDocuments() {
+		return documents;
+	}
+	public void setDocuments(ArrayList<Document> documents) {
+		this.documents = documents;
 	}
 	
 	public Document getDocument() {
@@ -56,7 +54,7 @@ public class MetadataExtraction {
 	public CommencePath getCommencePath() {
 		return commencePath;
 	}
-	public void setcommencePath(CommencePath commencePath) {
+	public void setCommencePath(CommencePath commencePath) {
 		this.commencePath = commencePath;
 	}
 
@@ -84,14 +82,6 @@ public class MetadataExtraction {
 		this.metadataExtractionRules = metadataExtractionRules;
 	}	
 
-	public ArrayList<String> getSources() {
-		return sources;
-	}
-
-	public void setSources(ArrayList<String> sources) {
-		this.sources = sources;
-	}
-
 	public int getMetadataExtractionRulesLastIndex() {
 		return metadataExtractionRules.getRules().size()-1;
 	}
@@ -99,85 +89,76 @@ public class MetadataExtraction {
 	public boolean getRuleEditable() {
 		return (!isUseDefaultRule()) && (getMetadataExtractionRules() != null);
 	}
-
+	
+	public ArrayList<String> getSources() {
+		return DataManager.getSources();
+	}
+	
+	public void documentSelected() {
+		if (getDocument().getCommencePaths().size() == 0)
+			getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
+		setCommencePath(null);
+		setMetadataExtractionRules(null);
+	}
+	
+	public void commencePathSelected() {
+		if (getCommencePath().getMetadataExtractionRulesList().size() == 0)
+			for (MetadataProperty metadataProperty : DataManager.getMetadataPropreties(getDocument().getId())) {
+				MetadataExtractionRules metadataExtractionRules = new MetadataExtractionRules();
+				metadataExtractionRules.setMetadataProperty(metadataProperty);
+				getCommencePath().getMetadataExtractionRulesList().add(metadataExtractionRules);
+			}
+		setMetadataExtractionRules(null);
+	}
 
 	
-	public void setRules() {		
-		try {
-			Connection conn = MSSQLConnection.getConnection();
-			PreparedStatement selectLookupStmt = conn.prepareStatement("SELECT lookup_value, returned_value FROM Lookup WHERE metadata_id = ?");
-			selectLookupStmt.setInt(1, getMetadataExtractionRules().getMetadataId());				
-			ResultSet lookupRs = selectLookupStmt.executeQuery();						
-			while (lookupRs.next()) {
-				Lookup lookup = new Lookup();
-				lookup.setLookupValue(lookupRs.getString(1));
-				lookup.setReturnedValue(lookupRs.getString(2));
-				getMetadataExtractionRules().getLookups().add(lookup);
-			}			
-		}
-		catch (SQLException e) {				
-			e.printStackTrace();
-		}
-		finally {
-			MSSQLConnection.close();
-		}
-
-		if (getMetadataExtractionRules().getLookups().size() == 0) {
-			getMetadataExtractionRules().setHasDefaultRules(false);
+	public void metadataPropertySeletced() {
+		if (getMetadataExtractionRules().getRules().size() == 0)
+			getMetadataExtractionRules().setRules(DataManager.getMetadataExtractionRules(getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId()));
+		
+		if (getMetadataExtractionRules().getRules().size() == 0)
+			getMetadataExtractionRules().setDefault(false);
+		else
+			getMetadataExtractionRules().setDefault(getMetadataExtractionRules().getRules().get(0).isDefault());
+		
+		getMetadataExtractionRules().setLookups(DataManager.getLookups(getMetadataExtractionRules().getMetadataProperty().getId()));
+				
+		getMetadataExtractionRules().setHasDefaultRules(getMetadataExtractionRules().getLookups().size() > 0);
+		
+		setUseDefaultRule(getMetadataExtractionRules().isDefault());
+		
+		if (isUseDefaultRule()) {
+			getMetadataExtractionRules().setDefaultRules(getMetadataExtractionRules().getRules());
+			getMetadataExtractionRules().setCustomRules(new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class));
 		}
 		else {
-			getMetadataExtractionRules().setHasDefaultRules(true);
+			DataTableArrayList<MetadataExtractionRule> metadataExtractionRules = new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class);
+			MetadataExtractionRule metadataExtractionRuleFP = new MetadataExtractionRule();
+			metadataExtractionRuleFP.setBlRule("Look up " + getMetadataExtractionRules().getMetadataProperty().getName());
+			metadataExtractionRuleFP.setSource("File Path");
+			metadataExtractionRuleFP.setPriority(1);
+			metadataExtractionRuleFP.setNew(true);
+			metadataExtractionRules.add(metadataExtractionRuleFP);
+			MetadataExtractionRule metadataExtractionRuleCT = new MetadataExtractionRule();
+			metadataExtractionRuleCT.setBlRule("Look up " + getMetadataExtractionRules().getMetadataProperty().getName());
+			metadataExtractionRuleCT.setSource("Content");
+			metadataExtractionRuleCT.setPriority(2);
+			metadataExtractionRuleCT.setNew(true);
+			metadataExtractionRules.add(metadataExtractionRuleCT);			
+			getMetadataExtractionRules().setDefaultRules(metadataExtractionRules);			
+			getMetadataExtractionRules().setCustomRules(getMetadataExtractionRules().getRules());
 		}
 		
-		if (getMetadataExtractionRules().isDefault()) {
-			setUseDefaultRule(true);
-			getMetadataExtractionRules().setDefaultRules(getMetadataExtractionRules().getRules());
-		}
-		else {
-			setUseDefaultRule(false);
-			getMetadataExtractionRules().setCustomRules(getMetadataExtractionRules().getRules()); 
-		}
 	}
 	
 	public void toggleRules() {
-		if (useDefaultRule) {
+		if (isUseDefaultRule()) {
 			getMetadataExtractionRules().setCustomRules(getMetadataExtractionRules().getRules());
-			if (getMetadataExtractionRules().getDefaultRules().size() != 0) {
-				getMetadataExtractionRules().setRules(getMetadataExtractionRules().getDefaultRules());
-			}
-			else {
-				ArrayList<MetadataExtractionRule> metadataExtractionRules = new ArrayList<MetadataExtractionRule>();
-				
-				
-				MetadataExtractionRule metadataExtractionRuleFP = new MetadataExtractionRule();
-				metadataExtractionRuleFP.setHrRule("Look up " + getMetadataExtractionRules().getMetadataName());
-				metadataExtractionRuleFP.setSource(Source.FILE_PATH);
-				metadataExtractionRuleFP.setPriority(1);
-				metadataExtractionRuleFP.setNew(true);
-				
-				metadataExtractionRules.add(metadataExtractionRuleFP);
-
-				MetadataExtractionRule metadataExtractionRuleCT = new MetadataExtractionRule();
-				metadataExtractionRuleCT.setHrRule("Look up " + getMetadataExtractionRules().getMetadataName());
-				metadataExtractionRuleCT.setSource(Source.CONTENT);
-				metadataExtractionRuleCT.setPriority(2);
-				metadataExtractionRuleCT.setNew(true);
-
-				metadataExtractionRules.add(metadataExtractionRuleCT);
-				
-				getMetadataExtractionRules().setRules(metadataExtractionRules);
-				getMetadataExtractionRules().setDefaultRules(metadataExtractionRules);
-			}
+			getMetadataExtractionRules().setRules(getMetadataExtractionRules().getDefaultRules());
 			getMetadataExtractionRules().setDefault(true);
 		}
 		else {
-			if (getMetadataExtractionRules().getCustomRules().size() != 0) {
-				getMetadataExtractionRules().setRules(getMetadataExtractionRules().getCustomRules());
-			}
-			else {
-				getMetadataExtractionRules().setRules(new ArrayList<MetadataExtractionRule>());
-				getMetadataExtractionRules().setCustomRules(new ArrayList<MetadataExtractionRule>());
-			}
+			getMetadataExtractionRules().setRules(getMetadataExtractionRules().getCustomRules());
 			getMetadataExtractionRules().setDefault(false);
 		}
 		
@@ -185,13 +166,17 @@ public class MetadataExtraction {
 	
 	public void preview() {
 		
+		int filePathCount = 0;
+		int contentCount = 0;
+		int defaultCount = 0;
+		
 		//TODO: put this into IdentifiedDocInstances.getIdentifiedDocInstances(documentId, commencePath)
 		if (identifiedDocInstances.size() == 0) {	
 			try {					
-				Connection conn = MSSQLConnection.getConnection();	
-				PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement("SELECT id, server, volume, path, name, extension from Identified_Doc_Instance where document_id = ? and volume + '/' + ISNULL(path,'') like ?");
+				Connection conn = ConnectionManager.getConnection();	
+				PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement("SELECT id, server, volume, path, name, extension from Identified_Document_Instance where document_id = ? and volume + '/' + ISNULL(path,'') like ?");
 				selectIdentifiedDocumentInstanceStmt.setInt(1, getDocument().getId());
-				selectIdentifiedDocumentInstanceStmt.setString(2, getCommencePath().getCommencePath() + "%");
+				selectIdentifiedDocumentInstanceStmt.setString(2, getCommencePath().getActualPath() + "%");
 				ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();				
 				
 				while (rs.next()) {
@@ -210,7 +195,7 @@ public class MetadataExtraction {
 				e.printStackTrace();
 			}
 			finally {
-				MSSQLConnection.close();
+				ConnectionManager.close();
 			}
 		}
 		
@@ -224,11 +209,13 @@ public class MetadataExtraction {
 				for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules()) {
 					
 					for (Lookup lookup : getMetadataExtractionRules().getLookups()) {
-						if (metadataExtractionRule.getSource().equals(Source.FILE_PATH)) {
-							identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getFullPath(), lookup, "LAST"));
+						if (metadataExtractionRule.getSource().equals("File Path")) {
+							if (identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getFullPath(), lookup, "LAST")))
+								filePathCount++;
 						}
-						else if (metadataExtractionRule.getSource().equals(Source.CONTENT)) {
-							identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getContent(), lookup, "FIRST"));
+						else if (metadataExtractionRule.getSource().equals("Content")) {
+							if (identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getContent(), lookup, "FIRST")))
+								contentCount++;
 						}
 
 						if (!identifiedDocInstance.getMetadataValue().getValue().equals("")) {
@@ -240,14 +227,17 @@ public class MetadataExtraction {
 			}
 			else {
 				for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules()) {
-					if (metadataExtractionRule.getSource().equals(Source.FILE_PATH)) {
-						identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getFullPath(), metadataExtractionRule.getRule(), metadataExtractionRule.getCapGroup(), "LAST"));
+					if (metadataExtractionRule.getSource().equals("File Path")) {
+						if (identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getFullPath(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), "LAST")))
+							filePathCount++;
 					}
-					else if (metadataExtractionRule.getSource().equals(Source.CONTENT)) {
-						identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getContent(), metadataExtractionRule.getRule(), metadataExtractionRule.getCapGroup(), "FIRST"));
+					else if (metadataExtractionRule.getSource().equals("Content")) {
+						if (identifiedDocInstance.getMetadataValue().setValue(Util.findRegex(identifiedDocInstance.getContent(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), "FIRST")))
+							contentCount++;
 					}
-					else if (metadataExtractionRule.getSource().equals(Source.DEFAULT)) {
-						identifiedDocInstance.getMetadataValue().setValue(metadataExtractionRule.getDefaultValue());
+					else if (metadataExtractionRule.getSource().equals("Default")) {
+						if (identifiedDocInstance.getMetadataValue().setValue(metadataExtractionRule.getDefaultValue()))
+							defaultCount++;
 					}
 					
 					if (!identifiedDocInstance.getMetadataValue().getValue().equals("")) {
@@ -256,7 +246,14 @@ public class MetadataExtraction {
 					}					
 				}
 			}
-		}		
+		}
+		
+
+		if (filePathCount + contentCount < getIdentifiedDocInstances().size() * 0.8f)
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / getIdentifiedDocInstances().size()) + "%, Content:" + Math.round(contentCount * 100.0f / getIdentifiedDocInstances().size()) + "%, Default: " +  + Math.round(defaultCount * 100.0f / getIdentifiedDocInstances().size()) + "%"));
+		else
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / getIdentifiedDocInstances().size()) + "%, Content:" + Math.round(contentCount * 100.0f / getIdentifiedDocInstances().size()) + "%, Default: " +  + Math.round(defaultCount * 100.0f / getIdentifiedDocInstances().size()) + "%"));
+		
 	}
 	
 	public void runAndSave() {
@@ -265,39 +262,39 @@ public class MetadataExtraction {
 		
 		if (useDefaultRule) {
 			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getCustomRules()) {
-				getMetadataExtractionRules().getRemovedRules().add(metadataExtractionRule);
+				getMetadataExtractionRules().getRules().getRemovedList().add(metadataExtractionRule);
 				metadataExtractionRule.setNew(true);
 			}
 		}
 		else {
 			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getDefaultRules()) {
-				getMetadataExtractionRules().getRemovedRules().add(metadataExtractionRule);
+				getMetadataExtractionRules().getRules().getRemovedList().add(metadataExtractionRule);
 				metadataExtractionRule.setNew(true);
 			}
 		}
 		
 		try {
-			Connection conn = MSSQLConnection.getConnection();	
+			Connection conn = ConnectionManager.getConnection();	
 			
 			PreparedStatement deleteMetadataExtractionRuleStmt = conn.prepareStatement("DELETE FROM Metadata_Extraction_Rule WHERE id = ?");
-			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRemovedRules()) {
+			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules().getRemovedList()) {
 				deleteMetadataExtractionRuleStmt.setInt(1, metadataExtractionRule.getId());
 				deleteMetadataExtractionRuleStmt.addBatch();
 			}
 			deleteMetadataExtractionRuleStmt.executeBatch();
 			
-			getMetadataExtractionRules().getRemovedRules().clear();
+			getMetadataExtractionRules().getRules().getRemovedList().clear();
 			
-			PreparedStatement updateMetadataExtractionRuleStmt = conn.prepareStatement("UPDATE Metadata_Extraction_Rule SET source=?, hr_rule=?, regex=?, capturing_group=?, default_value=?, priority=? WHERE ID = ?");
-			PreparedStatement insertMetadataExtractionRuleStmt = conn.prepareStatement("INSERT INTO Metadata_Extraction_Rule (commence_path_id,metadata_id,source,hr_rule,regex,capturing_group,default_value,priority,[default]) VALUES (?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement updateMetadataExtractionRuleStmt = conn.prepareStatement("UPDATE Metadata_Extraction_Rule SET source=?, bl_rule=?, regex=?, capturing_group=?, default_value=?, priority=? WHERE ID = ?");
+			PreparedStatement insertMetadataExtractionRuleStmt = conn.prepareStatement("INSERT INTO Metadata_Extraction_Rule (commence_path_id,metadata_property_id,source,bl_rule,regex,capturing_group,default_value,priority,is_default) VALUES (?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			
 			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules()) {
 				if (metadataExtractionRule.isNew()) {
-					insertMetadataExtractionRuleStmt.setInt(1, getMetadataExtractionRules().getMetadataId());
-					insertMetadataExtractionRuleStmt.setInt(2, getCommencePath().getId());
+					insertMetadataExtractionRuleStmt.setInt(1, getCommencePath().getId());
+					insertMetadataExtractionRuleStmt.setInt(2, getMetadataExtractionRules().getMetadataProperty().getId());
 					insertMetadataExtractionRuleStmt.setString(3, metadataExtractionRule.getSource());
-					insertMetadataExtractionRuleStmt.setString(4, metadataExtractionRule.getHrRule());
-					insertMetadataExtractionRuleStmt.setString(5, metadataExtractionRule.getRule());
+					insertMetadataExtractionRuleStmt.setString(4, metadataExtractionRule.getBlRule());
+					insertMetadataExtractionRuleStmt.setString(5, metadataExtractionRule.getRegex());
 					insertMetadataExtractionRuleStmt.setInt(6, metadataExtractionRule.getCapGroup());
 					insertMetadataExtractionRuleStmt.setString(7, metadataExtractionRule.getDefaultValue());
 					insertMetadataExtractionRuleStmt.setInt(8, metadataExtractionRule.getPriority());
@@ -312,8 +309,8 @@ public class MetadataExtraction {
 				}
 				else {
 					updateMetadataExtractionRuleStmt.setString(1, metadataExtractionRule.getSource());
-					updateMetadataExtractionRuleStmt.setString(2, metadataExtractionRule.getHrRule());
-					updateMetadataExtractionRuleStmt.setString(3, metadataExtractionRule.getRule());
+					updateMetadataExtractionRuleStmt.setString(2, metadataExtractionRule.getBlRule());
+					updateMetadataExtractionRuleStmt.setString(3, metadataExtractionRule.getRegex());
 					updateMetadataExtractionRuleStmt.setInt(4, metadataExtractionRule.getCapGroup());
 					updateMetadataExtractionRuleStmt.setString(5, metadataExtractionRule.getDefaultValue());
 					updateMetadataExtractionRuleStmt.setInt(6, metadataExtractionRule.getPriority());
@@ -328,13 +325,13 @@ public class MetadataExtraction {
 			 * Update Metadata_Value
 			 */
 			
-			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE identified_doc_instance_id IN (SELECT id FROM Identified_Doc_Instance WHERE document_id = ?) AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE commence_path_id = ? AND metadata_id = ?) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
+			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE identified_document_instance_id IN (SELECT id FROM Identified_Document_Instance WHERE document_id = ?) AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE commence_path_id = ? AND metadata_property_id = ?) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
 			deleteIdentifiedDocInstanceStmt.setInt(1, getDocument().getId());
 			deleteIdentifiedDocInstanceStmt.setInt(2, getCommencePath().getId());
-			deleteIdentifiedDocInstanceStmt.setInt(3, getMetadataExtractionRules().getMetadataId());
+			deleteIdentifiedDocInstanceStmt.setInt(3, getMetadataExtractionRules().getMetadataProperty().getId());
 			deleteIdentifiedDocInstanceStmt.execute();
 			
-			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_doc_instance_id,value,metadata_extraction_rule_id) VALUES (?,?,?)");
+			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id) VALUES (?,?,?)");
 			
 			for (IdentifiedDocInstance identifiedDocInstance : getIdentifiedDocInstances()) {
 				if (identifiedDocInstance.getMetadataValue().getMetadataExtractionRule() != null) {
@@ -347,15 +344,13 @@ public class MetadataExtraction {
 			insertMetadataValueStmt.executeBatch();			
 			
 			
-			FacesContext context = FacesContext.getCurrentInstance();
-	         
-	        context.addMessage(null, new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
 		}
 		catch (SQLException e) {				
 			e.printStackTrace();
 		}
 		finally {
-			MSSQLConnection.close();
+			ConnectionManager.close();
 		}	
 	}
 	

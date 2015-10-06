@@ -3,10 +3,11 @@ package com.ibm.ecm.mm.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommencePath {
+public class CommencePath extends DataTableElement {
 	private int id;
-	private String commencePath;
+	private String actualPath;
 	private String businessPath;
+
 	private ArrayList<MetadataExtractionRules> metadataExtractionRulesList;
 
 	public CommencePath() {
@@ -19,18 +20,22 @@ public class CommencePath {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public String getCommencePath() {
-		return commencePath;
+
+	public String getActualPath() {
+		return actualPath;
 	}
-	public void setCommencePath(String commencePath) {
-		this.commencePath = commencePath;
+
+	public void setActualPath(String actualPath) {
+		this.actualPath = actualPath;
 	}
+
 	public String getBusinessPath() {
 		return businessPath;
 	}
 	public void setBusinessPath(String businessPath) {
 		this.businessPath = businessPath;
 	}
+
 	public List<MetadataExtractionRules> getMetadataExtractionRulesList() {
 		return metadataExtractionRulesList;
 	}
@@ -41,6 +46,6 @@ public class CommencePath {
 	
 	@Override
 	public String toString() {
-		return getCommencePath() == null ? "" : getCommencePath();
+		return getActualPath() == null ? "" : getActualPath();
 	}
 }

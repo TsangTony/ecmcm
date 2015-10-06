@@ -4,7 +4,6 @@ import java.util.regex.Pattern;
 
 import com.ibm.ecm.mm.model.Lookup;
 
-
 public class Util {
 	
 	public static boolean isNonNegativeInteger(String s) {
@@ -57,9 +56,15 @@ public class Util {
 	public static String findRegex(String searchString, Lookup lookup, String sequence) {
 		String value = "";
 		
-		if (!findRegex(searchString, lookup.getLookupValue(), sequence).equals(""))
+		if (!findRegex(searchString, delimited(lookup.getLookupValue()), sequence).equals(""))
 			return lookup.getReturnedValue();
 		
 		return value;
 	}
+
+	private static String delimited(String lookupValue) {
+		String delimitor = "\\W";
+		return  "^" + lookupValue + delimitor + "|" + delimitor + lookupValue + "$|" + delimitor + lookupValue + delimitor + "|^" + lookupValue + "$";
+	}		
+	
 }

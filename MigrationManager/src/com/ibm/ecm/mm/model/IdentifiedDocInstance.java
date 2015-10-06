@@ -22,6 +22,7 @@ public class IdentifiedDocInstance {
 	private String server;
 	private String volume;
 	private String path;
+	private String digest;
 	private MetadataValue metadataValue;
 	
 	public long getId() {
@@ -54,6 +55,12 @@ public class IdentifiedDocInstance {
 	public void setVolume(String volume) {
 		this.volume = volume;
 	}
+	public String getDigest() {
+		return digest;
+	}
+	public void setDigest(String digest) {
+		this.digest = digest;
+	}
 	public String getPath() {
 		return path == null ? "" : path;
 	}
@@ -65,6 +72,9 @@ public class IdentifiedDocInstance {
 	}
 	public String getFullyQualifiedPath() {
 		return "\\\\" + getServer() + "/" + getVolume() + "/" + getFullPath();
+	}
+	private String getUnixMountedPath() {
+		return "/mnt/" + getVolume() + "/" + getFullPath();
 	}
 	public MetadataValue getMetadataValue() {
 		return metadataValue;
@@ -80,14 +90,31 @@ public class IdentifiedDocInstance {
 		PowerPointExtractor pptExtractor = null;	
 		XSLFPowerPointExtractor pptxExtractor = null;			
 		
+		File file = null;
+		FileInputStream fis = null;
 		try {
-			File file = new File(getFullyQualifiedPath());		
-			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+			//Windows
+			file = new File(getFullyQualifiedPath());
+			fis = new FileInputStream(file.getAbsolutePath());
+		}
+		catch (FileNotFoundException e1) {
+			//Unix
+			try {
+				file = new File(getUnixMountedPath());
+				fis = new FileInputStream(file.getAbsolutePath());
+			}
+			catch (FileNotFoundException e) {
+				//TODO: logging
+				System.out.println("Cannot read content from " + getName() + " because the file is not found.");
+				return content;
+			}
+		}
 			
+		try {
 			if (getExtension().toUpperCase().equals("PDF")) {						
 				PDFTextStripper stripper = new PDFTextStripper();
-				pdfDocument = PDDocument.load(fis);
-				content = stripper.getText(pdfDocument);			
+				pdfDocument = PDDocument.load(getFullyQualifiedPath());
+				content = stripper.getText(pdfDocument);
 			}
 			
 			else if (getExtension().toUpperCase().equals("DOC")) {
@@ -115,10 +142,6 @@ public class IdentifiedDocInstance {
 				//TODO: logging
 				System.out.println("Cannot read content from " + getName() + " due unsupported file format.");	
 			}	
-		}
-		catch (FileNotFoundException e) {
-			//TODO: logging
-			System.out.println("Cannot read content from " + getName() + " because the file is not found.");		
 		}
 		catch (Exception e) {
 			//TODO: logging

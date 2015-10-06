@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:h="http://java.sun.com/jsf/html"   
-	  xmlns:p="http://primefaces.org/ui">
-<head>
-<meta charset="UTF-8" />
-<title>IBM Migration Manager</title>
-</head>
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions">
+<h:head>
+		<meta charset="UTF-8" />
+		<title>IBM Migration Manager</title>
+</h:head>
 <body>
 	<h1>IBM Migration Manager</h1>
-	
 	<p:menubar>
         <p:submenu label="Manage Master Data" icon="ui-icon-document">
-            <p:menuitem value="Manage Snapshot" url="#" />
-            <p:menuitem value="Manage Document" url="#" />
+            <p:menuitem value="Manage Snapshot" url="#" icon="ui-icon-image" />
+            <p:menuitem value="Manage Document" url="#" icon="ui-icon-document" />
         </p:submenu>
-        <p:menuitem value="Identification" url="#" />
-        <p:menuitem value="Metadata Extraction" outcome="metadataextraction" />             
+        <p:menuitem value="Identification" outcome="identification" icon="ui-icon-search" />
+        <p:menuitem value="Metadata Extraction" outcome="metadataextraction" icon="ui-icon-gear" />             
 	</p:menubar>
 	
 </body>
