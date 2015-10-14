@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -15,7 +16,7 @@ import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
-public class IdentifiedDocInstance {
+public class IdentifiedDocInstance extends DataTableElement {
 	private long id;
 	private String name;
 	private String extension;
@@ -23,7 +24,12 @@ public class IdentifiedDocInstance {
 	private String volume;
 	private String path;
 	private String digest;
-	private MetadataValue metadataValue;
+	private ArrayList<MetadataValue> metadataValues;
+	private CommencePath commencePath;
+	
+	public IdentifiedDocInstance() {
+		setMetadataValues(new ArrayList<MetadataValue>());
+	}
 	
 	public long getId() {
 		return id;
@@ -67,21 +73,34 @@ public class IdentifiedDocInstance {
 	public void setPath(String path) {
 		this.path = path;
 	}
+	public String getVolumePath() {
+		return getPath().equals("") ? getVolume() : getVolume() + "/" + getPath();
+	}
 	public String getFullPath() {
-		return getPath().equals("") ? getName() : getPath() + "/" + getName();
+		return getPath().equals("") ? getVolume() + "/" + getName() : getVolume() + "/" + getPath() + "/" + getName();
 	}
 	public String getFullyQualifiedPath() {
-		return "\\\\" + getServer() + "/" + getVolume() + "/" + getFullPath();
+		return "\\\\" + getServer() + "/" + getFullPath();
 	}
-	private String getUnixMountedPath() {
-		return "/mnt/" + getVolume() + "/" + getFullPath();
+	public String getUnixMountedPath() {
+		return "/mnt/" + getFullPath();
 	}
+
+	public ArrayList<MetadataValue> getMetadataValues() {
+		return metadataValues;
+	}
+
+	public void setMetadataValues(ArrayList<MetadataValue> metadataValues) {
+		this.metadataValues = metadataValues;
+	}
+	
 	public MetadataValue getMetadataValue() {
-		return metadataValue;
+		if (getMetadataValues().size() > 0) {
+			return metadataValues.get(0);			
+		}
+		return null;		
 	}
-	public void setMetadataValue(MetadataValue metadataValue) {
-		this.metadataValue = metadataValue;
-	}
+
 	public String getContent() {	
 		String content = "";		
 		PDDocument pdfDocument = null;	
@@ -104,8 +123,7 @@ public class IdentifiedDocInstance {
 				fis = new FileInputStream(file.getAbsolutePath());
 			}
 			catch (FileNotFoundException e) {
-				//TODO: logging
-				System.out.println("Cannot read content from " + getName() + " because the file is not found.");
+				System.err.println("Cannot read content from " + getName() + " ("+ getId() +") because the file is not found.");
 				return content;
 			}
 		}
@@ -113,7 +131,7 @@ public class IdentifiedDocInstance {
 		try {
 			if (getExtension().toUpperCase().equals("PDF")) {						
 				PDFTextStripper stripper = new PDFTextStripper();
-				pdfDocument = PDDocument.load(getFullyQualifiedPath());
+				pdfDocument = PDDocument.load(file);
 				content = stripper.getText(pdfDocument);
 			}
 			
@@ -139,13 +157,11 @@ public class IdentifiedDocInstance {
 				content	= pptxExtractor.getText(true,true,true);
 			}
 			else {
-				//TODO: logging
-				System.out.println("Cannot read content from " + getName() + " due unsupported file format.");	
+				System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due unsupported file format.");	
 			}	
 		}
 		catch (Exception e) {
-			//TODO: logging
-			System.out.println("Cannot read content from " + getName() + " due to error.");
+			System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to error.");
 			e.printStackTrace();
 		}
 		finally {
@@ -166,5 +182,13 @@ public class IdentifiedDocInstance {
 		}		
 
 		return content;
+	}
+
+	public CommencePath getCommencePath() {
+		return commencePath;
+	}
+
+	public void setCommencePath(CommencePath commencePath) {
+		this.commencePath = commencePath;
 	}
 }

@@ -20,5 +20,10 @@
 		<managed-bean-class>com.ibm.ecm.mm.bean.Identification</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>generationBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.GenerationBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
 
 </faces-config>

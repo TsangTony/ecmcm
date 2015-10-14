@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class MetadataExtractionRules {
 	private MetadataProperty metadataProperty;
+	private int commencePathId;
 	private boolean isDefault;
 	private boolean hasDefault;
 	private DataTableArrayList<MetadataExtractionRule> rules;
@@ -25,6 +26,14 @@ public class MetadataExtractionRules {
 		this.metadataProperty = metadataProperty;
 	}
 	
+	public int getCommencePathId() {
+		return commencePathId;
+	}
+
+	public void setCommencePathId(int commencePathId) {
+		this.commencePathId = commencePathId;
+	}
+
 	public DataTableArrayList<MetadataExtractionRule> getRules() {
 		return rules;
 	}

@@ -25,7 +25,7 @@
 	
 	<h:form id="identification">
 	
-	<p:growl id="growl" for="growl" showDetail="true" sticky="true" />  
+	<p:growl id="growl" for="growl" showDetail="true" sticky="true" escape="false" />  
 	
 	<p:panelGrid id="optionPanel">
 		<p:row>
@@ -34,7 +34,7 @@
 				<p:selectOneMenu id="document" value="#{identification.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
 					<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
 					<f:selectItems value="#{identification.documents}" />
-					<p:ajax update="@this,commencePaths,identificationRules" listener="#{identification.documentSelected}" />
+					<p:ajax update="optionPanel,commencePathPanel,identificationRulesPanel" listener="#{identification.documentSelected}" />
 				</p:selectOneMenu>
 			</p:column>
 		</p:row>
@@ -42,7 +42,7 @@
 	
 	<br />
 	
-	<p:panel id="CommencePathPanel" header="Source Locations" toggleable="true">
+	<p:panel id="commencePathPanel" header="Source Locations" toggleable="true">
 	
 		<p:dataTable id="commencePaths" var="commencePath" value="#{identification.document.commencePaths}" editable="true" editMode="cell" rowIndexVar="rowIndex">
 		    <p:column headerText="Business Source Location" style="width: 44%">
@@ -75,15 +75,15 @@
 	<p:panel id="identificationRulesPanel" header="Identification Rules" toggleable="true">
 	
 		<p:fieldset legend="Business Rule" toggleable="true" toggleSpeed="500">	
-			<p:inputTextarea value="#{identification.document.blIdentificationRule}" rows="3" style="width:100%" >
-				<p:ajax event="change" update="@this" />
+			<p:inputTextarea id="blIdentificationRule" value="#{identification.document.blIdentificationRule}" rows="3" style="width:100%" >
+				<p:ajax event="change" update="blIdentificationRule" />
 			</p:inputTextarea>
 		</p:fieldset>
 		
 		<br />
 	
 		<p:dataTable id="identificationRules" var="identificationRule" value="#{identification.document.identificationRules}" editable="true" editMode="cell" rowIndexVar="rowIndex">
-			<p:column headerText="Logical Operator" style="width: 20%">
+			<p:column headerText="Logical Operator" style="width: 15%">
 		    	<p:cellEditor rendered="#{rowIndex != 0}">
 					<f:facet name="output"><h:outputText value="#{identificationRule.logicalOperator}" /></f:facet>
 					<f:facet name="input">
@@ -94,7 +94,18 @@
 					</f:facet>
             	</p:cellEditor>
 		    </p:column>
-		    <p:column headerText="Attribute" style="width: 20%">
+		    <p:column headerText="Left Paren" style="width: 5%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{identificationRule.leftParen}" /></f:facet>
+					<f:facet name="input">
+						<h:selectOneMenu value="#{identificationRule.leftParen}" style="width:100%" converter="omnifaces.SelectItemsConverter">
+			                <f:selectItem itemLabel="Select Left Paren" noSelectionOption="true" />
+			                <f:selectItems value="#{identification.leftParens}" />
+		                </h:selectOneMenu>
+					</f:facet>
+            	</p:cellEditor>
+		    </p:column>
+		    <p:column headerText="Attribute" style="width: 15%">
 		    	<p:cellEditor>
 					<f:facet name="output"><h:outputText value="#{identificationRule.attribute}" /></f:facet>
 					<f:facet name="input">
@@ -122,6 +133,17 @@
 					<f:facet name="input"><p:inputText id="valueInput" value="#{identificationRule.value}" style="width:96%" /></f:facet>
             	</p:cellEditor>
 		    </p:column>
+		    <p:column headerText="Right Paren" style="width: 5%">
+		    	<p:cellEditor>
+					<f:facet name="output"><h:outputText value="#{identificationRule.rightParen}" /></f:facet>
+					<f:facet name="input">
+						<h:selectOneMenu value="#{identificationRule.rightParen}" style="width:100%" converter="omnifaces.SelectItemsConverter">
+			                <f:selectItem itemLabel="Select Right Paren" noSelectionOption="true" />
+			                <f:selectItems value="#{identification.rightParens}" />
+		                </h:selectOneMenu>
+					</f:facet>
+            	</p:cellEditor>
+		    </p:column>
 		    <p:column style="width: 10%">    						    				
 			    <p:commandButton icon="ui-icon-closethick" action="#{identification.document.identificationRules.remove(identificationRule)}" update="identificationRules" ajax="true" style="width: 2em" />			    				
 			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identification.document.identificationRules.moveUp(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
@@ -139,23 +161,24 @@
 	
 	<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
 		<h:outputText value="Identifying..." />
-	</p:dialog>
+	</p:dialog>	
 	
 	<p:commandButton value="Preview" action="#{identification.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-	<p:commandButton value="Run and Save" action="#{identification.runAndSave}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	<p:commandButton value="Save" action="#{identification.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	<p:commandButton value="Run" action="#{identification.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
 	
 	<br />
 	<br />
 	
-	<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
+	<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" escape="false" />
 	
 	<p:panel header="Preview Result" toggleable="true">	
-		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identification.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100">
-		    <p:column headerText="File Path">
-		        <h:outputText value="#{identifiedDocInstance.path}" />
+		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identification.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+		    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.fullPath}">
+		        <h:outputText value="#{identifiedDocInstance.volumePath}" />
 		    </p:column>
 		 
-		    <p:column headerText="File Name">
+		    <p:column headerText="File Name" sortBy="#{identifiedDocInstance.name}">
 		        <h:outputText value="#{identifiedDocInstance.name}" />
 		    </p:column>
 		</p:dataTable>

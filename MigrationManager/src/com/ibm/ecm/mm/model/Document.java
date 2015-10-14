@@ -67,6 +67,9 @@ public class Document {
 
 	@Override
 	public String toString() {
-		return "DOC-" + String.valueOf(getId()) + " " + getName();
+		if (getId() > 99)		
+			return "DOC-" + String.valueOf(getId()) + " " + getName();
+		return "DOC-0" + String.valueOf(getId()) + " " + getName();
+		
 	}
 }

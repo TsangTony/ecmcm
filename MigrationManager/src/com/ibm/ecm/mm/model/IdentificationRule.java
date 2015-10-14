@@ -6,6 +6,8 @@ public class IdentificationRule extends DataTableElement {
 	private String attribute;
 	private String relationalOperator;
 	private String value;
+	private String leftParen;
+	private String rightParen;
 	
 	public int getId() {
 		return id;
@@ -36,6 +38,22 @@ public class IdentificationRule extends DataTableElement {
 	}
 	public void setRelationalOperator(String relationalOperator) {
 		this.relationalOperator = relationalOperator;
+	}
+	public String getLeftParen() {
+		if (leftParen == null)
+			return "";
+		return leftParen;
+	}
+	public void setLeftParen(String leftParen) {
+		this.leftParen = leftParen;
+	}
+	public String getRightParen() {
+		if (rightParen == null)
+			return "";
+		return rightParen;
+	}
+	public void setRightParen(String rightParen) {
+		this.rightParen = rightParen;
 	}
 	
 

@@ -142,17 +142,17 @@
 	
 	<p:panel header="Preview Result" toggleable="true">
 		
-		<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100">
-		    <p:column headerText="File Path">
+		<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+		    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
 		        <h:outputText value="#{identifiedDocInstance.path}" />
 		    </p:column>
-		    <p:column headerText="File Name">
+		    <p:column headerText="File Name" sortBy="#{identifiedDocInstance.name}">
 		        <h:outputText value="#{identifiedDocInstance.name}" />
 		    </p:column>
-		    <p:column headerText="Metadata Value">
+		    <p:column headerText="Metadata Value" sortBy="#{identifiedDocInstance.metadataValue.value}">
 		        <h:outputText value="#{identifiedDocInstance.metadataValue.value}" />
 		    </p:column>
-		    <p:column headerText="Source">
+		    <p:column headerText="Source" sortBy="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}">
 		        <h:outputText value="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}" />
 		    </p:column>
 		</p:dataTable>
