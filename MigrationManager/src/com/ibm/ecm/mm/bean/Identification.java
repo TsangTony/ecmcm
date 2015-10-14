@@ -190,7 +190,6 @@ public class Identification {
 			ArrayList<IdentifiedDocInstance> identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
 			
 			HashSet<String> digests = new HashSet<String>();
-			//HashSet<Long> ids = new HashSet<Long>();
 			
 			while (rs.next()) {
 				String digest = rs.getString(5);
