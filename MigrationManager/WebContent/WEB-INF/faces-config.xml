@@ -16,13 +16,18 @@
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>
-		<managed-bean-name>identification</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.bean.Identification</managed-bean-class>
+		<managed-bean-name>identificationBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.IdentificationBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>
 		<managed-bean-name>generationBean</managed-bean-name>
 		<managed-bean-class>com.ibm.ecm.mm.bean.GenerationBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>snapshotBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.SnapshotBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 

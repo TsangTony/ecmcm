@@ -56,7 +56,7 @@ public class Util {
 	public static String findRegex(String searchString, Lookup lookup, String sequence) {
 		String value = "";
 		
-		if (!findRegex(searchString, lookup.getLookupValue(), sequence).equals(""))
+		if (!findRegex(searchString, delimited(lookup.getLookupValue()), sequence).equals(""))
 			return lookup.getReturnedValue();
 		
 		return value;

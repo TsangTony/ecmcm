@@ -3,6 +3,7 @@ package com.ibm.ecm.mm.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
@@ -94,7 +95,7 @@ public class ExtractionManager {
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
 					DataManager.removeMetadataValues(document.getId(), metadataExtractionRules.getMetadataProperty().getId());
-					identifiedDocInstance = extractMetadata(identifiedDocInstance, metadataExtractionRules);
+					identifiedDocInstance.getMetadataValues().add(extractMetadata(identifiedDocInstance, metadataExtractionRules));
 				}
 			}
 		}
@@ -103,72 +104,79 @@ public class ExtractionManager {
 	}
 	
 	
-	public static IdentifiedDocInstance extractMetadata(IdentifiedDocInstance identifiedDocInstance, MetadataExtractionRules metadataExtractionRules) {
-		
-		
+	public static MetadataValue extractMetadata(IdentifiedDocInstance identifiedDocInstance, MetadataExtractionRules metadataExtractionRules) {
 		MetadataValue metadataValue = new MetadataValue();
 		metadataValue.setValue("");
-		
-		if (metadataExtractionRules.isDefault()) {
-			metadataExtractionRuleloop:
-			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
+		StringBuilder content = new StringBuilder();
+				
+		metadataExtractionRuleloop:
+		for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
+			StringBuilder valueBase = new StringBuilder();
+			String searchSequence = "FIRST";
+			if (metadataExtractionRule.getSource().equals("File Path"))  {
+				valueBase.append(identifiedDocInstance.getFullPath());
+				searchSequence = "LAST";
+			}
+			else if (metadataExtractionRule.getSource().equals("Content")) {
+				if (content.equals("")) {
+					valueBase.append(identifiedDocInstance.getContent());
+					content = valueBase;
+				}
+				else
+					valueBase = content;
+			}
+			else if (metadataExtractionRule.getSource().equals("Default")) {
+				metadataValue.setValue(metadataExtractionRule.getDefaultValue());
+				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
+				break;
+			}
+			
+			if (valueBase.toString().equals(""))
+				continue metadataExtractionRuleloop;
+
+			if (metadataExtractionRules.isDefault()) {
+				lookupLoop:
 				for (Lookup lookup : metadataExtractionRules.getLookups()) {
-					String valueBase = "";
-					if (metadataExtractionRule.getSource().equals("File Path")) 
-						valueBase = identifiedDocInstance.getFullPath();
-					else if (metadataExtractionRule.getSource().equals("Content"))
-						valueBase = identifiedDocInstance.getContent();	
-					if (!valueBase.equals("")) {
-						if (metadataExtractionRules.getMetadataProperty().getName().equals("Date")) {
-							SimpleDateFormat outputSdf = new SimpleDateFormat("yyyy-MM-dd");
-							SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
-							try {
-								String dateFound = Util.findRegex(valueBase, lookup.getLookupValue(), "LAST");
-								if (dateFound != "")
-									metadataValue.setValue(outputSdf.format(inputSdf.parse(dateFound)));
-							} catch (ParseException e) {
-								e.printStackTrace();
+					if (metadataExtractionRules.getMetadataProperty().getName().equals("Date") ||
+						metadataExtractionRules.getMetadataProperty().getName().equals("Month")||
+						metadataExtractionRules.getMetadataProperty().getName().equals("Year")) {
+						SimpleDateFormat outputSdf = new SimpleDateFormat("yyyy-MM-dd");
+						SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
+						try {
+							String dateFound = Util.findRegex(valueBase.toString(), lookup.getLookupValue(), searchSequence);
+							if (dateFound != "") {
+								Date dateParsed = inputSdf.parse(dateFound);
+								//TODO: from DB
+								Date upperLimit = outputSdf.parse("2020-12-31");
+								Date lowerLimit = outputSdf.parse("1940-01-01");
+								if (dateParsed.before(upperLimit) && dateParsed.after(lowerLimit))
+									metadataValue.setValue(outputSdf.format(dateParsed));
 							}
-						}
-						else {
-							metadataValue.setValue(Util.findRegex(valueBase, lookup, "LAST"));
-						}
-						
-						if (!metadataValue.getValue().equals("")) {				
-							metadataValue.setMetadataExtractionRule(metadataExtractionRule);
-							identifiedDocInstance.getMetadataValues().add(metadataValue);
-							break metadataExtractionRuleloop;
+						} catch (ParseException e) {
+							continue lookupLoop;
 						}
 					}
+					else
+						metadataValue.setValue(Util.findRegex(valueBase.toString(), lookup, searchSequence));
 				}
 			}
-		}
-		else {
-			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
-				if (metadataExtractionRule.getSource().equals("File Path"))
-					metadataValue.setValue(Util.findRegex(identifiedDocInstance.getFullPath(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), "LAST"));
-				else if (metadataExtractionRule.getSource().equals("Content"))
-					metadataValue.setValue(Util.findRegex(identifiedDocInstance.getContent(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), "FIRST"));
+			else
+				metadataValue.setValue(Util.findRegex(valueBase.toString(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), searchSequence));
 				
-				else if (metadataExtractionRule.getSource().equals("Default")) 
-					metadataValue.setValue(metadataExtractionRule.getDefaultValue());
-
-				
-				if (!metadataValue.getValue().equals("")) {
-					metadataValue.setMetadataExtractionRule(metadataExtractionRule);
-					identifiedDocInstance.getMetadataValues().add(metadataValue);
-					break;
-				}				
-			}
+			if (!metadataValue.getValue().equals("")) {
+				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
+				break metadataExtractionRuleloop;
+			}	
 		}
-		return identifiedDocInstance;
+		
+		return metadataValue;
 	}
 	
 
 	public static ArrayList<IdentifiedDocInstance> extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances, MetadataExtractionRules metadataExtractionRules) {
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {	
 			identifiedDocInstance.getMetadataValues().clear();
-			identifiedDocInstance = extractMetadata(identifiedDocInstance,metadataExtractionRules);		
+			identifiedDocInstance.getMetadataValues().add(extractMetadata(identifiedDocInstance,metadataExtractionRules));		
 		}	
 		return identifiedDocInstances;
 		

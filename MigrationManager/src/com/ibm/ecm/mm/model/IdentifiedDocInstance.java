@@ -26,9 +26,11 @@ public class IdentifiedDocInstance extends DataTableElement {
 	private String digest;
 	private ArrayList<MetadataValue> metadataValues;
 	private CommencePath commencePath;
+	private String snippet;
 	
 	public IdentifiedDocInstance() {
 		setMetadataValues(new ArrayList<MetadataValue>());
+		setSnippet("");
 	}
 	
 	public long getId() {
@@ -72,6 +74,9 @@ public class IdentifiedDocInstance extends DataTableElement {
 	}
 	public void setPath(String path) {
 		this.path = path;
+	}
+	public String getNameWithoutExtension() {
+		return getName().replace(getExtension(), "");
 	}
 	public String getVolumePath() {
 		return getPath().equals("") ? getVolume() : getVolume() + "/" + getPath();
@@ -190,5 +195,13 @@ public class IdentifiedDocInstance extends DataTableElement {
 
 	public void setCommencePath(CommencePath commencePath) {
 		this.commencePath = commencePath;
+	}
+
+	public String getSnippet() {
+		return snippet;
+	}
+
+	public void setSnippet(String snippet) {
+		this.snippet = snippet;
 	}
 }

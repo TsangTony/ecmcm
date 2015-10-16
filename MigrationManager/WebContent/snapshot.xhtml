@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions">
+<h:head>
+	<meta charset="UTF-8" />
+	<h:outputStylesheet library="css" name="style.css"  />
+	<title>IBM Migration Manager | </title>
+</h:head>
+<body>
+	<h1>IBM Migration Manager</h1>
+	<p:menubar>
+        <p:submenu label="Manage Master Data" icon="ui-icon-document">
+            <p:menuitem value="Manage Snapshot" url="#" icon="ui-icon-image" />
+            <p:menuitem value="Manage Document" url="#" icon="ui-icon-document" />
+        </p:submenu>
+        <p:menuitem value="Identification" outcome="identification" icon="ui-icon-search" />
+        <p:menuitem value="Metadata Extraction" outcome="metadataextraction" icon="ui-icon-gear" />             
+	</p:menubar>
+	<br />
+	<h:form>
+		<p:panel header="Snapshot Report" toggleable="true">	
+			<p:dataTable var="document" value="#{snapshotBean.documents}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+			    <p:column headerText="Document" sortBy="#{document.id}">
+			        <h:outputText value="#{document.id}" />
+			    </p:column>
+			 
+			    <p:column headerText="Snapshot 1" sortBy="#{document.s1}">
+			        <h:outputText value="#{document.s1}" />
+			    </p:column>			    
+			    
+			    <p:column headerText="Snapshot 2" sortBy="#{document.s2}">
+			        <h:outputText value="#{document.s2}" />
+			    </p:column>
+			</p:dataTable>
+		</p:panel>
+	</h:form>
+</body>
+</html>

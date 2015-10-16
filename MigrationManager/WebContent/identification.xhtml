@@ -31,10 +31,10 @@
 		<p:row>
 			<p:column>Document</p:column>
 			<p:column>
-				<p:selectOneMenu id="document" value="#{identification.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+				<p:selectOneMenu id="document" value="#{identificationBean.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
 					<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
-					<f:selectItems value="#{identification.documents}" />
-					<p:ajax update="optionPanel,commencePathPanel,identificationRulesPanel" listener="#{identification.documentSelected}" />
+					<f:selectItems value="#{identificationBean.documents}" />
+					<p:ajax update="optionPanel,commencePathPanel,identificationRulesPanel" listener="#{identificationBean.documentSelected}" />
 				</p:selectOneMenu>
 			</p:column>
 		</p:row>
@@ -44,7 +44,7 @@
 	
 	<p:panel id="commencePathPanel" header="Source Locations" toggleable="true">
 	
-		<p:dataTable id="commencePaths" var="commencePath" value="#{identification.document.commencePaths}" editable="true" editMode="cell" rowIndexVar="rowIndex">
+		<p:dataTable id="commencePaths" var="commencePath" value="#{identificationBean.document.commencePaths}" editable="true" editMode="cell" rowIndexVar="rowIndex">
 		    <p:column headerText="Business Source Location" style="width: 44%">
 		    	<p:cellEditor>
 					<f:facet name="output"><h:outputText value="#{commencePath.businessPath}" /></f:facet>
@@ -58,15 +58,15 @@
             	</p:cellEditor>
 		    </p:column>
 		    <p:column style="width: 12%">    						    				
-			    <p:commandButton icon="ui-icon-closethick" action="#{identification.document.commencePaths.remove(commencePath)}" update="commencePaths" ajax="true" style="width: 2em" />			    				
-			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identification.document.commencePaths.moveUp(commencePath)}" update="commencePaths" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
-			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{identification.document.commencePaths.moveDown(commencePath)}" update="commencePaths" ajax="true" disabled="#{rowIndex eq identification.commencePathsLastIndex}" style="width: 2em" />
+			    <p:commandButton icon="ui-icon-closethick" action="#{identificationBean.document.commencePaths.remove(commencePath)}" update="commencePaths" ajax="true" style="width: 2em" />			    				
+			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identificationBean.document.commencePaths.moveUp(commencePath)}" update="commencePaths" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
+			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{identificationBean.document.commencePaths.moveDown(commencePath)}" update="commencePaths" ajax="true" disabled="#{rowIndex eq identification.commencePathsLastIndex}" style="width: 2em" />
 			</p:column>
 			<p:ajax event="cellEdit" update="@this" />
 		</p:dataTable>
 		
 		<br />
-		<p:commandButton value="New Source Location" icon="ui-icon-plusthick" action="#{identification.document.commencePaths.addNew}" update="commencePaths" ajax="true" />
+		<p:commandButton value="New Source Location" icon="ui-icon-plusthick" action="#{identificationBean.document.commencePaths.addNew}" update="commencePaths" ajax="true" />
 		
 	</p:panel>
 	
@@ -75,21 +75,21 @@
 	<p:panel id="identificationRulesPanel" header="Identification Rules" toggleable="true">
 	
 		<p:fieldset legend="Business Rule" toggleable="true" toggleSpeed="500">	
-			<p:inputTextarea id="blIdentificationRule" value="#{identification.document.blIdentificationRule}" rows="3" style="width:100%" >
+			<p:inputTextarea id="blIdentificationRule" value="#{identificationBean.document.blIdentificationRule}" rows="3" style="width:100%" >
 				<p:ajax event="change" update="blIdentificationRule" />
 			</p:inputTextarea>
 		</p:fieldset>
 		
 		<br />
 	
-		<p:dataTable id="identificationRules" var="identificationRule" value="#{identification.document.identificationRules}" editable="true" editMode="cell" rowIndexVar="rowIndex">
+		<p:dataTable id="identificationRules" var="identificationRule" value="#{identificationBean.document.identificationRules}" editable="true" editMode="cell" rowIndexVar="rowIndex">
 			<p:column headerText="Logical Operator" style="width: 15%">
 		    	<p:cellEditor rendered="#{rowIndex != 0}">
 					<f:facet name="output"><h:outputText value="#{identificationRule.logicalOperator}" /></f:facet>
 					<f:facet name="input">
 						<h:selectOneMenu value="#{identificationRule.logicalOperator}" style="width:100%" converter="omnifaces.SelectItemsConverter">
 			                <f:selectItem itemLabel="Select Logical Operator" noSelectionOption="true" />
-			                <f:selectItems value="#{identification.logicalOperators}" />
+			                <f:selectItems value="#{identificationBean.logicalOperators}" />
 		                </h:selectOneMenu>
 					</f:facet>
             	</p:cellEditor>
@@ -100,7 +100,7 @@
 					<f:facet name="input">
 						<h:selectOneMenu value="#{identificationRule.leftParen}" style="width:100%" converter="omnifaces.SelectItemsConverter">
 			                <f:selectItem itemLabel="Select Left Paren" noSelectionOption="true" />
-			                <f:selectItems value="#{identification.leftParens}" />
+			                <f:selectItems value="#{identificationBean.leftParens}" />
 		                </h:selectOneMenu>
 					</f:facet>
             	</p:cellEditor>
@@ -111,7 +111,7 @@
 					<f:facet name="input">
 						<h:selectOneMenu value="#{identificationRule.attribute}" style="width:100%">
 			                <f:selectItem itemLabel="Select Attribute" noSelectionOption="true" />
-			                <f:selectItems value="#{identification.attributes}" />
+			                <f:selectItems value="#{identificationBean.attributes}" />
 		                </h:selectOneMenu>
 					</f:facet>
             	</p:cellEditor>
@@ -122,7 +122,7 @@
 					<f:facet name="input">
 						<h:selectOneMenu value="#{identificationRule.relationalOperator}" style="width:100%">
 	                		<f:selectItem itemLabel="Select Operator" noSelectionOption="true" />
-			                <f:selectItems value="#{identification.relationalOperators}" />
+			                <f:selectItems value="#{identificationBean.relationalOperators}" />
 						</h:selectOneMenu>
 					</f:facet>
             	</p:cellEditor>
@@ -139,22 +139,29 @@
 					<f:facet name="input">
 						<h:selectOneMenu value="#{identificationRule.rightParen}" style="width:100%" converter="omnifaces.SelectItemsConverter">
 			                <f:selectItem itemLabel="Select Right Paren" noSelectionOption="true" />
-			                <f:selectItems value="#{identification.rightParens}" />
+			                <f:selectItems value="#{identificationBean.rightParens}" />
 		                </h:selectOneMenu>
 					</f:facet>
             	</p:cellEditor>
 		    </p:column>
 		    <p:column style="width: 10%">    						    				
-			    <p:commandButton icon="ui-icon-closethick" action="#{identification.document.identificationRules.remove(identificationRule)}" update="identificationRules" ajax="true" style="width: 2em" />			    				
-			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identification.document.identificationRules.moveUp(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
-			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{identification.document.identificationRules.moveDown(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq identification.identificationRulesLastIndex}" style="width: 2em" />
+			    <p:commandButton icon="ui-icon-closethick" action="#{identificationBean.document.identificationRules.remove(identificationRule)}" update="identificationRules" ajax="true" style="width: 2em" />			    				
+			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{identificationBean.document.identificationRules.moveUp(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
+			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{identificationBean.document.identificationRules.moveDown(identificationRule)}" update="identificationRules" ajax="true" disabled="#{rowIndex eq identification.identificationRulesLastIndex}" style="width: 2em" />
 			</p:column>
 			<p:ajax event="cellEdit" update="@this" />
 		</p:dataTable>
 		
 		<br />
-		<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{identification.document.identificationRules.addNew}" update="identificationRules" ajax="true" />
-		
+		<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{identificationBean.document.identificationRules.addNew}" update="identificationRules" ajax="true" />
+		<p:spacer width="5" height="10" /> 
+		<p:commandButton value="Ignore Obsolete" icon="ui-icon-plusthick" action="#{identificationBean.ignoreObsolete}" update="identificationRules" ajax="true" />
+		<p:spacer width="10" height="10" /> 
+		<p:selectBooleanCheckbox id="noPdf" value="#{identificationBean.noPdf}">
+		    <p:ajax event="change" update="@this" />
+		</p:selectBooleanCheckbox>
+		<p:spacer width="5" height="10" /> 
+		<h:outputText value="Ignore the PDF version if two files with identical names exist in the same folder" />
 	</p:panel>
 		
 	<br />
@@ -163,9 +170,9 @@
 		<h:outputText value="Identifying..." />
 	</p:dialog>	
 	
-	<p:commandButton value="Preview" action="#{identification.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-	<p:commandButton value="Save" action="#{identification.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-	<p:commandButton value="Run" action="#{identification.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	<p:commandButton value="Preview" action="#{identificationBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	<p:commandButton value="Save" action="#{identificationBean.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+	<p:commandButton value="Run" action="#{identificationBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
 	
 	<br />
 	<br />
@@ -173,7 +180,7 @@
 	<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" escape="false" />
 	
 	<p:panel header="Preview Result" toggleable="true">	
-		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identification.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+		<p:dataTable id="preview" var="identifiedDocInstance" value="#{identificationBean.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 		    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.fullPath}">
 		        <h:outputText value="#{identifiedDocInstance.volumePath}" />
 		    </p:column>

@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
@@ -277,6 +278,7 @@ public class DataManager {
 		attributes.add("Filename");
 		attributes.add("File Path");
 		attributes.add("Extension");
+		attributes.add("Content");
 		return attributes;
 	}
 
@@ -308,15 +310,14 @@ public class DataManager {
 			Connection conn = ConnectionManager.getConnection();
 			
 			String query = "SELECT id, server, volume, path, name, extension from Identified_Document_Instance where document_id = ?";
-			
-			
+			if (commencePath != null)
+				query += " AND volume + '/' + ISNULL(path,'') LIKE ?";
 			
 			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement(query);
 			selectIdentifiedDocumentInstanceStmt.setInt(1, document.getId());
-			if (commencePath != null) {
-				query += " AND volume + '/' + ISNULL(path,'') LIKE ?";
+			if (commencePath != null)
 				selectIdentifiedDocumentInstanceStmt.setString(2, commencePath.getActualPath() + "%");
-			}
+			
 			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();				
 			
 			while (rs.next()) {
@@ -431,5 +432,259 @@ public class DataManager {
 		}
 		
 	}
+
+	public static ArrayList<Document> getSnapshots() {
+		ArrayList<Document> documents = new ArrayList<Document>();
+		try {	
+			Connection conn = ConnectionManager.getConnection();	
+			String query = "SELECT S1.document_id, S1.count, S1Del.count, S2New.count"
+					     + "  FROM (SELECT document_id, count(*) AS count "
+					     + "          FROM Identified_Document_Instance"
+					     + "         WHERE snapshot=1"
+					     + "         GROUP BY document_id) S1"
+					     + "  LEFT JOIN"
+					     + "       (SELECT document_id, count(*) AS count"
+					     + "          FROM Identified_Document_Instance"
+					     + "         WHERE snapshot=1"
+					     + "           AND snapshot_deleted IS NOT NULL"
+					     + "         GROUP BY document_id) S1Del"
+					     + "    ON S1.document_id = S1Del.document_id"
+					     + "  LEFT JOIN"
+					     + "       (SELECT document_id, count(*) AS count"
+					     + "          FROM Identified_Document_Instance"
+					     + "         WHERE snapshot=2"
+					     + "         GROUP BY document_id) S2New"
+		                 + "    ON S1.document_id = S2New.document_id";
+			PreparedStatement stmt = conn.prepareStatement(query);
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {					
+				Document doc = new Document();
+				doc.setId(rs.getInt(1));
+				doc.setS1(rs.getInt(2));
+				doc.setS1Deleted(rs.getInt(3));
+				doc.setS2New(rs.getInt(4));
+				documents.add(doc);
+			}			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close();
+		}		
+		return documents;
+	}
+	
+	public static void addSnippet(int documentId, ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		try {
+			Connection conn = ConnectionManager.getConnection();
+			
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet) SELECT id,name,path,volume,extension,server,?,? FROM All_Document_Instance WHERE id = ?");
+			
+			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+				insertIdentifiedDocInstancStmt.setInt(1, documentId);
+				insertIdentifiedDocInstancStmt.setString(2, identifiedDocInstance.getSnippet());
+				insertIdentifiedDocInstancStmt.setLong(3, identifiedDocInstance.getId());
+				insertIdentifiedDocInstancStmt.addBatch();
+			}
+			
+			insertIdentifiedDocInstancStmt.executeBatch();		
+		}
+		catch (SQLException e) {				
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close();
+		}	
+	}
+
+	public static void addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		try {
+			Connection conn = ConnectionManager.getConnection();
+			
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
+			
+			HashSet<Long> newIds = new HashSet<Long>();
+			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+				if (!existingIdentifiedDocInstanceIds.contains(identifiedDocInstance.getId())) {
+					insertIdentifiedDocInstancStmt.setInt(1, documentId);
+					insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
+					insertIdentifiedDocInstancStmt.addBatch();
+				}
+				newIds.add(identifiedDocInstance.getId());
+			}
+			
+			HashSet<Long> removedIdentifiedDocInstanceIds = new HashSet<Long>();
+			removedIdentifiedDocInstanceIds.addAll(existingIdentifiedDocInstanceIds);
+			removedIdentifiedDocInstanceIds.removeAll(newIds);		
+			
+			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ? AND id = ?");
+			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
+			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
+			deleteMetadataValueStmt.setInt(1, documentId);
+			for (Long removedIdentifiedDocInstanceId : removedIdentifiedDocInstanceIds) {
+				deleteIdentifiedDocInstanceStmt.setLong(2, removedIdentifiedDocInstanceId);
+				deleteIdentifiedDocInstanceStmt.addBatch();
+				deleteMetadataValueStmt.setLong(2, removedIdentifiedDocInstanceId);
+				deleteMetadataValueStmt.addBatch();
+			}
+			
+			insertIdentifiedDocInstancStmt.executeBatch();		
+			deleteMetadataValueStmt.executeBatch();		
+			deleteIdentifiedDocInstanceStmt.executeBatch();
+		}
+		catch (SQLException e) {				
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close();
+		}	
+	}
+	
+	public static ArrayList<IdentifiedDocInstance> getDocInstance(Document document, boolean noPdf, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
+		ArrayList<IdentifiedDocInstance> identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();		
+		String query = "SELECT ";		
+		
+		if (fromSnippet)
+			query += "id, name, path, volume, digest, extension, server FROM Identified_Document_Instance_Snippet WHERE document_id=" + document.getId() + " ";
+		else {		
+			query += "id, name, path, volume, digest, extension, server FROM All_Document_Instance WHERE snapshot_deleted IS NULL AND (";
+			for (CommencePath commencePath : document.getCommencePaths()) {
+				query += "volume + '/' + ISNULL(path,'') like '" + commencePath.getActualPath() + "/%' OR ";
+				query += "volume + '/' + ISNULL(path,'') = '" + commencePath.getActualPath() + "' OR ";
+			}		
+			query += "1=0) ";
+			
+			//TODO: IG rules from DB
+			
+			//extension		
+			query += "AND extension in ('doc','docx','dot','docm','dotx','dotm','docb',"
+				  +  "'xls','xlt','xlm','xlsx','xlsm','xltx','xltm','xlsb','xla','xll',"
+				  +  "'xlw','ppt','pot','pps','pptx','pptm','potx','potm','ppam','ppsx',"
+				  +  "'ppsm','sldx','sldm','VSD','VST','VSW','VDX','VSX','VTX','VSDX',"
+				  +  "'VSDM','VSSX','VSSM','VSTX','VSTM','VSL','pdf','csv'";
+			
+			if (document.getTeam().contains("Training")) {
+				query += ",'afc','wav','mp3','aif','rm','mid','aob','3gp','aiff','aac',"
+					  +  "'ape','au','flac','m4a','m4p','ra','raw','wma','mkv','flv','vob',"
+					  +  "'avi','mov','qt','wmv','rmvb','asf','mpg','mpeg','mp4',',mpe',"
+					  +  "'mpv','m2v','m4v','3g2','mxf','jpg','jpeg','tif','tiff','gif',"
+					  +  "'bmp','png','img','psd','cpt','ai','svg','ico'";
+			}
+			query += ") ";
+
+			//retention
+			if (document.getIgDocClass().equals("General Document"))
+				query += "AND mtime > DATEADD(YEAR,-7,GETDATE())";
+			
+			if (noPdf)
+				query += " ORDER BY server, volume, path, name";
+		}
+
+		
+		if (!skipIdentificationRules && document.getIdentificationRules().size() != 0) {
+			query += " AND (";
+			for (IdentificationRule identificationRule : document.getIdentificationRules()) {
+				if (identificationRule.getPriority() != 1 && identificationRule.getLogicalOperator() != null)
+					query += identificationRule.getLogicalOperator() + " ";
+				
+				query += identificationRule.getLeftParen();
+				
+				if (identificationRule.getAttribute().equals("Filename"))
+					query += "name ";
+				else if (identificationRule.getAttribute().equals("File Path"))
+					query += "ISNULL(path,'') ";
+				else if (identificationRule.getAttribute().equals("Extension"))
+					query += "extension ";
+				else if (identificationRule.getAttribute().equals("Content"))
+					query += "snippet ";
+								
+				if (identificationRule.getRelationalOperator().equals("Equals"))
+					query += "= '" + identificationRule.getValue() + "'";
+				else if (identificationRule.getRelationalOperator().equals("Not equals"))				
+					query += "!= '" + identificationRule.getValue() + "'";
+				else if (identificationRule.getRelationalOperator().equals("Contains"))
+					query += "LIKE '%" + identificationRule.getValue() + "%'";
+				else if (identificationRule.getRelationalOperator().equals("Not contains"))
+					query += "NOT LIKE '%" + identificationRule.getValue() + "%'";	
+				
+				query += identificationRule.getRightParen() + " ";
+			}
+
+			query += ") ";
+		}		
+		
+		try {		
+			Connection conn = ConnectionManager.getConnection();	
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);	
+			
+			HashSet<String> digests = new HashSet<String>();
+			boolean firstRecord = false;
+			
+			while (rs.next()) {
+				String digest = rs.getString(5);
+				if (fromSnippet || !digests.contains(digest)) {				
+					IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
+					identifiedDocInstance.setId(rs.getLong(1));	
+					identifiedDocInstance.setName(rs.getNString(2));	
+					identifiedDocInstance.setPath(rs.getNString(3));
+					identifiedDocInstance.setVolume(rs.getString(4));
+					identifiedDocInstance.setDigest(digest);
+					identifiedDocInstance.setExtension(rs.getString(6));
+					identifiedDocInstance.setServer(rs.getString(7));					
+					
+					//Ignore PDF
+					if (!fromSnippet && noPdf) {
+						if (!firstRecord && identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {
+							IdentifiedDocInstance preInstance = identifiedDocInstances.get(identifiedDocInstances.size()-1);
+							if (preInstance.getServer().equals(identifiedDocInstance.getServer()) &&
+							    preInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
+							    preInstance.getPath().equals(identifiedDocInstance.getPath()) &&
+							    preInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension())) {
+								   continue;
+							}
+						}
+					}
+					
+					for (CommencePath commencePath : document.getCommencePaths()) {
+						String fullPath = identifiedDocInstance.getPath() == null ? identifiedDocInstance.getVolume() : identifiedDocInstance.getVolume() + "/" + identifiedDocInstance.getPath();
+						if (fullPath.equals(commencePath.getActualPath()) || fullPath.startsWith(commencePath.getActualPath() + "/")) {
+							identifiedDocInstance.setCommencePath(commencePath);
+						}
+					}
+					
+					identifiedDocInstances.add(identifiedDocInstance);				
+					digests.add(digest);		
+				}			
+			}
+			firstRecord = true;
+		}
+		catch (SQLException e) {
+			System.err.println(e.getMessage() + " - " + query);
+			throw e;
+		}
+		finally {
+			ConnectionManager.close();
+		}
+		
+		return identifiedDocInstances;
+	}
+
+	public static void removeSnippet(int documentId) {
+		try {
+			Connection conn = ConnectionManager.getConnection();
+			PreparedStatement deleteSnippetStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance_Snippet WHERE document_id = ?");
+			deleteSnippetStmt.setInt(1, documentId);	
+			deleteSnippetStmt.execute();
+		}
+		catch (SQLException e) {				
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close();
+		}
+	}
+
 	
 }
