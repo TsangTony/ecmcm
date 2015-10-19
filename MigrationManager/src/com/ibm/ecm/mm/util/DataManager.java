@@ -110,7 +110,25 @@ public class DataManager {
 		ArrayList<MetadataProperty> metadataPropreties = new ArrayList<MetadataProperty>();
 		try {	
 			Connection conn = ConnectionManager.getConnection();		
-			PreparedStatement selectMetadataPropertyStmt = conn.prepareStatement("SELECT Metadata_Property.id, Metadata_Property.name FROM Document LEFT JOIN Document_Class ON Document.document_class_id = Document_Class.id LEFT JOIN [DC-MP] ON Document_Class.id = [DC-MP].document_class_id LEFT JOIN Metadata_Property ON [DC-MP].metadata_property_id = Metadata_Property.id WHERE document.id = ? ORDER BY Metadata_Property.id");
+			String query = ""
+					+ "SELECT metadata_property.id, "
+					+ "       metadata_property.NAME "
+					+ "FROM   document "
+					+ "       LEFT JOIN document_class DC1 "
+					+ "              ON document.document_class_id = DC1.id "
+					+ "       LEFT JOIN document_class DC2 "
+					+ "			  ON DC1.parent_id = DC2.id "
+					+ "       LEFT JOIN document_class DC3 "
+					+ "			  ON DC2.parent_id = DC3.id "
+					+ "       LEFT JOIN [dc-mp] "
+					+ "              ON DC1.id = [dc-mp].document_class_id "
+					+ "              OR DC2.id = [dc-mp].document_class_id "
+					+ "              OR DC3.id = [dc-mp].document_class_id "
+					+ "       LEFT JOIN metadata_property "
+					+ "              ON [dc-mp].metadata_property_id = metadata_property.id "
+					+ "WHERE  document.id = ? "
+					+ "ORDER  BY metadata_property.id";
+			PreparedStatement selectMetadataPropertyStmt = conn.prepareStatement(query);
 			selectMetadataPropertyStmt.setInt(1, documentId);
 			ResultSet selectMetadataPropertyRS = selectMetadataPropertyStmt.executeQuery();
 			while (selectMetadataPropertyRS.next()) {					
@@ -299,13 +317,12 @@ public class DataManager {
 		return sources;
 	}
 	
-	public static ArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document) {
+	public static DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document) {
 		return getIdentifiedDocInstances(document,null);
-	}
-	
+	}	
 
-	public static ArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document, CommencePath commencePath) {
-		ArrayList<IdentifiedDocInstance> identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
+	public static DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document, CommencePath commencePath) {
+		DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class);
 		try {					
 			Connection conn = ConnectionManager.getConnection();
 			
@@ -433,37 +450,112 @@ public class DataManager {
 		
 	}
 
-	public static ArrayList<Document> getSnapshots() {
+	public static ArrayList<Document> getDocumentStatusReport() {
 		ArrayList<Document> documents = new ArrayList<Document>();
 		try {	
 			Connection conn = ConnectionManager.getConnection();	
-			String query = "SELECT S1.document_id, S1.count, S1Del.count, S2New.count"
-					     + "  FROM (SELECT document_id, count(*) AS count "
-					     + "          FROM Identified_Document_Instance"
-					     + "         WHERE snapshot=1"
-					     + "         GROUP BY document_id) S1"
-					     + "  LEFT JOIN"
-					     + "       (SELECT document_id, count(*) AS count"
-					     + "          FROM Identified_Document_Instance"
-					     + "         WHERE snapshot=1"
-					     + "           AND snapshot_deleted IS NOT NULL"
-					     + "         GROUP BY document_id) S1Del"
-					     + "    ON S1.document_id = S1Del.document_id"
-					     + "  LEFT JOIN"
-					     + "       (SELECT document_id, count(*) AS count"
-					     + "          FROM Identified_Document_Instance"
-					     + "         WHERE snapshot=2"
-					     + "         GROUP BY document_id) S2New"
-		                 + "    ON S1.document_id = S2New.document_id";
+			
+			String query = ""
+					+ "SELECT document.id, "
+					+ "       document.NAME, "
+					+ "       team.NAME, "
+					+ "       Isnull(S1.count, 0)                   AS S1, "
+					+ "       Isnull(S1Del.count, 0)                AS S1Del, "
+					+ "       Isnull(S2New.count, 0)                AS S2New, "
+					+ "       metadata_property.id                  AS MPID, "
+					+ "       metadata_property.NAME                AS MP, "
+					+ "       Isnull(S1XMP.metadata_property_id, 0) AS S1XMP, "
+					+ "       Isnull(S2XMP.metadata_property_id, 0) AS S2XMP "
+					+ "FROM   document "
+					+ "       LEFT JOIN team "
+					+ "              ON document.team_id = team.id "
+					+ "       LEFT JOIN (SELECT document_id, "
+					+ "                         Count(*) AS count "
+					+ "                  FROM   identified_document_instance "
+					+ "                  WHERE  snapshot = 1 "
+					+ "                  GROUP  BY document_id) S1 "
+					+ "              ON document.id = S1.document_id "
+					+ "       LEFT JOIN (SELECT document_id, "
+					+ "                         Count(*) AS count "
+					+ "                  FROM   identified_document_instance "
+					+ "                  WHERE  snapshot = 1 "
+					+ "                         AND snapshot_deleted = 2 "
+					+ "                  GROUP  BY document_id) S1Del "
+					+ "              ON document.id = S1Del.document_id "
+					+ "       LEFT JOIN (SELECT document_id, "
+					+ "                         Count(*) AS count "
+					+ "                  FROM   identified_document_instance "
+					+ "                  WHERE  snapshot = 2 "
+					+ "                  GROUP  BY document_id) S2New "
+					+ "              ON document.id = S2New.document_id "
+					+ "       LEFT JOIN document_class DC1 "
+					+ "              ON document.document_class_id = DC1.id "
+					+ "       LEFT JOIN document_class DC2 "
+					+ "			  ON DC1.parent_id = DC2.id "
+					+ "       LEFT JOIN document_class DC3 "
+					+ "			  ON DC2.parent_id = DC3.id "
+					+ "       LEFT JOIN [dc-mp] "
+					+ "              ON DC1.id = [dc-mp].document_class_id "
+					+ "              OR DC2.id = [dc-mp].document_class_id "
+					+ "              OR DC3.id = [dc-mp].document_class_id "
+					+ "       LEFT JOIN metadata_property "
+					+ "              ON [dc-mp].metadata_property_id = metadata_property.id "
+					+ "       LEFT JOIN (SELECT metadata_value.document_id, "
+					+ "                         metadata_extraction_rule.metadata_property_id "
+					+ "                  FROM   metadata_value, "
+					+ "                         metadata_extraction_rule, "
+					+ "                         identified_document_instance "
+					+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
+					+ "                         metadata_extraction_rule.id "
+					+ "                         AND metadata_value.identified_document_instance_id = "
+					+ "                             identified_document_instance.id "
+					+ "                         AND identified_document_instance.snapshot = 1 "
+					+ "                  GROUP  BY metadata_value.document_id, "
+					+ "                            metadata_extraction_rule.metadata_property_id) S1XMP "
+					+ "              ON document.id = S1XMP.document_id "
+					+ "                 AND metadata_property.id = S1XMP.metadata_property_id "
+					+ "       LEFT JOIN (SELECT metadata_value.document_id, "
+					+ "                         metadata_extraction_rule.metadata_property_id "
+					+ "                  FROM   metadata_value, "
+					+ "                         metadata_extraction_rule, "
+					+ "                         identified_document_instance "
+					+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
+					+ "                         metadata_extraction_rule.id "
+					+ "                         AND metadata_value.identified_document_instance_id = "
+					+ "                             identified_document_instance.id "
+					+ "                         AND identified_document_instance.snapshot = 2 "
+					+ "                  GROUP  BY metadata_value.document_id, "
+					+ "                            metadata_extraction_rule.metadata_property_id) S2XMP "
+					+ "              ON document.id = S2XMP.document_id "
+					+ "                 AND metadata_property.id = S2XMP.metadata_property_id "
+					+ "ORDER  BY document.id ";
+
 			PreparedStatement stmt = conn.prepareStatement(query);
+			System.out.println(query);
 			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {					
-				Document doc = new Document();
-				doc.setId(rs.getInt(1));
-				doc.setS1(rs.getInt(2));
-				doc.setS1Deleted(rs.getInt(3));
-				doc.setS2New(rs.getInt(4));
-				documents.add(doc);
+			Document preDoc = null;
+			while (rs.next()) {
+				Document doc = null;
+				if (preDoc == null || rs.getInt(1) != preDoc.getId()) {
+					doc = new Document();
+					doc.setId(rs.getInt(1));
+					doc.setName(rs.getString(2));
+					doc.setTeam(rs.getString(3));
+					doc.setS1(rs.getInt(4));
+					doc.setS1Deleted(rs.getInt(5));
+					doc.setS2New(rs.getInt(6));
+					documents.add(doc);
+					preDoc=doc;
+				}
+				else 
+					doc = preDoc;
+				
+				MetadataProperty metadataProperty = new MetadataProperty();
+				metadataProperty.setId(rs.getInt(7));
+				metadataProperty.setName(rs.getString(8));
+				metadataProperty.getExtracted().add(rs.getInt(9) != 0);
+				metadataProperty.getExtracted().add(rs.getInt(10) != 0);
+				doc.getMetadataProperties().add(metadataProperty);				
 			}			
 		}
 		catch (SQLException e) {
@@ -479,7 +571,7 @@ public class DataManager {
 		try {
 			Connection conn = ConnectionManager.getConnection();
 			
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet) SELECT id,name,path,volume,extension,server,?,? FROM All_Document_Instance WHERE id = ?");
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet,snapshot_deleted) SELECT id,name,path,volume,extension,server,?,?,snapshot_deleted FROM All_Document_Instance WHERE id = ?");
 			
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				insertIdentifiedDocInstancStmt.setInt(1, documentId);
@@ -498,14 +590,18 @@ public class DataManager {
 		}	
 	}
 
-	public static void addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+	public static HashSet<Long> addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		HashSet<Long> newIds = new HashSet<Long>();
+		
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			
+			Connection conn = ConnectionManager.getConnection();			
 			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
 			
-			HashSet<Long> newIds = new HashSet<Long>();
-			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+			ArrayList<IdentifiedDocInstance> fullIdentifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
+			fullIdentifiedDocInstances.addAll(identifiedDocInstances);
+			fullIdentifiedDocInstances.addAll(identifiedDocInstances.getRemovedList());
+						
+			for (IdentifiedDocInstance identifiedDocInstance : fullIdentifiedDocInstances) {
 				if (!existingIdentifiedDocInstanceIds.contains(identifiedDocInstance.getId())) {
 					insertIdentifiedDocInstancStmt.setInt(1, documentId);
 					insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
@@ -538,17 +634,19 @@ public class DataManager {
 		}
 		finally {
 			ConnectionManager.close();
-		}	
+		}
+		
+		return newIds;		
 	}
 	
-	public static ArrayList<IdentifiedDocInstance> getDocInstance(Document document, boolean noPdf, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
-		ArrayList<IdentifiedDocInstance> identifiedDocInstances = new ArrayList<IdentifiedDocInstance>();		
+	public static DataTableArrayList<IdentifiedDocInstance> getDocInstances(Document document, boolean noPdf, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
+		DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class);		
 		String query = "SELECT ";		
 		
 		if (fromSnippet)
-			query += "id, name, path, volume, digest, extension, server FROM Identified_Document_Instance_Snippet WHERE document_id=" + document.getId() + " ";
+			query += "id, name, path, volume, digest, extension, server, snapshot_deleted FROM Identified_Document_Instance_Snippet WHERE document_id=" + document.getId() + " ";
 		else {		
-			query += "id, name, path, volume, digest, extension, server FROM All_Document_Instance WHERE snapshot_deleted IS NULL AND (";
+			query += "id, name, path, volume, digest, extension, server, snapshot_deleted FROM All_Document_Instance WHERE (";
 			for (CommencePath commencePath : document.getCommencePaths()) {
 				query += "volume + '/' + ISNULL(path,'') like '" + commencePath.getActualPath() + "/%' OR ";
 				query += "volume + '/' + ISNULL(path,'') = '" + commencePath.getActualPath() + "' OR ";
@@ -591,7 +689,7 @@ public class DataManager {
 				query += identificationRule.getLeftParen();
 				
 				if (identificationRule.getAttribute().equals("Filename"))
-					query += "name ";
+					query += "REPLACE([name],'.'+extension,'') ";
 				else if (identificationRule.getAttribute().equals("File Path"))
 					query += "ISNULL(path,'') ";
 				else if (identificationRule.getAttribute().equals("Extension"))
@@ -654,8 +752,16 @@ public class DataManager {
 						}
 					}
 					
-					identifiedDocInstances.add(identifiedDocInstance);				
-					digests.add(digest);		
+					/* Only doc instances without snapshot deleted will be shown in preview
+					 * but all will be identified and moved to Identified_Doc Instance
+					 */
+					
+					if (rs.getInt(8) == 0) 
+						identifiedDocInstances.add(identifiedDocInstance);
+					else
+						identifiedDocInstances.getRemovedList().add(identifiedDocInstance);
+					
+					digests.add(digest);
 				}			
 			}
 			firstRecord = true;

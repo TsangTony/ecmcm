@@ -1,5 +1,7 @@
 package com.ibm.ecm.mm.model;
 
+import java.util.ArrayList;
+
 public class Document {
 	private int id;
 	private String name;
@@ -8,13 +10,15 @@ public class Document {
 	private String team;
 	private DataTableArrayList<CommencePath> commencePaths;
 	private DataTableArrayList<IdentificationRule> identificationRules;
+	private ArrayList<MetadataProperty> metadataProperties;
 	private int s1;
-	private int s1Deleted;
 	private int s2New;
+	private int s1Deleted;
 	
 	public Document() {
 		this.commencePaths = new DataTableArrayList<CommencePath>(CommencePath.class);
 		this.identificationRules = new DataTableArrayList<IdentificationRule>(IdentificationRule.class);
+		this.metadataProperties = new ArrayList<MetadataProperty>();
 	}
 	
 	public int getId() {
@@ -67,6 +71,15 @@ public class Document {
 	public void setTeam(String team) {
 		this.team = team;
 	}
+	
+
+	public ArrayList<MetadataProperty> getMetadataProperties() {
+		return metadataProperties;
+	}
+
+	public void setMetadataProperties(ArrayList<MetadataProperty> metadataProperties) {
+		this.metadataProperties = metadataProperties;
+	}
 
 	public int getS1() {
 		return s1;
@@ -93,10 +106,29 @@ public class Document {
 		this.s2New = s2New;
 	}
 	
+	public String getS1Extracted() {		
+		int extracted = 0;
+		for (MetadataProperty metadataProperty : getMetadataProperties()) {
+			if (metadataProperty.getExtracted().get(0))
+				extracted++;
+		}
+		return extracted + " out of " + getMetadataProperties().size();
+	}
+	
+	public String getS2Extracted() {		
+		int extracted = 0;
+		for (MetadataProperty metadataProperty : getMetadataProperties()) {
+			if (metadataProperty.getExtracted().get(1))
+				extracted++;
+		}
+		return extracted + " out of " + getMetadataProperties().size();
+	}
+	
 	public String getS2() {
 		int s2 = getS1() - getS1Deleted() + getS2New();
 		return s2 + " (- " + getS1Deleted() + ", + " + getS2New() + ") ";
 	}
+
 
 	@Override
 	public String toString() {

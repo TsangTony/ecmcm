@@ -1,3 +1,14 @@
+.header, .footer {
+	font-family: Arial,sans-serif;
+}
+.header {
+	color: #333333;
+}
+.footer {
+	color: #4F4F4F;
+    font-size: 90%;
+}
+
 .ui-selectonemenu-filter-container {
     width: 98%;
 }

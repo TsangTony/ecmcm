@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:body>
+		<ui:composition template="./template/commonLayout.xhtml">
+   			<ui:define name="content">	
+				<h:form>
+					<p:panel header="Document Status Report" toggleable="true">	
+						<p:dataTable var="document" value="#{reportBean.documents}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+						    <p:column headerText="Team" sortBy="#{document.team}" style="width: 20%">
+						        <h:outputText value="#{document.team}" />
+						    </p:column>
+						    
+						    <p:column headerText="Document" sortBy="#{document.id}" style="width: 30%">
+						        <h:outputText value="#{document}" />
+						    </p:column>
+						 
+						    <p:column headerText="Snapshot 1" sortBy="#{document.s1}" style="width: 10%">
+						        <h:outputText value="#{document.s1}" />
+						    </p:column>			    
+						    
+						    <p:column headerText="Snapshot 2" sortBy="#{document.s2}" style="width: 10%">
+						        <h:outputText value="#{document.s2}" />
+						    </p:column>
+						    
+						    <p:column headerText="Snapshot 1 Metadata Extracted" style="width: 15%">
+						        <h:outputText value="#{document.s1Extracted}" />
+						    </p:column>
+						    
+						    <p:column headerText="Snapshot 2 Metadata Extracted" style="width: 15%">
+						        <h:outputText value="#{document.s2Extracted}" />
+						    </p:column>
+						</p:dataTable>
+					</p:panel>
+				</h:form>
+    		</ui:define>
+    	</ui:composition>
+	</h:body>
+</html>

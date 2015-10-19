@@ -12,6 +12,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 
 import com.ibm.ecm.mm.model.CommencePath;
+import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
@@ -25,14 +26,14 @@ public class IdentificationBean {
 	
 	private ArrayList<Document> documents;
 	private Document document;
-	private ArrayList<IdentifiedDocInstance> identifiedDocInstances;
-	private HashSet<Long> identifiedDocInstanceIds;
+	private DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances;
+	private HashSet<Long> existingIdentifiedDocInstanceIds;
 	private boolean noPdf;
 
 	public IdentificationBean() {
 		setDocuments(DataManager.getDocuments());
-		setIdentifiedDocInstances(new ArrayList<IdentifiedDocInstance>());
-		setIdentifiedDocInstanceIds(new HashSet<Long>());
+		setIdentifiedDocInstances(new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class));
+		setExistingIdentifiedDocInstanceIds(new HashSet<Long>());
 		setNoPdf(false);
 	}
 	
@@ -48,19 +49,19 @@ public class IdentificationBean {
 	public void setDocument(Document document) {
 		this.document = document;
 	}	
-	public ArrayList<IdentifiedDocInstance> getIdentifiedDocInstances() {
+	public DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances() {
 		return identifiedDocInstances;
 	}
-	public void setIdentifiedDocInstances(ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+	public void setIdentifiedDocInstances(DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances) {
 		this.identifiedDocInstances = identifiedDocInstances;
 	}
 
-	public HashSet<Long> getIdentifiedDocInstanceIds() {
-		return identifiedDocInstanceIds;
+	public HashSet<Long> getExistingIdentifiedDocInstanceIds() {
+		return existingIdentifiedDocInstanceIds;
 	}
 
-	public void setIdentifiedDocInstanceIds(HashSet<Long> identifiedDocInstanceIds) {
-		this.identifiedDocInstanceIds = identifiedDocInstanceIds;
+	public void setExistingIdentifiedDocInstanceIds(HashSet<Long> existingIdentifiedDocInstanceIds) {
+		this.existingIdentifiedDocInstanceIds = existingIdentifiedDocInstanceIds;
 	}
 
 	public boolean isNoPdf() {
@@ -83,9 +84,9 @@ public class IdentificationBean {
 		getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
 		getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
 		setIdentifiedDocInstances(DataManager.getIdentifiedDocInstances(getDocument()));
-		getIdentifiedDocInstanceIds().clear();
+		getExistingIdentifiedDocInstanceIds().clear();
 		for (IdentifiedDocInstance identifiedDocInstance : getIdentifiedDocInstances()) {
-			getIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
+			getExistingIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
 		}
 	}
 	
@@ -122,9 +123,10 @@ public class IdentificationBean {
 			for (IdentificationRule identificationRule : getDocument().getIdentificationRules())
 				if (identificationRule.getAttribute().equals("Content"))
 					contentRules.add(identificationRule);
+		
 		try {
 			if (contentRules.size() == 0) {
-				setIdentifiedDocInstances(DataManager.getDocInstance(getDocument(), isNoPdf(), false, false));
+				setIdentifiedDocInstances(DataManager.getDocInstances(getDocument(), isNoPdf(), false, false));
 			}
 			else {		
 				
@@ -133,7 +135,7 @@ public class IdentificationBean {
 				 * apply the rules and identify from dbo.Identified_Doc_Instance;
 				 */
 				
-				ArrayList<IdentifiedDocInstance> identifiedDocInstances = DataManager.getDocInstance(getDocument(), isNoPdf(), false, true);
+				DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = DataManager.getDocInstances(getDocument(), isNoPdf(), false, true);
 				for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 					String content = identifiedDocInstance.getContent();
 					if (!content.equals("")) {
@@ -149,7 +151,7 @@ public class IdentificationBean {
 					}
 				}
 				DataManager.addSnippet(getDocument().getId(), identifiedDocInstances);
-				setIdentifiedDocInstances(DataManager.getDocInstance(getDocument(), isNoPdf(), true, false));
+				setIdentifiedDocInstances(DataManager.getDocInstances(getDocument(), isNoPdf(), true, false));
 				DataManager.removeSnippet(getDocument().getId());
 			}
 			if (getIdentifiedDocInstances().size() == 0)
@@ -158,7 +160,7 @@ public class IdentificationBean {
 				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "1 document instance is identified."));
 			else
 				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", getIdentifiedDocInstances().size() + " document instances are identified."));
-		
+			
 			return false;
 		}
 		catch (SQLException e) {
@@ -298,8 +300,9 @@ public class IdentificationBean {
 		
 		if (!hasError) {
 		
-			DataManager.addIdentifiedDocInstances(getDocument().getId(), getIdentifiedDocInstanceIds(),  getIdentifiedDocInstances());
-									
+			setExistingIdentifiedDocInstanceIds(DataManager.addIdentifiedDocInstances(getDocument().getId(), getExistingIdentifiedDocInstanceIds(), getIdentifiedDocInstances()));
+			
+			
 			/*
 			 *  Metadata Extraction
 			 */

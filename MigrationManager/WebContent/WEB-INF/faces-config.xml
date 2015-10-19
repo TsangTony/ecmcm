@@ -26,8 +26,8 @@
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>
-		<managed-bean-name>snapshotBean</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.bean.SnapshotBean</managed-bean-class>
+		<managed-bean-name>reportBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.ReportBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 

@@ -1,164 +1,153 @@
-<!DOCTYPE html>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"   
 	  xmlns:p="http://primefaces.org/ui"
 	  xmlns:o="http://omnifaces.org/ui"
-	  xmlns:of="http://omnifaces.org/functions">
-<h:head>
-	<meta charset="UTF-8" />
-	<h:outputStylesheet library="css" name="style.css"  />
-	<title>IBM Migration Manager | Metadata Extraction</title>
-</h:head>
-<body>
-	<h1>IBM Migration Manager</h1>
-	<p:menubar>
-        <p:submenu label="Manage Master Data" icon="ui-icon-document">
-            <p:menuitem value="Manage Snapshot" url="#" icon="ui-icon-image" />
-            <p:menuitem value="Manage Document" url="#" icon="ui-icon-document" />
-        </p:submenu>
-        <p:menuitem value="Identification" outcome="identification" icon="ui-icon-search" />
-        <p:menuitem value="Metadata Extraction" outcome="metadataextraction" icon="ui-icon-gear" />             
-	</p:menubar>
-	
-	<br />
-	<br />
-	
-	<h:form id="metadataextraction">
-	
-	<p:growl id="growl" for="growl" showDetail="true" sticky="true" />  
-	
-	<p:panelGrid id="optionPanel">
-		<p:row>
-			<p:column>Document</p:column>
-			<p:column>
-				<p:selectOneMenu id="document" value="#{metadataExtraction.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
-					<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
-					<f:selectItems value="#{metadataExtraction.documents}" />
-					<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.documentSelected}" />
-				</p:selectOneMenu>
-			</p:column>
-		</p:row>
-		<p:row>
-			<p:column>Source Location</p:column>
-			<p:column>
-				<p:selectOneMenu id="sourceLocation" value="#{metadataExtraction.commencePath}" converter="omnifaces.SelectItemsConverter">
-					<f:selectItem itemLabel="Select Source Location" noSelectionOption="true" />
-					<f:selectItems value="#{metadataExtraction.document.commencePaths}" />
-					<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.commencePathSelected}" />
-				</p:selectOneMenu>
-			</p:column>
-		</p:row>
-		<p:row>
-			<p:column>Metadata Property</p:column>
-			<p:column>
-				<p:selectOneMenu id="metadataProperty" value="#{metadataExtraction.metadataExtractionRules}" converter="omnifaces.SelectItemsConverter">
-					<f:selectItem itemLabel="Select Metadata Property" noSelectionOption="true" />
-					<f:selectItems value="#{metadataExtraction.commencePath.metadataExtractionRulesList}" />
-					<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.metadataPropertySeletced}" />
-				</p:selectOneMenu>
-			</p:column>
-		</p:row>
-		<p:row rendered="#{metadataExtraction.metadataExtractionRules.hasDefault}">
-			<p:column>Use Default Rule</p:column>
-			<p:column>
-				<p:selectBooleanCheckbox id="useDefaultRule" value="#{metadataExtraction.useDefaultRule}">
-				    <p:ajax event="change" update="@this,metadataExtractionRulesPanel" listener="#{metadataExtraction.toggleRules}" />
-				</p:selectBooleanCheckbox>
+	  xmlns:of="http://omnifaces.org/functions"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:body>
+		<ui:composition template="./template/commonLayout.xhtml">
+	   		<ui:define name="content">		
+				<h:form id="metadataextraction">
 				
-			</p:column>
-		</p:row>
-	</p:panelGrid>
-	
-	<br />	
-	
-	<p:panel id="metadataExtractionRulesPanel" header="Metadata Extraction Rules" toggleable="true">
-	
-		<p:dataTable id="metadataExtractionRules" var="metadataExtractionRule" value="#{metadataExtraction.metadataExtractionRules.rules}" editable="#{metadataExtraction.ruleEditable}" editMode="cell" rowIndexVar="rowIndex">
-			<p:column headerText="Priority" style="width: 5%">
-		    	<h:outputText value="#{metadataExtractionRule.priority}" />
-		    </p:column>	 
-			<p:column headerText="Source" style="width: 15%">
-				<p:cellEditor>
-					<f:facet name="output"><h:outputText value="#{metadataExtractionRule.source}" /></f:facet>
-					<f:facet name="input">
-	                  <h:selectOneMenu value="#{metadataExtractionRule.source}" style="width:100%">
-	                      <f:selectItem itemLabel="Select Source" noSelectionOption="true" />
-	                      <f:selectItems value="#{metadataExtraction.sources}" />
-	                      <p:ajax event="change" update="metadataExtractionRules" />
-	                  </h:selectOneMenu>
-					</f:facet>
-            	</p:cellEditor>
-		    </p:column>	 
-		    <p:column headerText="Business Rule" style="width: 25%">
-		    	<p:cellEditor>
-					<f:facet name="output"><h:outputText value="#{metadataExtractionRule.blRule}" /></f:facet>
-					<f:facet name="input"><p:inputText id="blRuleInput" value="#{metadataExtractionRule.blRule}" style="width:96%" /></f:facet>
-            	</p:cellEditor>
-		    </p:column>	 
-		    <p:column headerText="Regular Expression" style="width: 25%">
-		    	<p:cellEditor rendered="#{metadataExtractionRule.source != 'Default'}">
-					<f:facet name="output"><h:outputText value="#{metadataExtractionRule.regex}" /></f:facet>
-					<f:facet name="input"><p:inputText id="regexInput" value="#{metadataExtractionRule.regex}" style="width:96%" /></f:facet>
-            	</p:cellEditor>
-		    </p:column>
-		    <p:column headerText="Capturing Group" style="width: 10%">
-		    	<p:cellEditor rendered="#{metadataExtractionRule.source != 'Default'}">
-					<f:facet name="output"><h:outputText value="#{metadataExtractionRule.capGroupStr}" /></f:facet>
-					<f:facet name="input"><p:inputText id="capGroupInput" value="#{metadataExtractionRule.capGroup}" style="width:96%" /></f:facet>
-            	</p:cellEditor>
-		    </p:column>
-		    <p:column headerText="Default Value" style="width: 10%">
-		    	<p:cellEditor rendered="#{metadataExtractionRule.source == 'Default'}">
-					<f:facet name="output"><h:outputText value="#{metadataExtractionRule.defaultValue}" /></f:facet>
-					<f:facet name="input"><p:inputText id="defaultValueInput" value="#{metadataExtractionRule.defaultValue}" style="width:96%" /></f:facet>
-            	</p:cellEditor>
-		    </p:column>
-		    <p:column style="width: 10%">    						    				
-			    <p:commandButton icon="ui-icon-closethick" action="#{metadataExtraction.metadataExtractionRules.rules.remove(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{!metadataExtraction.ruleEditable}" style="width: 2em" />			    				
-			    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{metadataExtraction.metadataExtractionRules.rules.moveUp(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq 0 || !metadataExtraction.ruleEditable}" style="width: 2em"  />
-			    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{metadataExtraction.metadataExtractionRules.rules.moveDown(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq metadataExtraction.metadataExtractionRulesLastIndex || !metadataExtraction.ruleEditable}" style="width: 2em" />
-			</p:column>
-			<p:ajax event="cellEdit" update="@this" />
-		</p:dataTable>
-		
-		<br />
-		<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{metadataExtraction.metadataExtractionRules.rules.addNew}" update="metadataExtractionRules" ajax="true"  rendered="#{metadataExtraction.ruleEditable}" />
-		
-	</p:panel>
-
-	<br />
-	
-	<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
-		<h:outputText value="Extracting Metadata..." />
-	</p:dialog>
-	
-	<p:commandButton value="Preview" action="#{metadataExtraction.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-	<p:commandButton value="Run and Save" action="#{metadataExtraction.runAndSave}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-
-	<br />
-	<br />
-	
-	<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
-	
-	<p:panel header="Preview Result" toggleable="true">
-		
-		<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
-		    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
-		        <h:outputText value="#{identifiedDocInstance.path}" />
-		    </p:column>
-		    <p:column headerText="File Name" sortBy="#{identifiedDocInstance.name}">
-		        <h:outputText value="#{identifiedDocInstance.name}" />
-		    </p:column>
-		    <p:column headerText="Metadata Value" sortBy="#{identifiedDocInstance.metadataValue.value}">
-		        <h:outputText value="#{identifiedDocInstance.metadataValue.value}" />
-		    </p:column>
-		    <p:column headerText="Source" sortBy="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}">
-		        <h:outputText value="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}" />
-		    </p:column>
-		</p:dataTable>
-	
-	</p:panel>
-	
-	</h:form>
-</body>
+					<p:growl id="growl" for="growl" showDetail="true" sticky="true" />  
+					
+					<p:panelGrid id="optionPanel">
+						<p:row>
+							<p:column>Document</p:column>
+							<p:column>
+								<p:selectOneMenu id="document" value="#{metadataExtraction.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+									<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
+									<f:selectItems value="#{metadataExtraction.documents}" />
+									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.documentSelected}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>Source Location</p:column>
+							<p:column>
+								<p:selectOneMenu id="sourceLocation" value="#{metadataExtraction.commencePath}" converter="omnifaces.SelectItemsConverter">
+									<f:selectItem itemLabel="Select Source Location" noSelectionOption="true" />
+									<f:selectItems value="#{metadataExtraction.document.commencePaths}" />
+									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.commencePathSelected}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>Metadata Property</p:column>
+							<p:column>
+								<p:selectOneMenu id="metadataProperty" value="#{metadataExtraction.metadataExtractionRules}" converter="omnifaces.SelectItemsConverter">
+									<f:selectItem itemLabel="Select Metadata Property" noSelectionOption="true" />
+									<f:selectItems value="#{metadataExtraction.commencePath.metadataExtractionRulesList}" />
+									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.metadataPropertySeletced}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{metadataExtraction.metadataExtractionRules.hasDefault}">
+							<p:column>Use Default Rule</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox id="useDefaultRule" value="#{metadataExtraction.useDefaultRule}">
+								    <p:ajax event="change" update="@this,metadataExtractionRulesPanel" listener="#{metadataExtraction.toggleRules}" />
+								</p:selectBooleanCheckbox>
+								
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					
+					<br />	
+					
+					<p:panel id="metadataExtractionRulesPanel" header="Metadata Extraction Rules" toggleable="true">
+					
+						<p:dataTable id="metadataExtractionRules" var="metadataExtractionRule" value="#{metadataExtraction.metadataExtractionRules.rules}" editable="#{metadataExtraction.ruleEditable}" editMode="cell" rowIndexVar="rowIndex">
+							<p:column headerText="Priority" style="width: 5%">
+						    	<h:outputText value="#{metadataExtractionRule.priority}" />
+						    </p:column>	 
+							<p:column headerText="Source" style="width: 15%">
+								<p:cellEditor>
+									<f:facet name="output"><h:outputText value="#{metadataExtractionRule.source}" /></f:facet>
+									<f:facet name="input">
+					                  <h:selectOneMenu value="#{metadataExtractionRule.source}" style="width:100%">
+					                      <f:selectItem itemLabel="Select Source" noSelectionOption="true" />
+					                      <f:selectItems value="#{metadataExtraction.sources}" />
+					                      <p:ajax event="change" update="metadataExtractionRules" />
+					                  </h:selectOneMenu>
+									</f:facet>
+				            	</p:cellEditor>
+						    </p:column>	 
+						    <p:column headerText="Business Rule" style="width: 25%">
+						    	<p:cellEditor>
+									<f:facet name="output"><h:outputText value="#{metadataExtractionRule.blRule}" /></f:facet>
+									<f:facet name="input"><p:inputText id="blRuleInput" value="#{metadataExtractionRule.blRule}" style="width:96%" /></f:facet>
+				            	</p:cellEditor>
+						    </p:column>	 
+						    <p:column headerText="Regular Expression" style="width: 25%">
+						    	<p:cellEditor rendered="#{metadataExtractionRule.source != 'Default'}">
+									<f:facet name="output"><h:outputText value="#{metadataExtractionRule.regex}" /></f:facet>
+									<f:facet name="input"><p:inputText id="regexInput" value="#{metadataExtractionRule.regex}" style="width:96%" /></f:facet>
+				            	</p:cellEditor>
+						    </p:column>
+						    <p:column headerText="Capturing Group" style="width: 10%">
+						    	<p:cellEditor rendered="#{metadataExtractionRule.source != 'Default'}">
+									<f:facet name="output"><h:outputText value="#{metadataExtractionRule.capGroupStr}" /></f:facet>
+									<f:facet name="input"><p:inputText id="capGroupInput" value="#{metadataExtractionRule.capGroup}" style="width:96%" /></f:facet>
+				            	</p:cellEditor>
+						    </p:column>
+						    <p:column headerText="Default Value" style="width: 10%">
+						    	<p:cellEditor rendered="#{metadataExtractionRule.source == 'Default'}">
+									<f:facet name="output"><h:outputText value="#{metadataExtractionRule.defaultValue}" /></f:facet>
+									<f:facet name="input"><p:inputText id="defaultValueInput" value="#{metadataExtractionRule.defaultValue}" style="width:96%" /></f:facet>
+				            	</p:cellEditor>
+						    </p:column>
+						    <p:column style="width: 10%">    						    				
+							    <p:commandButton icon="ui-icon-closethick" action="#{metadataExtraction.metadataExtractionRules.rules.remove(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{!metadataExtraction.ruleEditable}" style="width: 2em" />			    				
+							    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{metadataExtraction.metadataExtractionRules.rules.moveUp(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq 0 || !metadataExtraction.ruleEditable}" style="width: 2em"  />
+							    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{metadataExtraction.metadataExtractionRules.rules.moveDown(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq metadataExtraction.metadataExtractionRulesLastIndex || !metadataExtraction.ruleEditable}" style="width: 2em" />
+							</p:column>
+							<p:ajax event="cellEdit" update="@this" />
+						</p:dataTable>
+						
+						<br />
+						<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{metadataExtraction.metadataExtractionRules.rules.addNew}" update="metadataExtractionRules" ajax="true"  rendered="#{metadataExtraction.ruleEditable}" />
+						
+					</p:panel>
+				
+					<br />
+					
+					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
+						<h:outputText value="Extracting Metadata..." />
+					</p:dialog>
+					
+					<p:commandButton value="Preview" action="#{metadataExtraction.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+					<p:commandButton value="Run and Save" action="#{metadataExtraction.runAndSave}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+				
+					<br />
+					<br />
+					
+					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
+					
+					<p:panel header="Preview Result" toggleable="true">
+						
+						<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
+						        <h:outputText value="#{identifiedDocInstance.path}" />
+						    </p:column>
+						    <p:column headerText="File Name" sortBy="#{identifiedDocInstance.name}">
+						        <h:outputText value="#{identifiedDocInstance.name}" />
+						    </p:column>
+						    <p:column headerText="Metadata Value" sortBy="#{identifiedDocInstance.metadataValue.value}">
+						        <h:outputText value="#{identifiedDocInstance.metadataValue.value}" />
+						    </p:column>
+						    <p:column headerText="Source" sortBy="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}">
+						        <h:outputText value="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}" />
+						    </p:column>
+						</p:dataTable>
+					
+					</p:panel>
+				
+				</h:form>
+    		</ui:define>
+    	</ui:composition>
+	</h:body>
 </html>

@@ -6,11 +6,11 @@ import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.util.DataManager;
 
 
-public class SnapshotBean {
+public class ReportBean {
 	private ArrayList<Document> documents;
 
-	public SnapshotBean() {
-		setDocuments(DataManager.getSnapshots());
+	public ReportBean() {
+		setDocuments(DataManager.getDocumentStatusReport());
 	}
 	
 	public ArrayList<Document> getDocuments() {
