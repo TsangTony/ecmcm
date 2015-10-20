@@ -456,82 +456,108 @@ public class DataManager {
 			Connection conn = ConnectionManager.getConnection();	
 			
 			String query = ""
-					+ "SELECT document.id, "
-					+ "       document.NAME, "
-					+ "       team.NAME, "
-					+ "       Isnull(S1.count, 0)                   AS S1, "
-					+ "       Isnull(S1Del.count, 0)                AS S1Del, "
-					+ "       Isnull(S2New.count, 0)                AS S2New, "
-					+ "       metadata_property.id                  AS MPID, "
-					+ "       metadata_property.NAME                AS MP, "
-					+ "       Isnull(S1XMP.metadata_property_id, 0) AS S1XMP, "
-					+ "       Isnull(S2XMP.metadata_property_id, 0) AS S2XMP "
-					+ "FROM   document "
-					+ "       LEFT JOIN team "
-					+ "              ON document.team_id = team.id "
-					+ "       LEFT JOIN (SELECT document_id, "
-					+ "                         Count(*) AS count "
-					+ "                  FROM   identified_document_instance "
-					+ "                  WHERE  snapshot = 1 "
-					+ "                  GROUP  BY document_id) S1 "
-					+ "              ON document.id = S1.document_id "
-					+ "       LEFT JOIN (SELECT document_id, "
-					+ "                         Count(*) AS count "
-					+ "                  FROM   identified_document_instance "
-					+ "                  WHERE  snapshot = 1 "
-					+ "                         AND snapshot_deleted = 2 "
-					+ "                  GROUP  BY document_id) S1Del "
-					+ "              ON document.id = S1Del.document_id "
-					+ "       LEFT JOIN (SELECT document_id, "
-					+ "                         Count(*) AS count "
-					+ "                  FROM   identified_document_instance "
-					+ "                  WHERE  snapshot = 2 "
-					+ "                  GROUP  BY document_id) S2New "
-					+ "              ON document.id = S2New.document_id "
-					+ "       LEFT JOIN document_class DC1 "
-					+ "              ON document.document_class_id = DC1.id "
-					+ "       LEFT JOIN document_class DC2 "
-					+ "			  ON DC1.parent_id = DC2.id "
-					+ "       LEFT JOIN document_class DC3 "
-					+ "			  ON DC2.parent_id = DC3.id "
-					+ "       LEFT JOIN [dc-mp] "
-					+ "              ON DC1.id = [dc-mp].document_class_id "
-					+ "              OR DC2.id = [dc-mp].document_class_id "
-					+ "              OR DC3.id = [dc-mp].document_class_id "
-					+ "       LEFT JOIN metadata_property "
-					+ "              ON [dc-mp].metadata_property_id = metadata_property.id "
-					+ "       LEFT JOIN (SELECT metadata_value.document_id, "
-					+ "                         metadata_extraction_rule.metadata_property_id "
-					+ "                  FROM   metadata_value, "
-					+ "                         metadata_extraction_rule, "
-					+ "                         identified_document_instance "
-					+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
-					+ "                         metadata_extraction_rule.id "
-					+ "                         AND metadata_value.identified_document_instance_id = "
-					+ "                             identified_document_instance.id "
-					+ "                         AND identified_document_instance.snapshot = 1 "
-					+ "                  GROUP  BY metadata_value.document_id, "
-					+ "                            metadata_extraction_rule.metadata_property_id) S1XMP "
-					+ "              ON document.id = S1XMP.document_id "
-					+ "                 AND metadata_property.id = S1XMP.metadata_property_id "
-					+ "       LEFT JOIN (SELECT metadata_value.document_id, "
-					+ "                         metadata_extraction_rule.metadata_property_id "
-					+ "                  FROM   metadata_value, "
-					+ "                         metadata_extraction_rule, "
-					+ "                         identified_document_instance "
-					+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
-					+ "                         metadata_extraction_rule.id "
-					+ "                         AND metadata_value.identified_document_instance_id = "
-					+ "                             identified_document_instance.id "
-					+ "                         AND identified_document_instance.snapshot = 2 "
-					+ "                  GROUP  BY metadata_value.document_id, "
-					+ "                            metadata_extraction_rule.metadata_property_id) S2XMP "
-					+ "              ON document.id = S2XMP.document_id "
-					+ "                 AND metadata_property.id = S2XMP.metadata_property_id "
-					+ "ORDER  BY document.id ";
+						+ "SELECT document.id, "
+						+ "       document.NAME, "
+						+ "       team.NAME, "
+						+ "       Isnull(S1.count, 0)    AS S1, "
+						+ "       Isnull(S1Del.count, 0) AS S1Del, "
+						+ "       Isnull(S2.count, 0) AS S2, "
+						+ "       metadata_property.id   AS MPID, "
+						+ "       metadata_property.NAME AS MP, "
+						+ "       Isnull(S1XMP.count, 0) AS S1XMP, "
+						+ "       Isnull(S1DelXMP.count, 0) AS S1DelXMP, "
+						+ "       Isnull(S2XMP.count, 0) AS S2XMP "
+						+ "FROM   document "
+						+ "       LEFT JOIN team "
+						+ "              ON document.team_id = team.id "
+						+ "       LEFT JOIN (SELECT document_id, "
+						+ "                         Count(*) AS count "
+						+ "                  FROM   identified_document_instance "
+						+ "                  WHERE  snapshot = 1 "
+						+ "                  GROUP  BY document_id) S1 "
+						+ "              ON document.id = S1.document_id "
+						+ "       LEFT JOIN (SELECT document_id, "
+						+ "                         Count(*) AS count "
+						+ "                  FROM   identified_document_instance "
+						+ "                  WHERE  snapshot = 1 "
+						+ "                         AND snapshot_deleted = 2 "
+						+ "                  GROUP  BY document_id) S1Del "
+						+ "              ON document.id = S1Del.document_id "
+						+ "       LEFT JOIN (SELECT document_id, "
+						+ "                         Count(*) AS count "
+						+ "                  FROM   identified_document_instance "
+						+ "                  WHERE  snapshot = 2 "
+						+ "                  GROUP  BY document_id) S2 "
+						+ "              ON document.id = S2.document_id "
+						+ "       LEFT JOIN document_class DC1 "
+						+ "              ON document.document_class_id = DC1.id "
+						+ "       LEFT JOIN document_class DC2 "
+						+ "              ON DC1.parent_id = DC2.id "
+						+ "       LEFT JOIN document_class DC3 "
+						+ "              ON DC2.parent_id = DC3.id "
+						+ "       LEFT JOIN [dc-mp] "
+						+ "              ON DC1.id = [dc-mp].document_class_id "
+						+ "                  OR DC2.id = [dc-mp].document_class_id "
+						+ "                  OR DC3.id = [dc-mp].document_class_id "
+						+ "       LEFT JOIN metadata_property "
+						+ "              ON [dc-mp].metadata_property_id = metadata_property.id "
+						+ "       LEFT JOIN (SELECT metadata_value.document_id, "
+						+ "						 metadata_extraction_rule.metadata_property_id, "
+						+ "                         Count(*) AS count "
+						+ "                  FROM   metadata_value, "
+						+ "                         metadata_extraction_rule, "
+						+ "                         identified_document_instance "
+						+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
+						+ "                         metadata_extraction_rule.id "
+						+ "                         AND metadata_value.identified_document_instance_id = "
+						+ "                             identified_document_instance.id "
+						+ "                         AND identified_document_instance.snapshot = 1 "
+						+ "						 AND metadata_value.document_id = identified_document_instance.document_id "
+						+ "						 AND rtrim(ltrim(isnull(Metadata_Value.value,'')))!='' "
+						+ "                  GROUP  BY metadata_value.document_id, "
+						+ "                            metadata_extraction_rule.metadata_property_id) S1XMP "
+						+ "              ON document.id = S1XMP.document_id "
+						+ "                 AND metadata_property.id = S1XMP.metadata_property_id "
+						+ "	          LEFT JOIN (SELECT metadata_value.document_id, "
+						+ "						 metadata_extraction_rule.metadata_property_id, "
+						+ "                         Count(*) AS count "
+						+ "                  FROM   metadata_value, "
+						+ "                         metadata_extraction_rule, "
+						+ "                         identified_document_instance "
+						+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
+						+ "                         metadata_extraction_rule.id "
+						+ "                         AND metadata_value.identified_document_instance_id = "
+						+ "                             identified_document_instance.id "
+						+ "                         AND identified_document_instance.snapshot = 1 "
+						+ "						 AND Identified_Document_Instance.snapshot_deleted IS NOT NULL "
+						+ "						 AND metadata_value.document_id = identified_document_instance.document_id "
+						+ "						 AND rtrim(ltrim(isnull(Metadata_Value.value,'')))!='' "
+						+ "                  GROUP  BY metadata_value.document_id, "
+						+ "                            metadata_extraction_rule.metadata_property_id) S1DelXMP "
+						+ "              ON document.id = S1DelXMP.document_id "
+						+ "                 AND metadata_property.id = S1XMP.metadata_property_id "
+						+ "       LEFT JOIN (SELECT metadata_value.document_id, "
+						+ "						 metadata_extraction_rule.metadata_property_id, "
+						+ "                         Count(*) AS count "
+						+ "                  FROM   metadata_value, "
+						+ "                         metadata_extraction_rule, "
+						+ "                         identified_document_instance "
+						+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
+						+ "                         metadata_extraction_rule.id "
+						+ "                         AND metadata_value.identified_document_instance_id = "
+						+ "                             identified_document_instance.id "
+						+ "                         AND identified_document_instance.snapshot = 2 "
+						+ "						 AND metadata_value.document_id = identified_document_instance.document_id "
+						+ "						 AND rtrim(ltrim(isnull(Metadata_Value.value,'')))!='' "
+						+ "                  GROUP  BY metadata_value.document_id, "
+						+ "                            metadata_extraction_rule.metadata_property_id) S2XMP "
+						+ "              ON document.id = S2XMP.document_id "
+						+ "                 AND metadata_property.id = S2XMP.metadata_property_id "
+						+ "ORDER  BY document.id";
+
+
 
 			PreparedStatement stmt = conn.prepareStatement(query);
-			System.out.println(query);
 			ResultSet rs = stmt.executeQuery();
 			Document preDoc = null;
 			while (rs.next()) {
@@ -549,12 +575,12 @@ public class DataManager {
 				}
 				else 
 					doc = preDoc;
-				
+				 
 				MetadataProperty metadataProperty = new MetadataProperty();
 				metadataProperty.setId(rs.getInt(7));
 				metadataProperty.setName(rs.getString(8));
-				metadataProperty.getExtracted().add(rs.getInt(9) != 0);
-				metadataProperty.getExtracted().add(rs.getInt(10) != 0);
+				metadataProperty.getExtracted().add(rs.getInt(9));
+				metadataProperty.getExtracted().add(rs.getInt(11));
 				doc.getMetadataProperties().add(metadataProperty);				
 			}			
 		}
@@ -712,6 +738,8 @@ public class DataManager {
 			query += ") ";
 		}		
 		
+		System.out.println(query);
+		
 		try {		
 			Connection conn = ConnectionManager.getConnection();	
 			Statement stmt = conn.createStatement();
@@ -734,13 +762,14 @@ public class DataManager {
 					
 					//Ignore PDF
 					if (!fromSnippet && noPdf) {
-						if (!firstRecord && identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {
+						if (!firstRecord && identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {							
 							IdentifiedDocInstance preInstance = identifiedDocInstances.get(identifiedDocInstances.size()-1);
 							if (preInstance.getServer().equals(identifiedDocInstance.getServer()) &&
 							    preInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
 							    preInstance.getPath().equals(identifiedDocInstance.getPath()) &&
 							    preInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension())) {
-								   continue;
+								System.out.println(identifiedDocInstance.getName() + "(" + identifiedDocInstance.getId() + ") is a PDF version of " + preInstance.getName() + "(" + preInstance.getId() + ")");
+								continue;
 							}
 						}
 					}
@@ -749,6 +778,10 @@ public class DataManager {
 						String fullPath = identifiedDocInstance.getPath() == null ? identifiedDocInstance.getVolume() : identifiedDocInstance.getVolume() + "/" + identifiedDocInstance.getPath();
 						if (fullPath.equals(commencePath.getActualPath()) || fullPath.startsWith(commencePath.getActualPath() + "/")) {
 							identifiedDocInstance.setCommencePath(commencePath);
+							break;
+						}
+						else {
+							System.out.println(identifiedDocInstance.getName() + "(" + identifiedDocInstance.getId() + ") has no matching commence path");
 						}
 					}
 					
@@ -756,10 +789,12 @@ public class DataManager {
 					 * but all will be identified and moved to Identified_Doc Instance
 					 */
 					
-					if (rs.getInt(8) == 0) 
+					if (rs.getInt(8) == 0) {
 						identifiedDocInstances.add(identifiedDocInstance);
-					else
+					}
+					else {
 						identifiedDocInstances.getRemovedList().add(identifiedDocInstance);
+					}
 					
 					digests.add(digest);
 				}			
@@ -773,6 +808,8 @@ public class DataManager {
 		finally {
 			ConnectionManager.close();
 		}
+		
+		System.out.println("DOC-" + document.getId() + " identification finished. " + identifiedDocInstances.size() + " : " + identifiedDocInstances.getRemovedList().size());
 		
 		return identifiedDocInstances;
 	}

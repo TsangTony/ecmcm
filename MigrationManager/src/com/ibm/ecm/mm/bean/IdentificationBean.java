@@ -126,10 +126,11 @@ public class IdentificationBean {
 		
 		try {
 			if (contentRules.size() == 0) {
+				System.out.println("DOC-" + getDocument().getId() + " has no content rule");
 				setIdentifiedDocInstances(DataManager.getDocInstances(getDocument(), isNoPdf(), false, false));
 			}
 			else {		
-				
+				System.out.println("DOC-" + getDocument().getId() + " has content rules");
 				/*
 				 * If there is content rule, read the content and write to dbo.Identified_Doc_Instance.snippet first. After that,
 				 * apply the rules and identify from dbo.Identified_Doc_Instance;
@@ -154,6 +155,7 @@ public class IdentificationBean {
 				setIdentifiedDocInstances(DataManager.getDocInstances(getDocument(), isNoPdf(), true, false));
 				DataManager.removeSnippet(getDocument().getId());
 			}
+			
 			if (getIdentifiedDocInstances().size() == 0)
 				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No document instance is identified."));
 			else if (getIdentifiedDocInstances().size() == 1)
@@ -301,7 +303,6 @@ public class IdentificationBean {
 		if (!hasError) {
 		
 			setExistingIdentifiedDocInstanceIds(DataManager.addIdentifiedDocInstances(getDocument().getId(), getExistingIdentifiedDocInstanceIds(), getIdentifiedDocInstances()));
-			
 			
 			/*
 			 *  Metadata Extraction

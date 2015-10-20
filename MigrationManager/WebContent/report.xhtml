@@ -9,32 +9,77 @@
       xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:body>
 		<ui:composition template="./template/commonLayout.xhtml">
-   			<ui:define name="content">	
-				<h:form>
-					<p:panel header="Document Status Report" toggleable="true">	
-						<p:dataTable var="document" value="#{reportBean.documents}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
-						    <p:column headerText="Team" sortBy="#{document.team}" style="width: 20%">
+   			<ui:define name="content">
+				<h:form>					
+					<p:panelGrid id="optionPanel">
+						<p:row>
+							<p:column>Report</p:column>
+							<p:column>
+								<p:selectOneMenu id="document" value="#{reportBean.report}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+									<f:selectItem itemLabel="Select Report" noSelectionOption="true" />
+									<f:selectItems value="#{reportBean.reports}" />
+									<p:ajax update="optionPanel,reportPanel" listener="#{reportBean.reportSelected}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					
+					<br />
+						
+					<p:panel id="reportPanel" header="Document Status Report" toggleable="true">	
+					
+						<p:dataTable var="document" value="#{reportBean.documents}" rows="20" paginator="true" 
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+							rowsPerPageTemplate="20,50,100" sortMode="multiple" filteredValue="#{reportBean.filteredDocument}"  rendered="#{reportBean.documentStatusReport}">
+						    
+						    <p:column headerText="Team" sortBy="#{document.team}" style="width: 15%" filterBy="#{document.team}" filterMatchMode="contains">
 						        <h:outputText value="#{document.team}" />
 						    </p:column>
 						    
-						    <p:column headerText="Document" sortBy="#{document.id}" style="width: 30%">
+						    <p:column headerText="Document" sortBy="#{document.id}" style="width: 20%" filterBy="#{document}" filterMatchMode="contains">
 						        <h:outputText value="#{document}" />
 						    </p:column>
 						 
-						    <p:column headerText="Snapshot 1" sortBy="#{document.s1}" style="width: 10%">
+						    <p:column headerText="Snapshot 1" sortBy="#{document.s1}" style="width: 10%" filterBy="#{document.s1}" filterMatchMode="contains">
 						        <h:outputText value="#{document.s1}" />
 						    </p:column>			    
 						    
-						    <p:column headerText="Snapshot 2" sortBy="#{document.s2}" style="width: 10%">
+						    <p:column headerText="Snapshot 2" sortBy="#{document.s2}" style="width: 10%" filterBy="#{document.s2}" filterMatchMode="contains">
 						        <h:outputText value="#{document.s2}" />
 						    </p:column>
 						    
-						    <p:column headerText="Snapshot 1 Metadata Extracted" style="width: 15%">
+						    <p:column headerText="Snapshot 1 Metadata Extracted" sortBy="#{document.s1Extracted}" style="width: 20%" filterBy="#{document.s1Extracted}" filterMatchMode="contains">
 						        <h:outputText value="#{document.s1Extracted}" />
 						    </p:column>
 						    
-						    <p:column headerText="Snapshot 2 Metadata Extracted" style="width: 15%">
+						    <p:column headerText="Snapshot 2 Metadata Extracted" sortBy="#{document.s2Extracted}" style="width: 20%"  filterBy="#{document.s2Extracted}" filterMatchMode="contains">
 						        <h:outputText value="#{document.s2Extracted}" />
+						    </p:column>
+						</p:dataTable>
+						
+						
+						<p:dataTable var="document" value="#{reportBean.metadataDocuments}" rows="20" paginator="true" 
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+							rowsPerPageTemplate="20,50,100" sortMode="multiple" filteredValue="#{reportBean.filteredDocument}"  rendered="#{reportBean.metadataStatusReport}">
+						    
+						    <p:column headerText="Team" sortBy="#{document.team}" style="width: 20%" filterBy="#{document.team}" filterMatchMode="contains">
+						        <h:outputText value="#{document.team}" />
+						    </p:column>
+						    
+						    <p:column headerText="Document" sortBy="#{document.id}" style="width: 25%" filterBy="#{document}" filterMatchMode="contains">
+						        <h:outputText value="#{document}" />
+						    </p:column>
+						    
+						    <p:column headerText="Metadata" sortBy="#{document.metadataProperties.get(document.priority).name}" style="width: 15%" filterBy="#{document.metadataProperties.get(document.priority).name}" filterMatchMode="contains">
+						        <h:outputText value="#{document.metadataProperties.get(document.priority).name}" />
+						    </p:column>
+						    
+						    <p:column headerText="Snapshot 1 Success Rate (%)" sortBy="#{document.metadataProperties.get(document.priority).extracted.get(0)/document.s1*100}" style="width: 20%" filterBy="#{document.metadataProperties.get(document.priority).extracted.get(0)/document.s1*100}" filterMatchMode="contains">
+						        <h:outputText value="#{document.metadataProperties.get(document.priority).extracted.get(0)/document.s1*100}" />
+						    </p:column>
+						    
+						    <p:column headerText="Snapshot 2 Success Rate (%)" sortBy="#{document.metadataProperties.get(document.priority).extracted.get(1)/(document.s1-document.s1Deleted+document.s2New)*100}" style="width: 20%" filterBy="#{document.metadataProperties.get(document.priority).extracted.get(1)/(document.s1-document.s1Deleted+document.s2New)*100}" filterMatchMode="contains">
+						        <h:outputText value="#{document.metadataProperties.get(document.priority).extracted.get(1)/(document.s1-document.s1Deleted+document.s2New)*100}" />
 						    </p:column>
 						</p:dataTable>
 					</p:panel>

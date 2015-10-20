@@ -2,7 +2,7 @@ package com.ibm.ecm.mm.model;
 
 import java.util.ArrayList;
 
-public class Document {
+public class Document extends DataTableElement {
 	private int id;
 	private String name;
 	private String blIdentificationRule;
@@ -10,6 +10,7 @@ public class Document {
 	private String team;
 	private DataTableArrayList<CommencePath> commencePaths;
 	private DataTableArrayList<IdentificationRule> identificationRules;
+	
 	private ArrayList<MetadataProperty> metadataProperties;
 	private int s1;
 	private int s2New;
@@ -80,7 +81,11 @@ public class Document {
 	public void setMetadataProperties(ArrayList<MetadataProperty> metadataProperties) {
 		this.metadataProperties = metadataProperties;
 	}
-
+	
+	/*
+	 * For Document Status Report
+	 */
+	
 	public int getS1() {
 		return s1;
 	}
@@ -106,10 +111,11 @@ public class Document {
 		this.s2New = s2New;
 	}
 	
+	
 	public String getS1Extracted() {		
 		int extracted = 0;
 		for (MetadataProperty metadataProperty : getMetadataProperties()) {
-			if (metadataProperty.getExtracted().get(0))
+			if (metadataProperty.getExtracted().get(0)>0)
 				extracted++;
 		}
 		return extracted + " out of " + getMetadataProperties().size();
@@ -118,7 +124,7 @@ public class Document {
 	public String getS2Extracted() {		
 		int extracted = 0;
 		for (MetadataProperty metadataProperty : getMetadataProperties()) {
-			if (metadataProperty.getExtracted().get(1))
+			if (metadataProperty.getExtracted().get(1)>0)
 				extracted++;
 		}
 		return extracted + " out of " + getMetadataProperties().size();

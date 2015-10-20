@@ -5,10 +5,10 @@ import java.util.ArrayList;
 public class MetadataProperty {
 	private int id;
 	private String name;
-	private ArrayList<Boolean> extracted;
+	private ArrayList<Integer> extracted;
 	
 	public MetadataProperty() {
-		setExtracted(new ArrayList<Boolean>());
+		setExtracted(new ArrayList<Integer>());
 	}
 	
 	public int getId() {
@@ -23,10 +23,10 @@ public class MetadataProperty {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public ArrayList<Boolean> getExtracted() {
+	public ArrayList<Integer> getExtracted() {
 		return extracted;
 	}
-	public void setExtracted(ArrayList<Boolean> extracted) {
+	public void setExtracted(ArrayList<Integer> extracted) {
 		this.extracted = extracted;
 	}
 	

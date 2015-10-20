@@ -25,7 +25,7 @@ public class GenerationManager {
 											+ "      Identified_Document_Instance.volume,"
 											+ "      Identified_Document_Instance.path,"
 											+ "      Identified_Document_Instance.name,"
-											+ "      Metadata_Property.name,"
+											+ "      Metadata_Property.filenet_class,"
 											+ "      Metadata_Value.value,"
 											+ "      Document_Class.name,"
 											+ "      Document.name,"
@@ -102,17 +102,19 @@ public class GenerationManager {
 					element.setTextContent(document);
 					docElement.appendChild(element);
 					
-					//BusinessMetadat
+					//BusinessMetadata
 					element = doc.createElement("BusinessMetadata");
 					docElement.appendChild(element);
 					
-					//Metadata
+					//Migration ID
+					Element elementOfMetadata = doc.createElement("MigrationID");
+	    			elementOfMetadata.setTextContent(migrationId.toString());
+	    			element.appendChild(elementOfMetadata);		
 					
-					if (metadataName != null) {					
-						Element elementOfMetadata = doc.createElement(metadataName);
-		    			elementOfMetadata.setTextContent(metadataValue);
-		    			element.appendChild(elementOfMetadata);					
-					}
+					//Metadata		
+					elementOfMetadata = doc.createElement(metadataName);
+	    			elementOfMetadata.setTextContent(metadataValue);
+	    			element.appendChild(elementOfMetadata);		
 					
 	    			Lastelement = element;
 	    			lastMigrationId = migrationId;

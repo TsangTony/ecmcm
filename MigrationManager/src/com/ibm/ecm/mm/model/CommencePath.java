@@ -26,8 +26,10 @@ public class CommencePath extends DataTableElement {
 	}
 
 	public void setActualPath(String actualPath) {
-		actualPath = actualPath.replace("\\", "/");
-		actualPath = actualPath.endsWith("/") ? actualPath.substring(0, actualPath.length()-2) : actualPath; 
+		if (actualPath != null) {
+			actualPath = actualPath.replace("\\", "/");
+			actualPath = actualPath.endsWith("/") ? actualPath.substring(0, actualPath.length()-2) : actualPath;
+		}
 		this.actualPath = actualPath;
 	}
 

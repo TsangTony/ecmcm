@@ -30,5 +30,10 @@
 		<managed-bean-class>com.ibm.ecm.mm.bean.ReportBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>validationBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.ValidationBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
 
 </faces-config>
