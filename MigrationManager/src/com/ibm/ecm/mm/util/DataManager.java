@@ -700,9 +700,6 @@ public class DataManager {
 			//retention
 			if (document.getIgDocClass().equals("General Document"))
 				query += "AND mtime > DATEADD(YEAR,-7,GETDATE())";
-			
-			if (noPdf)
-				query += " ORDER BY server, volume, path, name";
 		}
 
 		
@@ -735,12 +732,14 @@ public class DataManager {
 				query += identificationRule.getRightParen() + " ";
 			}
 
-			query += ") ";
+			query += ")";
 		}		
+		
+		query += " ORDER BY server, volume, path, name";
 		
 		System.out.println(query);
 		
-		try {		
+		try {
 			Connection conn = ConnectionManager.getConnection();	
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);	
@@ -790,13 +789,13 @@ public class DataManager {
 					 */
 					
 					if (rs.getInt(8) == 0) {
+						digests.add(digest);
 						identifiedDocInstances.add(identifiedDocInstance);
 					}
 					else {
 						identifiedDocInstances.getRemovedList().add(identifiedDocInstance);
-					}
+					}					
 					
-					digests.add(digest);
 				}			
 			}
 			firstRecord = true;
