@@ -128,10 +128,12 @@ public class IdentifiedDocInstance extends DataTableElement {
 				fis = new FileInputStream(file.getAbsolutePath());
 			}
 			catch (FileNotFoundException e) {
-				System.err.println("Cannot read content from " + getName() + " ("+ getId() +") because the file is not found.");
+				System.err.println("Cannot read content from " + getUnixMountedPath() +" because the file is not found.");
+				e.printStackTrace();
 				return content;
 			}
 		}
+		
 			
 		try {
 			if (getExtension().toUpperCase().equals("PDF")) {						

@@ -16,9 +16,7 @@ import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
-import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.util.DataManager;
-import com.ibm.ecm.mm.util.ExtractionManager;
 import com.ibm.ecm.mm.util.IdentificationManager;
 import com.ibm.ecm.mm.util.ConnectionManager;
 
@@ -83,9 +81,8 @@ public class IdentificationBean {
 	public void documentSelected() {
 		getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
 		getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
-		setIdentifiedDocInstances(DataManager.getIdentifiedDocInstances(getDocument()));
 		getExistingIdentifiedDocInstanceIds().clear();
-		for (IdentifiedDocInstance identifiedDocInstance : getIdentifiedDocInstances()) {
+		for (IdentifiedDocInstance identifiedDocInstance : DataManager.getIdentifiedDocInstances(getDocument())) {
 			getExistingIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
 		}
 	}
@@ -114,62 +111,8 @@ public class IdentificationBean {
 		getDocument().getIdentificationRules().addAll(IdentificationManager.createObsoleteRules(getDocument().getIdentificationRules().size()+1));
 	}
 		
-	public boolean preview() {
-		
-		ArrayList<IdentificationRule> contentRules = new ArrayList<IdentificationRule>();
-		
-		
-		if (getDocument().getIdentificationRules().size() != 0)
-			for (IdentificationRule identificationRule : getDocument().getIdentificationRules())
-				if (identificationRule.getAttribute().equals("Content"))
-					contentRules.add(identificationRule);
-		
-		try {
-			if (contentRules.size() == 0) {
-				System.out.println("DOC-" + getDocument().getId() + " has no content rule");
-				setIdentifiedDocInstances(DataManager.getDocInstances(getDocument(), isNoPdf(), false, false));
-			}
-			else {		
-				System.out.println("DOC-" + getDocument().getId() + " has content rules");
-				/*
-				 * If there is content rule, read the content and write to dbo.Identified_Doc_Instance.snippet first. After that,
-				 * apply the rules and identify from dbo.Identified_Doc_Instance;
-				 */
-				
-				DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = DataManager.getDocInstances(getDocument(), isNoPdf(), false, true);
-				for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-					String content = identifiedDocInstance.getContent();
-					if (!content.equals("")) {
-						for (IdentificationRule contentRule : contentRules) {
-							if (content.equals(contentRule.getValue())) {
-								identifiedDocInstance.setSnippet(contentRule.getValue());
-								break;
-							}
-							else if (content.contains(contentRule.getValue())) {
-								identifiedDocInstance.setSnippet(identifiedDocInstance.getSnippet() + contentRule.getValue());
-							}
-						}
-					}
-				}
-				DataManager.addSnippet(getDocument().getId(), identifiedDocInstances);
-				setIdentifiedDocInstances(DataManager.getDocInstances(getDocument(), isNoPdf(), true, false));
-				DataManager.removeSnippet(getDocument().getId());
-			}
-			
-			if (getIdentifiedDocInstances().size() == 0)
-				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No document instance is identified."));
-			else if (getIdentifiedDocInstances().size() == 1)
-				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "1 document instance is identified."));
-			else
-				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", getIdentifiedDocInstances().size() + " document instances are identified."));
-			
-			return false;
-		}
-		catch (SQLException e) {
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Identification Rules have error."));
-			return true;
-		}
-
+	public void preview() {
+		setIdentifiedDocInstances(IdentificationManager.identify(getDocument(),isNoPdf()));	
 	}
 	
 	public void save() {
@@ -297,33 +240,7 @@ public class IdentificationBean {
 	
 
 	public void run() {
-		
-		boolean hasError = preview();
-		
-		if (!hasError) {
-		
-			setExistingIdentifiedDocInstanceIds(DataManager.addIdentifiedDocInstances(getDocument().getId(), getExistingIdentifiedDocInstanceIds(), getIdentifiedDocInstances()));
-			
-			/*
-			 *  Metadata Extraction
-			 */
-			
-			ArrayList<MetadataProperty> extractedMetadataProperties = ExtractionManager.extractMetadata(getIdentifiedDocInstances(), getDocument());
-			String message = "Identified Document Instances are saved.";
-			if (extractedMetadataProperties.size() == 0) {
-				message += " There is no default Metadata Property extracted.";
-			}
-			else {
-				message += "The following Metadata Properties are extracted and saved. <ol>";
-			for (MetadataProperty metadataProperty : extractedMetadataProperties) {
-				message += "<li>" + metadataProperty.getName() + "</li>";
-			}
-			message += "</ol>";
-			}
-			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful",  message) );
-		}
-		else {
-			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error",  "Identification Rules have error. Nothing is saved.") );
-		}
+		preview();
+		IdentificationManager.saveIdentifiedDocInstances(getDocument(), getExistingIdentifiedDocInstanceIds(), getIdentifiedDocInstances());
 	}
 }

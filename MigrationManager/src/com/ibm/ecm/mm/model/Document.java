@@ -134,6 +134,18 @@ public class Document extends DataTableElement {
 		int s2 = getS1() - getS1Deleted() + getS2New();
 		return s2 + " (- " + getS1Deleted() + ", + " + getS2New() + ") ";
 	}
+	
+	public String getS1SuccessRate(int metadataIndex) {
+		if (getS1()<=0)
+			return String.valueOf(0);
+		return String.valueOf(Math.round((float) getMetadataProperties().get(metadataIndex).getExtracted().get(0) / (float) getS1() * 100));
+	}
+	
+	public String getS2SuccessRate(int metadataIndex) {
+		if (getS1()-getS1Deleted()+getS2New()<=0)
+			return String.valueOf(0);
+		return String.valueOf(Math.round((float) getMetadataProperties().get(metadataIndex).getExtracted().get(1) / (float) (getS1()-getS1Deleted()+getS2New()) * 100));
+	}
 
 
 	@Override

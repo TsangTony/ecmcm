@@ -93,9 +93,11 @@ public class ExtractionManager {
 	public static void extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances, Document document, ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
-				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
-					DataManager.removeMetadataValues(document.getId(), metadataExtractionRules.getMetadataProperty().getId());
-					identifiedDocInstance.getMetadataValues().add(extractMetadata(identifiedDocInstance, metadataExtractionRules));
+				if (identifiedDocInstance.getCommencePath() != null) {
+					if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
+						DataManager.removeMetadataValues(document.getId(), metadataExtractionRules.getMetadataProperty().getId());
+						identifiedDocInstance.getMetadataValues().add(extractMetadata(identifiedDocInstance, metadataExtractionRules));
+					}
 				}
 			}
 		}

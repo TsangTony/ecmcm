@@ -340,11 +340,11 @@ public class DataManager {
 			while (rs.next()) {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				identifiedDocInstance.setId(rs.getLong(1));
-				identifiedDocInstance.setServer(rs.getString(2));
-				identifiedDocInstance.setVolume(rs.getString(3));
-				identifiedDocInstance.setPath(rs.getString(4));
-				identifiedDocInstance.setName(rs.getString(5));	
-				identifiedDocInstance.setExtension(rs.getString(6));
+				identifiedDocInstance.setServer(rs.getString(2).trim());
+				identifiedDocInstance.setVolume(rs.getString(3).trim());
+				identifiedDocInstance.setPath(rs.getString(4).trim());
+				identifiedDocInstance.setName(rs.getString(5).trim());	
+				identifiedDocInstance.setExtension(rs.getString(6).trim());
 				identifiedDocInstance.setCommencePath(commencePath);
 				identifiedDocInstance.setNew(false);
 				identifiedDocInstances.add(identifiedDocInstance);
@@ -617,6 +617,8 @@ public class DataManager {
 	}
 
 	public static HashSet<Long> addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		System.out.println("addIdentifiedDocInstances " + documentId);
+		
 		HashSet<Long> newIds = new HashSet<Long>();
 		
 		try {
@@ -745,60 +747,80 @@ public class DataManager {
 			ResultSet rs = stmt.executeQuery(query);	
 			
 			HashSet<String> digests = new HashSet<String>();
-			boolean firstRecord = false;
+			boolean firstRecord = true;
+			
+			IdentifiedDocInstance preInstance = null;
 			
 			while (rs.next()) {
-				String digest = rs.getString(5);
-				if (fromSnippet || !digests.contains(digest)) {				
-					IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
-					identifiedDocInstance.setId(rs.getLong(1));	
-					identifiedDocInstance.setName(rs.getNString(2));	
-					identifiedDocInstance.setPath(rs.getNString(3));
-					identifiedDocInstance.setVolume(rs.getString(4));
-					identifiedDocInstance.setDigest(digest);
-					identifiedDocInstance.setExtension(rs.getString(6));
-					identifiedDocInstance.setServer(rs.getString(7));					
-					
-					//Ignore PDF
-					if (!fromSnippet && noPdf) {
-						if (!firstRecord && identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {							
-							IdentifiedDocInstance preInstance = identifiedDocInstances.get(identifiedDocInstances.size()-1);
-							if (preInstance.getServer().equals(identifiedDocInstance.getServer()) &&
-							    preInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
-							    preInstance.getPath().equals(identifiedDocInstance.getPath()) &&
-							    preInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension())) {
-								System.out.println(identifiedDocInstance.getName() + "(" + identifiedDocInstance.getId() + ") is a PDF version of " + preInstance.getName() + "(" + preInstance.getId() + ")");
-								continue;
+				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
+				identifiedDocInstance.setId(rs.getLong(1));	
+				identifiedDocInstance.setName(rs.getNString(2).trim());	
+				identifiedDocInstance.setPath(rs.getNString(3).trim());
+				identifiedDocInstance.setVolume(rs.getString(4).trim());
+				identifiedDocInstance.setDigest(rs.getString(5).trim());
+				identifiedDocInstance.setExtension(rs.getString(6).trim());
+				identifiedDocInstance.setServer(rs.getString(7).trim());
+				
+				int snapshotDeleted = rs.getInt(8);
+				
+				if (snapshotDeleted == 0) {
+					if (fromSnippet || !digests.contains(identifiedDocInstance.getDigest())) {
+						//Ignore PDF
+						if (!fromSnippet && noPdf) {
+							if (!firstRecord && identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {				
+								if (preInstance.getServer().equals(identifiedDocInstance.getServer()) &&
+								    preInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
+								    preInstance.getPath().equals(identifiedDocInstance.getPath()) &&
+								    preInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension())) {
+									System.out.println(identifiedDocInstance.getName() + "(" + identifiedDocInstance.getId() + ") is a PDF version of " + preInstance.getName() + "(" + preInstance.getId() + ")");
+									continue;
+								}
+							}
+						}						
+
+						boolean hasCommencePath = false;
+						
+						for (CommencePath commencePath : document.getCommencePaths()) {
+							String fullPath = identifiedDocInstance.getPath() == null ? identifiedDocInstance.getVolume() : identifiedDocInstance.getVolume() + "/" + identifiedDocInstance.getPath();
+							if (fullPath.equals(commencePath.getActualPath()) || fullPath.startsWith(commencePath.getActualPath() + "/")) {
+								identifiedDocInstance.setCommencePath(commencePath);
+								hasCommencePath = true;
+								break;
 							}
 						}
-					}
-					
-					for (CommencePath commencePath : document.getCommencePaths()) {
-						String fullPath = identifiedDocInstance.getPath() == null ? identifiedDocInstance.getVolume() : identifiedDocInstance.getVolume() + "/" + identifiedDocInstance.getPath();
-						if (fullPath.equals(commencePath.getActualPath()) || fullPath.startsWith(commencePath.getActualPath() + "/")) {
-							identifiedDocInstance.setCommencePath(commencePath);
-							break;
+						
+						if (!hasCommencePath) {
+							String log = identifiedDocInstance.getFullyQualifiedPath() + " has no matching commence path :";
+							for (CommencePath commencePath : document.getCommencePaths())
+								log += commencePath.getActualPath() + ";";
+							System.out.println(log);
 						}
-						else {
-							System.out.println(identifiedDocInstance.getName() + "(" + identifiedDocInstance.getId() + ") has no matching commence path");
-						}
-					}
-					
-					/* Only doc instances without snapshot deleted will be shown in preview
-					 * but all will be identified and moved to Identified_Doc Instance
-					 */
-					
-					if (rs.getInt(8) == 0) {
-						digests.add(digest);
+						
+						
+						digests.add(identifiedDocInstance.getDigest());
 						identifiedDocInstances.add(identifiedDocInstance);
+						preInstance = identifiedDocInstance;
+						firstRecord = false;
+						
 					}
-					else {
-						identifiedDocInstances.getRemovedList().add(identifiedDocInstance);
-					}					
-					
-				}			
+				}
+				else {
+					identifiedDocInstances.getRemovedList().add(identifiedDocInstance);
+				}
 			}
-			firstRecord = true;
+			
+			/*
+			 * After all unique digests of non-snapshot-deleted are collected in digests,
+			 * remove duplicates in snapshot-deleted instances
+			 */
+			
+			ArrayList<IdentifiedDocInstance> tobeRemoved = new ArrayList<IdentifiedDocInstance>();			
+			for (IdentifiedDocInstance snapshotDeletedInstance : identifiedDocInstances.getRemovedList()) {
+				if (digests.contains(snapshotDeletedInstance.getDigest()))
+					tobeRemoved.add(snapshotDeletedInstance);
+			}
+			identifiedDocInstances.getRemovedList().removeAll(tobeRemoved);		
+			
 		}
 		catch (SQLException e) {
 			System.err.println(e.getMessage() + " - " + query);
