@@ -152,7 +152,10 @@ public class Document extends DataTableElement {
 	public String toString() {
 		if (getId() > 99)		
 			return "DOC-" + String.valueOf(getId()) + " " + getName();
-		return "DOC-0" + String.valueOf(getId()) + " " + getName();
-		
+		if (getId() > 9)		
+			return "DOC-0" + String.valueOf(getId()) + " " + getName();
+		if (getId() == 0)
+			return "All Documents";
+		return "DOC-00" + String.valueOf(getId()) + " " + getName();		
 	}
 }

@@ -16,40 +16,48 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class GenerationManager {
-	public static byte[] generate() {		
+	public static byte[] generate(int genDocumentId) {		
 		try {		
 			Connection conn = ConnectionManager.getConnection("generate");
 			Statement stmt = conn.createStatement();
-	        ResultSet rs = stmt.executeQuery("SELECT Identified_Document_Instance.id,"
-										    + "      Identified_Document_Instance.server,"
-											+ "      Identified_Document_Instance.volume,"
-											+ "      Identified_Document_Instance.path,"
-											+ "      Identified_Document_Instance.name,"
-											+ "      Metadata_Property.filenet_class,"
-											+ "      Metadata_Value.value,"
-											+ "      Document_Class.name,"
-											+ "      Document.name,"
-											+ "      Team.name,"
-											+ "      Team.department,"
-											+ "      IG_Security_Class.name,"
-											+ "      Document.id"
-											+ " FROM Identified_Document_Instance"
-											+ " LEFT JOIN Metadata_Value"
-											+ "   ON Identified_Document_Instance.id = Metadata_Value.identified_document_instance_id"
-											+ " LEFT JOIN Metadata_Extraction_Rule"
-											+ "   ON Metadata_Value.metadata_extraction_rule_id = Metadata_Extraction_Rule.id"
-											+ " LEFT JOIN Metadata_Property"
-											+ "   ON Metadata_Extraction_Rule.metadata_property_id = Metadata_Property.id"
-											+ " LEFT JOIN Document"
-											+ "   ON Identified_Document_Instance.document_id = Document.id"
-											+ " LEFT JOIN Document_Class"
-											+ "   ON Document.document_class_id = Document_Class.id"
-											+ " LEFT JOIN Team"
-											+ "   ON Document.team_id = Team.id"
-											+ " LEFT JOIN IG_Security_Class"
-											+ "   ON Document.ig_security_class_id = IG_Security_Class.id"
-											+ " ORDER BY Identified_Document_Instance.id");
-		       
+	        String query = "SELECT Identified_Document_Instance.id,"
+					    + "      Identified_Document_Instance.server,"
+						+ "      Identified_Document_Instance.volume,"
+						+ "      Identified_Document_Instance.path,"
+						+ "      Identified_Document_Instance.name,"
+						+ "      Metadata_Property.filenet_class,"
+						+ "      Metadata_Value.value,"
+						+ "      Document_Class.name,"
+						+ "      Document.name,"
+						+ "      Team.name,"
+						+ "      Team.department,"
+						+ "      IG_Security_Class.name,"
+						+ "      Document.id"
+						+ " FROM Identified_Document_Instance"
+						+ " LEFT JOIN Metadata_Value"
+						+ "   ON Identified_Document_Instance.id = Metadata_Value.identified_document_instance_id"
+						+ "  AND Identified_Document_Instance.document_id = Metadata_Value.document_id"
+						+ " LEFT JOIN Metadata_Extraction_Rule"
+						+ "   ON Metadata_Value.metadata_extraction_rule_id = Metadata_Extraction_Rule.id"
+						+ " LEFT JOIN Metadata_Property"
+						+ "   ON Metadata_Extraction_Rule.metadata_property_id = Metadata_Property.id"
+						+ " LEFT JOIN Document"
+						+ "   ON Identified_Document_Instance.document_id = Document.id"
+						+ " LEFT JOIN Document_Class"
+						+ "   ON Document.document_class_id = Document_Class.id"
+						+ " LEFT JOIN Team"
+						+ "   ON Document.team_id = Team.id"
+						+ " LEFT JOIN IG_Security_Class"
+						+ "   ON Document.ig_security_class_id = IG_Security_Class.id";
+		    
+	        if (genDocumentId != 0) {
+	        	 query += " WHERE Document.id = " + genDocumentId;
+	        }
+	        
+	        query += " ORDER BY Identified_Document_Instance.id";
+	        
+	        ResultSet rs = stmt.executeQuery(query);
+	        
 	        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			Document doc = docBuilder.newDocument();
@@ -76,10 +84,12 @@ public class GenerationManager {
 				 String secClass = rs.getString(12);
 				 int documentId = rs.getInt(13);
 	        	
-	        	if (migrationId == lastMigrationId && lastDocumentId==documentId) {	        		
-					Element elementOfMetadata  = doc.createElement(metadataName);
-	    			elementOfMetadata.setTextContent(metadataValue);
-	    			Lastelement.appendChild(elementOfMetadata);
+	        	if (migrationId == lastMigrationId && lastDocumentId==documentId) {	  
+	    			if (metadataName != null) {
+						Element elementOfMetadata  = doc.createElement(metadataName);
+		    			elementOfMetadata.setTextContent(metadataValue);
+		    			Lastelement.appendChild(elementOfMetadata);
+	    			}
 				}
 	        	else {
 	        		//create new document element 
@@ -109,13 +119,40 @@ public class GenerationManager {
 					//Migration ID
 					Element elementOfMetadata = doc.createElement("MigrationID");
 	    			elementOfMetadata.setTextContent(migrationId.toString());
-	    			element.appendChild(elementOfMetadata);		
+	    			element.appendChild(elementOfMetadata);	
+
+					//Security Class
+					elementOfMetadata = doc.createElement("Security_Classification_IG");
+	    			elementOfMetadata.setTextContent(secClass);
+	    			element.appendChild(elementOfMetadata);			    			
+
+					//SPI
+					elementOfMetadata = doc.createElement("SPI_IG");
+	    			elementOfMetadata.setTextContent(null);
+	    			element.appendChild(elementOfMetadata);	
 					
-					//Metadata		
-					elementOfMetadata = doc.createElement(metadataName);
-	    			elementOfMetadata.setTextContent(metadataValue);
-	    			element.appendChild(elementOfMetadata);		
-					
+					//owningDept
+					elementOfMetadata = doc.createElement("Owning_Dept_IG");
+	    			elementOfMetadata.setTextContent(owningDept);
+	    			element.appendChild(elementOfMetadata);	
+	    			
+					//Owning_Business_Unit
+					elementOfMetadata = doc.createElement("Owning_Business_Unit");
+	    			elementOfMetadata.setTextContent(owningBu);
+	    			element.appendChild(elementOfMetadata);	
+
+					//Content_Type
+					elementOfMetadata = doc.createElement("Content_Type");
+	    			elementOfMetadata.setTextContent(contentType);
+	    			element.appendChild(elementOfMetadata);	
+	    			
+					//Metadata
+	    			if (metadataName != null) {
+						elementOfMetadata = doc.createElement(metadataName);
+		    			elementOfMetadata.setTextContent(metadataValue);
+		    			element.appendChild(elementOfMetadata);		
+	    			}
+	    			
 	    			Lastelement = element;
 	    			lastMigrationId = migrationId;
 	    			lastDocumentId = documentId;

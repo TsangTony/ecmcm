@@ -20,6 +20,10 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
@@ -186,10 +190,24 @@ public class IdentifiedDocInstance extends DataTableElement {
 					}
 				}
 			}
+			else if (getExtension().toUpperCase().equals("XLSX")) {
+				XSSFWorkbook wb = new XSSFWorkbook(fis);
+				for (int i=0; i < wb.getNumberOfSheets(); i++) {
+					XSSFSheet ws = wb.getSheetAt(i);
+					Iterator<Row> rowItr = ws.rowIterator();
+					while (rowItr.hasNext()) {
+						XSSFRow row = (XSSFRow) rowItr.next();
+						Iterator<Cell> cellItr = row.cellIterator();
+						while (cellItr.hasNext()) {
+							XSSFCell cell = (XSSFCell) cellItr.next();
+							content += cell.toString() + "\n";
+						}
+					}
+				}
+			}
 			else {
 				System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due unsupported file format.");	
 			}	
-			System.out.println(content);
 		}
 		catch (Exception e) {
 			System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to error.");

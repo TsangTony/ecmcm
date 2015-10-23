@@ -77,7 +77,7 @@ public class IdentificationManager {
 				}
 				DataManager.addSnippet(document.getId(), identifiedDocInstances);
 				identifiedDocInstances = DataManager.getDocInstances(document, noPdf, true, false);
-				//DataManager.removeSnippet(document.getId());
+				DataManager.removeSnippet(document.getId());
 			}
 			
 			int displayCount = identifiedDocInstances.getLatestSnapshotInstances().size();

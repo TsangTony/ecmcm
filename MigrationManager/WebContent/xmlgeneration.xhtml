@@ -11,6 +11,19 @@
 		<ui:composition template="./template/commonLayout.xhtml">
    			<ui:define name="content">	
 				<h:form>
+					<p:panelGrid id="optionPanel">
+						<p:row>
+							<p:column>Document</p:column>
+							<p:column>
+								<p:selectOneMenu id="document" value="#{generationBean.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+									<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
+									<f:selectItems value="#{generationBean.documents}" />
+									<p:ajax update="@this" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<br />
 					<p:commandButton value="Generate" action="#{generationBean.generate}" ajax="false" />
 				</h:form>
     		</ui:define>
