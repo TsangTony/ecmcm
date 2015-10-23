@@ -6,13 +6,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
+import com.ibm.ecm.mm.model.IdentifiedDocInstances;
 import com.ibm.ecm.mm.model.Lookup;
 import com.ibm.ecm.mm.model.MetadataExtractionRule;
 import com.ibm.ecm.mm.model.MetadataProperty;
@@ -23,7 +26,7 @@ public class DataManager {
 	public static ArrayList<Document> getDocuments() {		
 		ArrayList<Document> documents = new ArrayList<Document>();		
 		try {	
-			Connection conn = ConnectionManager.getConnection();		
+			Connection conn = ConnectionManager.getConnection("getDocuments");		
 			PreparedStatement selectDocumentStmt = conn.prepareStatement(
 					  "SELECT Document.id, Document.name, Document.bl_identification_rule,"
 					+ "       Team.name, IG_Document_Class.name"
@@ -48,7 +51,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getDocuments");
 		}		
 		return documents;
 	}
@@ -56,7 +59,7 @@ public class DataManager {
 	public static DataTableArrayList<CommencePath> getCommencePaths(int documentId) {
 		DataTableArrayList<CommencePath> commencePaths = new DataTableArrayList<CommencePath>(CommencePath.class);
 		try {	
-			Connection conn = ConnectionManager.getConnection();		
+			Connection conn = ConnectionManager.getConnection("getCommencePaths");		
 			PreparedStatement selectCommencePathStmt = conn.prepareStatement("SELECT id,business_path,actual_path FROM Commence_Path WHERE document_id = ? ORDER BY id");
 			selectCommencePathStmt.setInt(1, documentId);
 			ResultSet selectCommencePathRS = selectCommencePathStmt.executeQuery();
@@ -72,7 +75,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getCommencePaths");
 		}		
 		return commencePaths;
 	}
@@ -80,7 +83,7 @@ public class DataManager {
 	public static DataTableArrayList<IdentificationRule> getIdentificationRules(int documentId) {
 		DataTableArrayList<IdentificationRule> identificationRules = new DataTableArrayList<IdentificationRule>(IdentificationRule.class);
 		try {	
-			Connection conn = ConnectionManager.getConnection();		
+			Connection conn = ConnectionManager.getConnection("getIdentificationRules");		
 			PreparedStatement selectIdentificationRuleStmt = conn.prepareStatement("SELECT id, operator_1, attribute, operator_2, value, left_paren, right_paren, priority FROM Identification_Rule WHERE document_id = ? ORDER BY id");
 			selectIdentificationRuleStmt.setInt(1, documentId);
 			ResultSet selectIdentificationRuleRS = selectIdentificationRuleStmt.executeQuery();
@@ -101,7 +104,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getIdentificationRules");
 		}		
 		return identificationRules;
 	}
@@ -109,7 +112,7 @@ public class DataManager {
 	public static ArrayList<MetadataProperty> getMetadataPropreties(int documentId) {
 		ArrayList<MetadataProperty> metadataPropreties = new ArrayList<MetadataProperty>();
 		try {	
-			Connection conn = ConnectionManager.getConnection();		
+			Connection conn = ConnectionManager.getConnection("getMetadataPropreties");		
 			String query = ""
 					+ "SELECT metadata_property.id, "
 					+ "       metadata_property.NAME "
@@ -142,7 +145,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getMetadataPropreties");
 		}
 		return metadataPropreties;
 	}
@@ -150,7 +153,7 @@ public class DataManager {
 	public static DataTableArrayList<MetadataExtractionRule> getMetadataExtractionRules(int commencePathId, int metadataPropertyId) {
 		DataTableArrayList<MetadataExtractionRule> metadataExtractionRules = new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class);
 		try {	
-			Connection conn = ConnectionManager.getConnection();		
+			Connection conn = ConnectionManager.getConnection("getMetadataExtractionRules");		
 			PreparedStatement selectMetadataExtractionRulesStmt = conn.prepareStatement("SELECT id, priority, source, bl_rule, regex, capturing_group, default_value, is_default FROM Metadata_Extraction_Rule WHERE commence_path_id = ? AND metadata_property_id = ? ORDER BY priority");
 			selectMetadataExtractionRulesStmt.setInt(1, commencePathId);
 			selectMetadataExtractionRulesStmt.setInt(2, metadataPropertyId);
@@ -172,7 +175,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getMetadataExtractionRules");
 		}		
 		return metadataExtractionRules;
 	}
@@ -180,7 +183,7 @@ public class DataManager {
 	public static ArrayList<Lookup> getLookups(int metadataPropertyId) {
 		ArrayList<Lookup> lookups = new ArrayList<Lookup>();
 		try {
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("getLookups");
 			PreparedStatement selectLookupStmt = conn.prepareStatement("SELECT lookup_value, returned_value FROM Lookup WHERE metadata_property_id = ?");
 			selectLookupStmt.setInt(1, metadataPropertyId);				
 			ResultSet lookupRs = selectLookupStmt.executeQuery();						
@@ -195,7 +198,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getLookups");
 		}
 		return lookups;
 	}
@@ -214,7 +217,7 @@ public class DataManager {
 	
 	public static void removeMetadataValues(int documentId, ArrayList<Integer> metadataPropertyIds) {
 		try {
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
 			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE metadata_property_id IN (?)) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
 			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);	
 			
@@ -229,13 +232,13 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("removeMetadataValues");
 		}
 	}
 	
 	public static void removeMetadataValues(int documentId, int commencePathId, ArrayList<Integer> metadataPropertyIds) {
 		try {
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
 			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE commence_path_id = ? AND metadata_property_id IN (?)) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
 			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
 			deleteIdentifiedDocInstanceStmt.setInt(2, commencePathId);
@@ -251,13 +254,13 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("removeMetadataValues");
 		}
 	}
 	
 	public static void addMetadataValues(ArrayList<IdentifiedDocInstance> identifiedDocInstances, int documentId) {
 		try {
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("addMetadataValues");
 			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				
@@ -279,7 +282,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("addMetadataValues");
 		}
 	}
 
@@ -324,7 +327,7 @@ public class DataManager {
 	public static DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document, CommencePath commencePath) {
 		DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class);
 		try {					
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("getIdentifiedDocInstances");
 			
 			String query = "SELECT id, server, volume, path, name, extension from Identified_Document_Instance where document_id = ?";
 			if (commencePath != null)
@@ -340,11 +343,11 @@ public class DataManager {
 			while (rs.next()) {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				identifiedDocInstance.setId(rs.getLong(1));
-				identifiedDocInstance.setServer(rs.getString(2).trim());
-				identifiedDocInstance.setVolume(rs.getString(3).trim());
-				identifiedDocInstance.setPath(rs.getString(4).trim());
-				identifiedDocInstance.setName(rs.getString(5).trim());	
-				identifiedDocInstance.setExtension(rs.getString(6).trim());
+				identifiedDocInstance.setServer(rs.getString(2) == null ? null : rs.getString(2).trim());
+				identifiedDocInstance.setVolume(rs.getString(3) == null ? null : rs.getString(3).trim());
+				identifiedDocInstance.setPath(rs.getString(4) == null ? null : rs.getString(4).trim());
+				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());	
+				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
 				identifiedDocInstance.setCommencePath(commencePath);
 				identifiedDocInstance.setNew(false);
 				identifiedDocInstances.add(identifiedDocInstance);
@@ -354,7 +357,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getIdentifiedDocInstances");
 		}
 		return identifiedDocInstances;
 	}
@@ -377,7 +380,7 @@ public class DataManager {
 
 	public static void removeMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules) {
 		try {					
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("removeMetadataExtractionRule");
 			PreparedStatement deleteMetadataExtractionRuleStmt = conn.prepareStatement("DELETE FROM Metadata_Extraction_Rule WHERE id = ?");
 			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
 				deleteMetadataExtractionRuleStmt.setInt(1, metadataExtractionRule.getId());
@@ -389,13 +392,13 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("removeMetadataExtractionRule");
 		}
 	}
 	
 	public static void updateMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules) {
 		try {					
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("updateMetadataExtractionRule");
 			PreparedStatement updateMetadataExtractionRuleStmt = conn.prepareStatement("UPDATE Metadata_Extraction_Rule SET source=?, bl_rule=?, regex=?, capturing_group=?, default_value=?, priority=? WHERE ID = ?");
 			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
 				updateMetadataExtractionRuleStmt.setString(1, metadataExtractionRule.getSource());
@@ -413,7 +416,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("updateMetadataExtractionRule");
 		}
 	}
 	
@@ -421,7 +424,7 @@ public class DataManager {
 	
 	public static void addMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules, int commencePathId, int metadataPropertyId, boolean isDefault) {
 		try {					
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("addMetadataExtractionRule");
 			PreparedStatement insertMetadataExtractionRuleStmt = conn.prepareStatement("INSERT INTO Metadata_Extraction_Rule (commence_path_id,metadata_property_id,source,bl_rule,regex,capturing_group,default_value,priority,is_default) VALUES (?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
 				insertMetadataExtractionRuleStmt.setInt(1, commencePathId);
@@ -445,7 +448,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("addMetadataExtractionRule");
 		}
 		
 	}
@@ -453,7 +456,7 @@ public class DataManager {
 	public static ArrayList<Document> getDocumentStatusReport() {
 		ArrayList<Document> documents = new ArrayList<Document>();
 		try {	
-			Connection conn = ConnectionManager.getConnection();	
+			Connection conn = ConnectionManager.getConnection("getDocumentStatusReport");	
 			
 			String query = ""
 						+ "SELECT document.id, "
@@ -588,17 +591,17 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getDocumentStatusReport");
 		}		
 		return documents;
 	}
 	
-	public static void addSnippet(int documentId, ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+	public static void addSnippet(int documentId, IdentifiedDocInstances identifiedDocInstances) {
 		try {
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("addSnippet");
 			
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet,snapshot_deleted) SELECT id,name,path,volume,extension,server,?,?,snapshot_deleted FROM All_Document_Instance WHERE id = ?");
-			
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet,snapshot_deleted,snapshot) SELECT id,name,path,volume,extension,server,?,?,snapshot_deleted,snapshot FROM All_Document_Instance WHERE id = ?");
+									
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				insertIdentifiedDocInstancStmt.setInt(1, documentId);
 				insertIdentifiedDocInstancStmt.setString(2, identifiedDocInstance.getSnippet());
@@ -612,24 +615,18 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("addSnippet");
 		}	
 	}
 
-	public static HashSet<Long> addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances) {
-		System.out.println("addIdentifiedDocInstances " + documentId);
-		
+	public static HashSet<Long> addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, IdentifiedDocInstances identifiedDocInstances) {
 		HashSet<Long> newIds = new HashSet<Long>();
 		
 		try {
-			Connection conn = ConnectionManager.getConnection();			
+			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");			
 			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
-			
-			ArrayList<IdentifiedDocInstance> fullIdentifiedDocInstances = new ArrayList<IdentifiedDocInstance>();
-			fullIdentifiedDocInstances.addAll(identifiedDocInstances);
-			fullIdentifiedDocInstances.addAll(identifiedDocInstances.getRemovedList());
-						
-			for (IdentifiedDocInstance identifiedDocInstance : fullIdentifiedDocInstances) {
+									
+			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				if (!existingIdentifiedDocInstanceIds.contains(identifiedDocInstance.getId())) {
 					insertIdentifiedDocInstancStmt.setInt(1, documentId);
 					insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
@@ -661,15 +658,18 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("addIdentifiedDocInstances");
 		}
 		
 		return newIds;		
 	}
 	
-	public static DataTableArrayList<IdentifiedDocInstance> getDocInstances(Document document, boolean noPdf, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
-		DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class);		
-		String query = "SELECT ";		
+	
+	
+	public static IdentifiedDocInstances getDocInstances(Document document, boolean noPdf, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
+		
+		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();		
+		String query = "SELECT ";
 		
 		if (fromSnippet)
 			query += "id, name, path, volume, digest, extension, server, snapshot_deleted FROM Identified_Document_Instance_Snippet WHERE document_id=" + document.getId() + " ";
@@ -737,107 +737,116 @@ public class DataManager {
 			query += ")";
 		}		
 		
-		query += " ORDER BY server, volume, path, name";
+		query += " ORDER BY snapshot, snapshot_deleted";
 		
 		System.out.println(query);
 		
 		try {
-			Connection conn = ConnectionManager.getConnection();	
+			Connection conn = ConnectionManager.getConnection("getDocInstances");	
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);	
 			
-			HashSet<String> digests = new HashSet<String>();
-			boolean firstRecord = true;
+			HashMap<String,Integer> digests = new HashMap<String,Integer>();
 			
-			IdentifiedDocInstance preInstance = null;
+			ArrayList<IdentifiedDocInstance> pdfInstances = new ArrayList<IdentifiedDocInstance>();
 			
 			while (rs.next()) {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				identifiedDocInstance.setId(rs.getLong(1));	
-				identifiedDocInstance.setName(rs.getNString(2).trim());	
-				identifiedDocInstance.setPath(rs.getNString(3).trim());
-				identifiedDocInstance.setVolume(rs.getString(4).trim());
-				identifiedDocInstance.setDigest(rs.getString(5).trim());
-				identifiedDocInstance.setExtension(rs.getString(6).trim());
-				identifiedDocInstance.setServer(rs.getString(7).trim());
+				identifiedDocInstance.setName(rs.getNString(2) == null ? null : rs.getNString(2).trim());	
+				identifiedDocInstance.setPath(rs.getNString(3) == null ? null : rs.getNString(3).trim());
+				identifiedDocInstance.setVolume(rs.getString(4) == null ? null : rs.getString(4).trim());
+				identifiedDocInstance.setDigest(rs.getString(5) == null ? null : rs.getString(5).trim());
+				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
+				identifiedDocInstance.setServer(rs.getString(7) == null ? null : rs.getString(7).trim());
+				identifiedDocInstance.setSnapshotDeleted(rs.getInt(8));
 				
-				int snapshotDeleted = rs.getInt(8);
 				
-				if (snapshotDeleted == 0) {
-					if (fromSnippet || !digests.contains(identifiedDocInstance.getDigest())) {
-						//Ignore PDF
-						if (!fromSnippet && noPdf) {
-							if (!firstRecord && identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {				
-								if (preInstance.getServer().equals(identifiedDocInstance.getServer()) &&
-								    preInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
-								    preInstance.getPath().equals(identifiedDocInstance.getPath()) &&
-								    preInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension())) {
-									System.out.println(identifiedDocInstance.getName() + "(" + identifiedDocInstance.getId() + ") is a PDF version of " + preInstance.getName() + "(" + preInstance.getId() + ")");
-									continue;
-								}
-							}
-						}						
+				if (fromSnippet ||
+					!digests.containsKey(identifiedDocInstance.getDigest()) || 
+					 digests.get(identifiedDocInstance.getDigest()) > 0) {
+					
+					
+					//Ignore PDF
+					if (!fromSnippet && noPdf) {
+						if (identifiedDocInstance.getExtension().toUpperCase().equals("PDF"))	{	
+							pdfInstances.add(identifiedDocInstance);
+						}
+					}
 
-						boolean hasCommencePath = false;
-						
-						for (CommencePath commencePath : document.getCommencePaths()) {
-							String fullPath = identifiedDocInstance.getPath() == null ? identifiedDocInstance.getVolume() : identifiedDocInstance.getVolume() + "/" + identifiedDocInstance.getPath();
-							if (fullPath.equals(commencePath.getActualPath()) || fullPath.startsWith(commencePath.getActualPath() + "/")) {
-								identifiedDocInstance.setCommencePath(commencePath);
-								hasCommencePath = true;
-								break;
+					boolean hasCommencePath = false;
+					
+					for (CommencePath commencePath : document.getCommencePaths()) {						
+						if (identifiedDocInstance.getVolumePath().equals(commencePath.getActualPath()) || identifiedDocInstance.getVolumePath().startsWith(commencePath.getActualPath() + "/")) {
+							identifiedDocInstance.setCommencePath(commencePath);
+							hasCommencePath = true;
+							break;
+						}
+					}
+					
+					if (!hasCommencePath) {
+						String log = identifiedDocInstance.getFullyQualifiedPath() + " has no matching commence path :";
+						for (CommencePath commencePath : document.getCommencePaths())
+							log += commencePath.getActualPath() + ";";
+						System.out.println(log);
+					}		
+					
+					if ((digests.containsKey(identifiedDocInstance.getDigest()) &&
+						identifiedDocInstance.getSnapshotDeleted() == 0) ||
+						!digests.containsKey(identifiedDocInstance.getDigest())) {
+						digests.put(identifiedDocInstance.getDigest(),Integer.valueOf(identifiedDocInstance.getSnapshotDeleted()));
+					}
+					
+					identifiedDocInstances.add(identifiedDocInstance);	
+					
+					if (identifiedDocInstance.getSnapshotDeleted() == 0)
+						identifiedDocInstances.getLatestSnapshotInstances().add(identifiedDocInstance);
+					
+				}
+
+			}
+				
+			ArrayList<IdentifiedDocInstance> tobeRemovedPdf = new ArrayList<IdentifiedDocInstance>();
+			
+			//noPdf
+			if (!fromSnippet && noPdf) {
+				if (pdfInstances.size() > 0) {
+					for (IdentifiedDocInstance pdfInstance : pdfInstances) {
+						for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+							if (pdfInstance.getServer().equals(identifiedDocInstance.getServer()) &&
+								pdfInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
+								pdfInstance.getPath().equals(identifiedDocInstance.getPath()) &&
+								pdfInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension()) &&
+								!identifiedDocInstance.getExtension().toUpperCase().equals("PDF") &&
+								identifiedDocInstance.getSnapshotDeleted() == 0) {
+									tobeRemovedPdf.add(pdfInstance);
 							}
 						}
-						
-						if (!hasCommencePath) {
-							String log = identifiedDocInstance.getFullyQualifiedPath() + " has no matching commence path :";
-							for (CommencePath commencePath : document.getCommencePaths())
-								log += commencePath.getActualPath() + ";";
-							System.out.println(log);
-						}
-						
-						
-						digests.add(identifiedDocInstance.getDigest());
-						identifiedDocInstances.add(identifiedDocInstance);
-						preInstance = identifiedDocInstance;
-						firstRecord = false;
-						
 					}
 				}
-				else {
-					identifiedDocInstances.getRemovedList().add(identifiedDocInstance);
-				}
 			}
 			
-			/*
-			 * After all unique digests of non-snapshot-deleted are collected in digests,
-			 * remove duplicates in snapshot-deleted instances
-			 */
-			
-			ArrayList<IdentifiedDocInstance> tobeRemoved = new ArrayList<IdentifiedDocInstance>();			
-			for (IdentifiedDocInstance snapshotDeletedInstance : identifiedDocInstances.getRemovedList()) {
-				if (digests.contains(snapshotDeletedInstance.getDigest()))
-					tobeRemoved.add(snapshotDeletedInstance);
+			for (IdentifiedDocInstance pdfInstance : tobeRemovedPdf) {
+				System.out.println(pdfInstance.getName());
 			}
-			identifiedDocInstances.getRemovedList().removeAll(tobeRemoved);		
+			
+			identifiedDocInstances.removeAll(tobeRemovedPdf);
+			identifiedDocInstances.getLatestSnapshotInstances().removeAll(tobeRemovedPdf);
 			
 		}
 		catch (SQLException e) {
 			System.err.println(e.getMessage() + " - " + query);
-			throw e;
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("getDocInstances");
 		}
-		
-		System.out.println("DOC-" + document.getId() + " identification finished. " + identifiedDocInstances.size() + " : " + identifiedDocInstances.getRemovedList().size());
 		
 		return identifiedDocInstances;
 	}
 
 	public static void removeSnippet(int documentId) {
 		try {
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("removeSnippet");
 			PreparedStatement deleteSnippetStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance_Snippet WHERE document_id = ?");
 			deleteSnippetStmt.setInt(1, documentId);	
 			deleteSnippetStmt.execute();
@@ -846,7 +855,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("removeSnippet");
 		}
 	}
 

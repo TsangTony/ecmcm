@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
 public class GenerationManager {
 	public static byte[] generate() {		
 		try {		
-			Connection conn = ConnectionManager.getConnection();
+			Connection conn = ConnectionManager.getConnection("generate");
 			Statement stmt = conn.createStatement();
 	        ResultSet rs = stmt.executeQuery("SELECT Identified_Document_Instance.id,"
 										    + "      Identified_Document_Instance.server,"
@@ -137,7 +137,7 @@ public class GenerationManager {
 			e.printStackTrace();
 	    }
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("generate");
 		}
 		return null;
 	}

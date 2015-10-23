@@ -12,10 +12,10 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 
 import com.ibm.ecm.mm.model.CommencePath;
-import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
+import com.ibm.ecm.mm.model.IdentifiedDocInstances;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.IdentificationManager;
 import com.ibm.ecm.mm.util.ConnectionManager;
@@ -24,13 +24,13 @@ public class IdentificationBean {
 	
 	private ArrayList<Document> documents;
 	private Document document;
-	private DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances;
+	private IdentifiedDocInstances identifiedDocInstances;
 	private HashSet<Long> existingIdentifiedDocInstanceIds;
 	private boolean noPdf;
 
 	public IdentificationBean() {
 		setDocuments(DataManager.getDocuments());
-		setIdentifiedDocInstances(new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class));
+		setIdentifiedDocInstances(new IdentifiedDocInstances());
 		setExistingIdentifiedDocInstanceIds(new HashSet<Long>());
 		setNoPdf(false);
 	}
@@ -47,11 +47,14 @@ public class IdentificationBean {
 	public void setDocument(Document document) {
 		this.document = document;
 	}	
-	public DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances() {
+	public IdentifiedDocInstances getIdentifiedDocInstances() {
 		return identifiedDocInstances;
 	}
-	public void setIdentifiedDocInstances(DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+	public void setIdentifiedDocInstances(IdentifiedDocInstances identifiedDocInstances) {
 		this.identifiedDocInstances = identifiedDocInstances;
+	}
+	public ArrayList<IdentifiedDocInstance> getLatestSnapshotInstances() {
+		return identifiedDocInstances.getLatestSnapshotInstances();
 	}
 
 	public HashSet<Long> getExistingIdentifiedDocInstanceIds() {
@@ -79,11 +82,16 @@ public class IdentificationBean {
 	}	
 	
 	public void documentSelected() {
+		try {
 		getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
 		getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
 		getExistingIdentifiedDocInstanceIds().clear();
 		for (IdentifiedDocInstance identifiedDocInstance : DataManager.getIdentifiedDocInstances(getDocument())) {
 			getExistingIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
+		}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -112,14 +120,19 @@ public class IdentificationBean {
 	}
 		
 	public void preview() {
-		setIdentifiedDocInstances(IdentificationManager.identify(getDocument(),isNoPdf()));	
+		try {
+			setIdentifiedDocInstances(IdentificationManager.identify(getDocument(),isNoPdf()));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void save() {
 		
 		
 		try {
-			Connection conn = ConnectionManager.getConnection();	
+			Connection conn = ConnectionManager.getConnection("save");	
 			
 			/*
 			 *  BL Identification Rule
@@ -229,7 +242,7 @@ public class IdentificationBean {
 			e.printStackTrace();
 		}
 		finally {
-			ConnectionManager.close();
+			ConnectionManager.close("save");
 		}	
 					
 		String message = "Source Locations and Identification Rules are saved.";

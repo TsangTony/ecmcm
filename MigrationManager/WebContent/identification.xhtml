@@ -167,7 +167,7 @@
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" escape="false" />
 					
 					<p:panel header="Preview Result" toggleable="true">	
-						<p:dataTable id="preview" var="identifiedDocInstance" value="#{identificationBean.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+						<p:dataTable id="preview" var="identifiedDocInstance" value="#{identificationBean.latestSnapshotInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.fullPath}">
 						        <h:outputText value="#{identifiedDocInstance.volumePath}" />
 						    </p:column>

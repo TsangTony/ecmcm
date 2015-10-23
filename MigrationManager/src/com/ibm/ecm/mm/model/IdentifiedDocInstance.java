@@ -5,12 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -27,6 +34,7 @@ public class IdentifiedDocInstance extends DataTableElement {
 	private ArrayList<MetadataValue> metadataValues;
 	private CommencePath commencePath;
 	private String snippet;
+	private int snapshotDeleted;
 	
 	public IdentifiedDocInstance() {
 		setMetadataValues(new ArrayList<MetadataValue>());
@@ -163,9 +171,25 @@ public class IdentifiedDocInstance extends DataTableElement {
 				pptxExtractor = new XSLFPowerPointExtractor(ppt);
 				content	= pptxExtractor.getText(true,true,true);
 			}
+			else if (getExtension().toUpperCase().equals("XLS")) {
+				HSSFWorkbook wb = new HSSFWorkbook(fis);
+				for (int i=0; i < wb.getNumberOfSheets(); i++) {
+					HSSFSheet ws = wb.getSheetAt(i);
+					Iterator<Row> rowItr = ws.rowIterator();
+					while (rowItr.hasNext()) {
+						HSSFRow row = (HSSFRow) rowItr.next();
+						Iterator<Cell> cellItr = row.cellIterator();
+						while (cellItr.hasNext()) {
+							HSSFCell cell = (HSSFCell) cellItr.next();
+							content += cell.toString() + "\n";
+						}
+					}
+				}
+			}
 			else {
 				System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due unsupported file format.");	
 			}	
+			System.out.println(content);
 		}
 		catch (Exception e) {
 			System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to error.");
@@ -205,5 +229,13 @@ public class IdentifiedDocInstance extends DataTableElement {
 
 	public void setSnippet(String snippet) {
 		this.snippet = snippet;
+	}
+
+	public int getSnapshotDeleted() {
+		return snapshotDeleted;
+	}
+
+	public void setSnapshotDeleted(int snapshotDeleted) {
+		this.snapshotDeleted = snapshotDeleted;
 	}
 }

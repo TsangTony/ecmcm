@@ -11,6 +11,7 @@ import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
+import com.ibm.ecm.mm.model.IdentifiedDocInstances;
 import com.ibm.ecm.mm.model.MetadataProperty;
 
 public class IdentificationManager {
@@ -39,8 +40,8 @@ public class IdentificationManager {
 		return identificationRules;
 	}
 	
-	public static DataTableArrayList<IdentifiedDocInstance> identify(Document document, boolean noPdf) {
-		DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = null;
+	public static IdentifiedDocInstances identify(Document document, boolean noPdf) {
+		IdentifiedDocInstances identifiedDocInstances = null;
 		ArrayList<IdentificationRule> contentRules = new ArrayList<IdentificationRule>();		
 		
 		if (document.getIdentificationRules().size() != 0)
@@ -76,25 +77,29 @@ public class IdentificationManager {
 				}
 				DataManager.addSnippet(document.getId(), identifiedDocInstances);
 				identifiedDocInstances = DataManager.getDocInstances(document, noPdf, true, false);
-				DataManager.removeSnippet(document.getId());
+				//DataManager.removeSnippet(document.getId());
 			}
 			
-			if (identifiedDocInstances.size() == 0)
+			int displayCount = identifiedDocInstances.getLatestSnapshotInstances().size();
+			
+			if (displayCount == 0)
 				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No document instance is identified."));
-			else if (identifiedDocInstances.size() == 1)
+			else if (displayCount == 1)
 				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "1 document instance is identified."));
 			else
-				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", identifiedDocInstances.size() + " document instances are identified."));
+				FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", displayCount + " document instances are identified."));
+
+			return identifiedDocInstances;
 			
 		}
 		catch (SQLException e) {
 			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Identification Rules have error."));
 		}
-		
-		return identifiedDocInstances;
+
+		return null;
 	}
 	
-	public static void saveIdentifiedDocInstances(Document document, HashSet<Long> existingIdentifiedDocInstaneIds, DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+	public static void saveIdentifiedDocInstances(Document document, HashSet<Long> existingIdentifiedDocInstaneIds, IdentifiedDocInstances identifiedDocInstances) {
 		
 		try {
 			
@@ -104,18 +109,18 @@ public class IdentificationManager {
 			 *  Metadata Extraction
 			 */
 			
-			ArrayList<MetadataProperty> extractedMetadataProperties = ExtractionManager.extractMetadata(identifiedDocInstances, document);
+			//ArrayList<MetadataProperty> extractedMetadataProperties = ExtractionManager.extractMetadata(identifiedDocInstances, document);
 			String message = "Identified Document Instances are saved.";
-			if (extractedMetadataProperties.size() == 0) {
-				message += " There is no default Metadata Property extracted.";
-			}
-			else {
-				message += "The following Metadata Properties are extracted and saved. <ol>";
-			for (MetadataProperty metadataProperty : extractedMetadataProperties) {
-				message += "<li>" + metadataProperty.getName() + "</li>";
-			}
-			message += "</ol>";
-			}
+			//if (extractedMetadataProperties.size() == 0) {
+			//	message += " There is no default Metadata Property extracted.";
+			//}
+			//else {
+			//	message += "The following Metadata Properties are extracted and saved. <ol>";
+			//for (MetadataProperty metadataProperty : extractedMetadataProperties) {
+			//	message += "<li>" + metadataProperty.getName() + "</li>";
+			//}
+			//message += "</ol>";
+			//}
 			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful",  message) );
 		
 
