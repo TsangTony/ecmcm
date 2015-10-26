@@ -38,9 +38,9 @@
 						<p:row>
 							<p:column>Metadata Property</p:column>
 							<p:column>
-								<p:selectOneMenu id="metadataProperty" value="#{metadataExtraction.metadataExtractionRules}" converter="omnifaces.SelectItemsConverter">
+								<p:selectOneMenu id="metadataProperty" value="#{metadataExtraction.metadataProperty}" converter="omnifaces.SelectItemsConverter">
 									<f:selectItem itemLabel="Select Metadata Property" noSelectionOption="true" />
-									<f:selectItems value="#{metadataExtraction.commencePath.metadataExtractionRulesList}" />
+									<f:selectItems value="#{metadataExtraction.document.metadataProperties}" />
 									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{metadataExtraction.metadataPropertySeletced}" />
 								</p:selectOneMenu>
 							</p:column>
@@ -129,7 +129,7 @@
 					
 					<p:panel header="Preview Result" toggleable="true">
 						
-						<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.identifiedDocInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
+						<p:dataTable id="preview" var="identifiedDocInstance" value="#{metadataExtraction.latestSnapshotInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
 						        <h:outputText value="#{identifiedDocInstance.path}" />
 						    </p:column>

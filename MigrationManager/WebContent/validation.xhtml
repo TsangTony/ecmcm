@@ -11,21 +11,19 @@
 		<ui:composition template="./template/commonLayout.xhtml">
    			<ui:define name="content">	
 				<h:form>
-					<p:dataTable id="documents" var="document" value="#{validationBean.documents}" selection="#{validationBean.selectedDocuments}" rowKey="#{document.id}" filteredValue="#{validationBean.filteredDocuments}">
-				        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+					<p:dataTable id="documents" var="document" value="#{validationBean.documents}" selection="#{validationBean.document}" rowKey="#{document.id}" filteredValue="#{validationBean.filteredDocuments}">
+				        <p:column selectionMode="single" style="width:16px;text-align:center"/>
 				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}" filterMatchMode="contains">
 				            <h:outputText value="#{document.team}" />
 				        </p:column>
-				        <p:column headerText="Document" sortBy="#{document}" filterBy="#{document}" filterMatchMode="contains">
+				        <p:column headerText="Document" sortBy="#{document.id}" filterBy="#{document}" filterMatchMode="contains">
 				            <h:outputText value="#{document}" />
 				        </p:column>
 				    </p:dataTable>
 				    
-				    <p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
-						<h:outputText value="Generating..." />
-					</p:dialog>	
-				    
-				    <p:commandButton value="Generate" action="#{validationBean.generate}" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+				    <br />
+				        
+				    <p:commandButton value="Generate" action="#{validationBean.generate}" ajax="false" />
 				</h:form>
     		</ui:define>
     	</ui:composition>

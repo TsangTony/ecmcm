@@ -5,10 +5,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
+import com.ibm.ecm.mm.model.IdentifiedDocInstances;
 import com.ibm.ecm.mm.model.Lookup;
 import com.ibm.ecm.mm.model.MetadataExtractionRule;
 import com.ibm.ecm.mm.model.MetadataExtractionRules;
@@ -23,7 +27,7 @@ public class ExtractionManager {
 		
 		for (CommencePath commencePath : document.getCommencePaths()) {
 			for (MetadataProperty metadataProperty : metadataPropreties) {				
-				DataTableArrayList<MetadataExtractionRule> existingMetadataExtractionRuleList = DataManager.getMetadataExtractionRules(commencePath.getId(), metadataProperty.getId());
+				DataTableArrayList<MetadataExtractionRule> existingMetadataExtractionRuleList = DataManager.getMetadataExtractionRules(document.getId(),commencePath.getId(),metadataProperty.getId());
 				if (existingMetadataExtractionRuleList.size() > 0) {
 					MetadataExtractionRules existingMetadataExtractionRules = new MetadataExtractionRules();
 					existingMetadataExtractionRules.setCommencePathId(commencePath.getId());
@@ -142,7 +146,14 @@ public class ExtractionManager {
 					if (metadataExtractionRules.getMetadataProperty().getName().equals("Date") ||
 						metadataExtractionRules.getMetadataProperty().getName().equals("Month")||
 						metadataExtractionRules.getMetadataProperty().getName().equals("Year")) {
+						
 						SimpleDateFormat outputSdf = new SimpleDateFormat("yyyy-MM-dd");
+						
+						if (metadataExtractionRules.getMetadataProperty().getName().equals("Month"))
+							outputSdf = new SimpleDateFormat("MMMMM");
+						else if (metadataExtractionRules.getMetadataProperty().getName().equals("Year"))
+							outputSdf = new SimpleDateFormat("yyyy");
+						
 						SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
 						try {
 							String dateFound = Util.findRegex(valueBase.toString(), lookup.getLookupValue(), searchSequence);
@@ -170,16 +181,43 @@ public class ExtractionManager {
 				break metadataExtractionRuleloop;
 			}	
 		}
-		
 		return metadataValue;
 	}
 	
+	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances, MetadataExtractionRules metadataExtractionRules) {
+		ArrayList<MetadataExtractionRules> metadataExtractionRulesList = new ArrayList<MetadataExtractionRules>();
+		metadataExtractionRulesList.add(metadataExtractionRules);
+		return extractMetadata(identifiedDocInstances, metadataExtractionRulesList);
+	}
 
-	public static ArrayList<IdentifiedDocInstance> extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances, MetadataExtractionRules metadataExtractionRules) {
+	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances, ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
+		int filePathCount = 0;
+		int contentCount = 0;
+		int defaultCount = 0;
+		
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {	
 			identifiedDocInstance.getMetadataValues().clear();
-			identifiedDocInstance.getMetadataValues().add(extractMetadata(identifiedDocInstance,metadataExtractionRules));		
-		}	
+			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
+				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
+					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
+					identifiedDocInstance.getMetadataValues().add(metadataValue);					
+					if (identifiedDocInstance.getSnapshotDeleted() == 0) {
+						if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("File Path"))
+							filePathCount++;
+						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Content"))
+							contentCount++;
+						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Default"))
+							defaultCount++;
+					}			
+				}
+			}
+		}
+		
+		if (filePathCount + contentCount < identifiedDocInstances.getLatestSnapshotInstances().size() * 0.8f)
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Content:" + Math.round(contentCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Default: " + Math.round(defaultCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%"));
+		else
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Content:" + Math.round(contentCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Default: " + Math.round(defaultCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%"));
+		
 		return identifiedDocInstances;
 		
 	}

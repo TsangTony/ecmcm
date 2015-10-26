@@ -40,13 +40,12 @@ public class GenerationBean {
 		this.document = document;
 	}
 
-	public void generate() {
-		
+	public void generate() {		
 		FacesContext ctx = FacesContext.getCurrentInstance();
 		HttpServletResponse response = (HttpServletResponse) ctx.getExternalContext().getResponse();
 		
 		response.setContentType("text/xml");
-		response.setHeader("Content-Disposition", "attachment;filename=file.xml");  
+		response.setHeader("Content-Disposition", "attachment;filename=\"" + getDocument().toString() + ".xml\"");  
 
 		ServletOutputStream out;
 		

@@ -12,6 +12,7 @@ public class MetadataExtractionRule extends DataTableElement {
 	private boolean isNew;
 	private String example;
 	private int successCount;	
+	private int commencePathId;
 
 	public int getId() {
 		return id;
@@ -94,6 +95,12 @@ public class MetadataExtractionRule extends DataTableElement {
 	}
 	public void setDefault(boolean isDefault) {
 		this.isDefault = isDefault;
+	}
+	public int getCommencePathId() {
+		return commencePathId;
+	}
+	public void setCommencePathId(int commencePathId) {
+		this.commencePathId = commencePathId;
 	}
 	
 }

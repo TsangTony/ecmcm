@@ -7,6 +7,7 @@ public class Document extends DataTableElement {
 	private String name;
 	private String blIdentificationRule;
 	private String igDocClass;
+	private String igSecClass;
 	private String team;
 	private DataTableArrayList<CommencePath> commencePaths;
 	private DataTableArrayList<IdentificationRule> identificationRules;
@@ -63,6 +64,14 @@ public class Document extends DataTableElement {
 
 	public void setIgDocClass(String igDocClass) {
 		this.igDocClass = igDocClass;
+	}
+
+	public String getIgSecClass() {
+		return igSecClass;
+	}
+
+	public void setIgSecClass(String igSecClass) {
+		this.igSecClass = igSecClass;
 	}
 
 	public String getTeam() {

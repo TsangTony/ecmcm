@@ -48,10 +48,11 @@ public class GenerationManager {
 						+ " LEFT JOIN Team"
 						+ "   ON Document.team_id = Team.id"
 						+ " LEFT JOIN IG_Security_Class"
-						+ "   ON Document.ig_security_class_id = IG_Security_Class.id";
+						+ "   ON Document.ig_security_class_id = IG_Security_Class.id "
+						+ "WHERE Identified_Document_Instance.snapshot_deleted IS NULL";
 		    
 	        if (genDocumentId != 0) {
-	        	 query += " WHERE Document.id = " + genDocumentId;
+	        	 query += " AND Document.id = " + genDocumentId;
 	        }
 	        
 	        query += " ORDER BY Identified_Document_Instance.id";
@@ -104,7 +105,7 @@ public class GenerationManager {
 					
 					//Destination
 					element = doc.createElement("Destination");
-					element.setTextContent("/CPA");
+					element.setTextContent(null);
 					docElement.appendChild(element);
 					
 					//DocumentClass
@@ -128,7 +129,7 @@ public class GenerationManager {
 
 					//SPI
 					elementOfMetadata = doc.createElement("SPI_IG");
-	    			elementOfMetadata.setTextContent(null);
+	    			elementOfMetadata.setTextContent(" ");
 	    			element.appendChild(elementOfMetadata);	
 					
 					//owningDept

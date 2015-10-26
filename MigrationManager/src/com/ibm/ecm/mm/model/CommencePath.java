@@ -50,6 +50,8 @@ public class CommencePath extends DataTableElement {
 	
 	@Override
 	public String toString() {
+		if (getId()==0)
+			return "All Commence Paths";
 		return getActualPath() == null ? "" : getActualPath();
 	}
 }

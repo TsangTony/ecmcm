@@ -54,7 +54,7 @@ public class IdentificationBean {
 		this.identifiedDocInstances = identifiedDocInstances;
 	}
 	public ArrayList<IdentifiedDocInstance> getLatestSnapshotInstances() {
-		return identifiedDocInstances.getLatestSnapshotInstances();
+		return getIdentifiedDocInstances().getLatestSnapshotInstances();
 	}
 
 	public HashSet<Long> getExistingIdentifiedDocInstanceIds() {
@@ -83,12 +83,12 @@ public class IdentificationBean {
 	
 	public void documentSelected() {
 		try {
-		getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
-		getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
-		getExistingIdentifiedDocInstanceIds().clear();
-		for (IdentifiedDocInstance identifiedDocInstance : DataManager.getIdentifiedDocInstances(getDocument())) {
-			getExistingIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
-		}
+			getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
+			getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
+			getExistingIdentifiedDocInstanceIds().clear();
+			for (IdentifiedDocInstance identifiedDocInstance : DataManager.getIdentifiedDocInstances(getDocument())) {
+				getExistingIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
+			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();

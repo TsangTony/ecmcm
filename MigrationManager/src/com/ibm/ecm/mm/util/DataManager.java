@@ -8,7 +8,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
@@ -26,16 +25,27 @@ public class DataManager {
 	public static ArrayList<Document> getDocuments() {		
 		ArrayList<Document> documents = new ArrayList<Document>();		
 		try {	
-			Connection conn = ConnectionManager.getConnection("getDocuments");		
-			PreparedStatement selectDocumentStmt = conn.prepareStatement(
-					  "SELECT Document.id, Document.name, Document.bl_identification_rule,"
-					+ "       Team.name, IG_Document_Class.name"
-					+ "  FROM Document, Team, IG_Document_Class"
-					+ " WHERE Document.team_id = Team.id"
-					+ "   AND Document.ig_document_class_id = IG_Document_Class.id"
-					+ "   AND Document.is_active=1"
-					+ "   AND Document.is_cm_qualified=1"
-					+ " ORDER BY Document.id");
+			Connection conn = ConnectionManager.getConnection("getDocuments");	
+			String query = ""
+					+ "SELECT document.id, "
+					+ "       document.NAME, "
+					+ "       document.bl_identification_rule, "
+					+ "       team.NAME, "
+					+ "       ig_document_class.NAME, "
+					+ "       ig_security_class.NAME "
+					+ "FROM   document "
+					+ "left join team "
+					+ "on document.team_id = team.id "
+					+ "left join ig_document_class "
+					+ "on  document.ig_document_class_id = ig_document_class.id "
+					+ "left join ig_security_class "
+					+ "on  document.ig_security_class_id = ig_security_class.id "
+					+ "  where "
+					+ "       document.is_active = 1 "
+					+ "       AND document.is_cm_qualified = 1 "
+					+ "ORDER  BY document.id";
+
+			PreparedStatement selectDocumentStmt = conn.prepareStatement(query);
 			ResultSet selectDocumentRS = selectDocumentStmt.executeQuery();
 			while (selectDocumentRS.next()) {					
 				Document document = new Document();
@@ -44,6 +54,7 @@ public class DataManager {
 				document.setBlIdentificationRule(selectDocumentRS.getString(3));
 				document.setTeam(selectDocumentRS.getString(4));
 				document.setIgDocClass(selectDocumentRS.getString(5));
+				document.setIgSecClass(selectDocumentRS.getString(6));
 				documents.add(document);
 			}			
 		}
@@ -150,15 +161,40 @@ public class DataManager {
 		return metadataPropreties;
 	}
 	
-	public static DataTableArrayList<MetadataExtractionRule> getMetadataExtractionRules(int commencePathId, int metadataPropertyId) {
+	public static DataTableArrayList<MetadataExtractionRule> getMetadataExtractionRules(int documentId, int commencePathId, int metadataPropertyId) {
 		DataTableArrayList<MetadataExtractionRule> metadataExtractionRules = new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class);
 		try {	
-			Connection conn = ConnectionManager.getConnection("getMetadataExtractionRules");		
-			PreparedStatement selectMetadataExtractionRulesStmt = conn.prepareStatement("SELECT id, priority, source, bl_rule, regex, capturing_group, default_value, is_default FROM Metadata_Extraction_Rule WHERE commence_path_id = ? AND metadata_property_id = ? ORDER BY priority");
-			selectMetadataExtractionRulesStmt.setInt(1, commencePathId);
+			Connection conn = ConnectionManager.getConnection("getMetadataExtractionRules");	
+			String query = ""
+					+ "SELECT id, "
+					+ "       priority, "
+					+ "       source, "
+					+ "       bl_rule, "
+					+ "       regex, "
+					+ "       capturing_group, "
+					+ "       default_value, "
+					+ "       is_default "
+					+ "FROM   metadata_extraction_rule "
+					+ "WHERE  ";
+			
+			if (commencePathId == 0)
+				query += "    commence_path_id IN (SELECT id FROM Commence_Path WHERE document_id = ?) ";
+			else
+				query += "    commence_path_id = ?";
+			
+			query  += "  AND  metadata_property_id = ? "
+				    + "ORDER  BY priority";
+			
+			PreparedStatement selectMetadataExtractionRulesStmt = conn.prepareStatement(query);
+			if (commencePathId == 0)
+				selectMetadataExtractionRulesStmt.setInt(1, documentId);
+			else
+				selectMetadataExtractionRulesStmt.setInt(1, commencePathId);
+			
 			selectMetadataExtractionRulesStmt.setInt(2, metadataPropertyId);
+			
 			ResultSet selectMetadataExtractionRulesRS = selectMetadataExtractionRulesStmt.executeQuery();
-			while (selectMetadataExtractionRulesRS.next()) {					
+			while (selectMetadataExtractionRulesRS.next()) {		
 				MetadataExtractionRule metadataExtractionRule = new MetadataExtractionRule();
 				metadataExtractionRule.setId(selectMetadataExtractionRulesRS.getInt(1));
 				metadataExtractionRule.setPriority(selectMetadataExtractionRulesRS.getInt(2));
@@ -239,15 +275,33 @@ public class DataManager {
 	public static void removeMetadataValues(int documentId, int commencePathId, ArrayList<Integer> metadataPropertyIds) {
 		try {
 			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
-			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE commence_path_id = ? AND metadata_property_id IN (?)) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
+			String query = ""
+					+ "DELETE FROM metadata_value "
+					+ "WHERE  document_id = ? "
+					+ "       AND ( metadata_extraction_rule_id IN (SELECT id "
+					+ "                                             FROM   metadata_extraction_rule "
+					+ "                                            WHERE   metadata_property_id IN ( ? ) ";
+			
+			if (commencePathId != 0)
+				query += "                                           AND   commence_path_id = ?  ";
+			
+			query += "                                                        ) "
+					+ "              OR metadata_extraction_rule_id NOT IN (SELECT id "
+					+ "                                                     FROM "
+					+ "                 metadata_extraction_rule) )";
+
+			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement(query);
 			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
-			deleteIdentifiedDocInstanceStmt.setInt(2, commencePathId);
 			
 			String metadataPropertyIdList = "" + metadataPropertyIds.get(0);			
 			for (int i=1; i < metadataPropertyIds.size(); i++)
 				metadataPropertyIdList += "," + metadataPropertyIds.get(i);
 			
-			deleteIdentifiedDocInstanceStmt.setString(3, metadataPropertyIdList);
+			deleteIdentifiedDocInstanceStmt.setString(2, metadataPropertyIdList);
+			
+			if (commencePathId != 0)
+				deleteIdentifiedDocInstanceStmt.setInt(3, commencePathId);
+			
 			deleteIdentifiedDocInstanceStmt.execute();
 		}
 		catch (SQLException e) {				
@@ -320,16 +374,19 @@ public class DataManager {
 		return sources;
 	}
 	
-	public static DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document) {
+	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document) {
 		return getIdentifiedDocInstances(document,null);
 	}	
 
-	public static DataTableArrayList<IdentifiedDocInstance> getIdentifiedDocInstances(Document document, CommencePath commencePath) {
-		DataTableArrayList<IdentifiedDocInstance> identifiedDocInstances = new DataTableArrayList<IdentifiedDocInstance>(IdentifiedDocInstance.class);
-		try {					
+	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath) {
+		if (commencePath!=null && commencePath.getId()==0)
+			commencePath = null;
+		
+		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();
+		try {
 			Connection conn = ConnectionManager.getConnection("getIdentifiedDocInstances");
 			
-			String query = "SELECT id, server, volume, path, name, extension from Identified_Document_Instance where document_id = ?";
+			String query = "SELECT id, server, volume, path, name, extension, snapshot_deleted from Identified_Document_Instance where document_id = ?";
 			if (commencePath != null)
 				query += " AND volume + '/' + ISNULL(path,'') LIKE ?";
 			
@@ -348,9 +405,25 @@ public class DataManager {
 				identifiedDocInstance.setPath(rs.getString(4) == null ? null : rs.getString(4).trim());
 				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());	
 				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
-				identifiedDocInstance.setCommencePath(commencePath);
 				identifiedDocInstance.setNew(false);
+				if (commencePath != null)
+					identifiedDocInstance.setCommencePath(commencePath);
+				else {
+					for (CommencePath docCommencePath : document.getCommencePaths()) {
+						if (docCommencePath.getId()==0)
+							continue;
+						if (identifiedDocInstance.getVolumePath().startsWith(docCommencePath.getActualPath())) {
+							identifiedDocInstance.setCommencePath(docCommencePath);
+							break;
+						}
+						System.out.println("No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+					}
+				}
+				
 				identifiedDocInstances.add(identifiedDocInstance);
+				
+				if (rs.getInt(7)==0)
+					identifiedDocInstances.getLatestSnapshotInstances().add(identifiedDocInstance);
 			}
 		}
 		catch (SQLException e) {				
@@ -359,6 +432,7 @@ public class DataManager {
 		finally {
 			ConnectionManager.close("getIdentifiedDocInstances");
 		}
+		
 		return identifiedDocInstances;
 	}
 
@@ -379,11 +453,18 @@ public class DataManager {
 	}
 
 	public static void removeMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules) {
+		HashSet<Integer> metadataExtractionRuleIds = new HashSet<Integer>();
+		for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules)
+			metadataExtractionRuleIds.add(metadataExtractionRule.getId());
+		removeMetadataExtractionRule(metadataExtractionRuleIds);
+	}
+	
+	public static void removeMetadataExtractionRule(HashSet<Integer> metadataExtractionRuleIds) {
 		try {					
 			Connection conn = ConnectionManager.getConnection("removeMetadataExtractionRule");
 			PreparedStatement deleteMetadataExtractionRuleStmt = conn.prepareStatement("DELETE FROM Metadata_Extraction_Rule WHERE id = ?");
-			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
-				deleteMetadataExtractionRuleStmt.setInt(1, metadataExtractionRule.getId());
+			for (Integer metadataExtractionRuleId : metadataExtractionRuleIds) {
+				deleteMetadataExtractionRuleStmt.setInt(1, metadataExtractionRuleId);
 				deleteMetadataExtractionRuleStmt.addBatch();
 			}
 			deleteMetadataExtractionRuleStmt.executeBatch();
