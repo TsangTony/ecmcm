@@ -118,13 +118,15 @@ public class IdentifiedDocInstance extends DataTableElement {
 		return null;		
 	}
 
-	public String getContent() {	
+	public String getContent() {
 		String content = "";		
 		PDDocument pdfDocument = null;	
 		WordExtractor docExtractor = null;
 		XWPFWordExtractor docxExtractor = null;
 		PowerPointExtractor pptExtractor = null;	
-		XSLFPowerPointExtractor pptxExtractor = null;			
+		XSLFPowerPointExtractor pptxExtractor = null;	
+		HSSFWorkbook wb = null;
+		XSSFWorkbook xwb = null;
 		
 		File file = null;
 		FileInputStream fis = null;
@@ -141,7 +143,6 @@ public class IdentifiedDocInstance extends DataTableElement {
 			}
 			catch (FileNotFoundException e) {
 				System.err.println("Cannot read content from " + getUnixMountedPath() +" because the file is not found.");
-				e.printStackTrace();
 				return content;
 			}
 		}
@@ -176,7 +177,7 @@ public class IdentifiedDocInstance extends DataTableElement {
 				content	= pptxExtractor.getText(true,true,true);
 			}
 			else if (getExtension().toUpperCase().equals("XLS")) {
-				HSSFWorkbook wb = new HSSFWorkbook(fis);
+				wb = new HSSFWorkbook(fis);
 				for (int i=0; i < wb.getNumberOfSheets(); i++) {
 					HSSFSheet ws = wb.getSheetAt(i);
 					Iterator<Row> rowItr = ws.rowIterator();
@@ -191,9 +192,9 @@ public class IdentifiedDocInstance extends DataTableElement {
 				}
 			}
 			else if (getExtension().toUpperCase().equals("XLSX")) {
-				XSSFWorkbook wb = new XSSFWorkbook(fis);
-				for (int i=0; i < wb.getNumberOfSheets(); i++) {
-					XSSFSheet ws = wb.getSheetAt(i);
+				xwb = new XSSFWorkbook(fis);
+				for (int i=0; i < xwb.getNumberOfSheets(); i++) {
+					XSSFSheet ws = xwb.getSheetAt(i);
 					Iterator<Row> rowItr = ws.rowIterator();
 					while (rowItr.hasNext()) {
 						XSSFRow row = (XSSFRow) rowItr.next();
@@ -211,7 +212,6 @@ public class IdentifiedDocInstance extends DataTableElement {
 		}
 		catch (Exception e) {
 			System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to error.");
-			e.printStackTrace();
 		}
 		finally {
 			try {
@@ -225,6 +225,8 @@ public class IdentifiedDocInstance extends DataTableElement {
 					pptExtractor.close();
 				if (pptxExtractor != null)
 					pptxExtractor.close();
+				if (wb != null)
+					wb.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

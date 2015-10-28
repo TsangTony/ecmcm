@@ -10,7 +10,7 @@ public class ConnectionManager {
 		
 	public static Connection getConnection(String method) {
 		
-		System.out.println(method + " get connection");
+		//System.out.println(method + " get connection");
 		
 		connectionString = "jdbc:sqlserver://127.0.0.1:1433;database=ECMCM;user=sa;password=P@ssw0rd";
 		
@@ -26,7 +26,7 @@ public class ConnectionManager {
 	}
 	
 	public static void close(String method) {
-		System.out.println(method + " close connection");
+		//System.out.println(method + " close connection");
 		try {
 			conn.close();
 		} catch (SQLException e) {

@@ -30,6 +30,8 @@ public class Util {
 			if (matcher.find())
 				value = matcher.group();
 		}
+		if (!value.equals(""))
+			System.out.println("Value found :" + value);
 		return value;
 	}
 	
@@ -38,7 +40,7 @@ public class Util {
 		if (capGroup==0)
 			value = findRegex(searchString, regex, sequence);
 		else {
-			Pattern pattern = Pattern.compile(regex);
+			Pattern pattern = Pattern.compile("(?i)"+regex);
 			Matcher matcher = pattern.matcher(searchString);
 			if (sequence.equals("LAST")) {
 				while (matcher.find())
@@ -56,14 +58,16 @@ public class Util {
 	public static String findRegex(String searchString, Lookup lookup, String sequence) {
 		String value = "";
 		
-		if (!findRegex(searchString, delimited(lookup.getLookupValue()), sequence).equals(""))
+		if (!findRegex(searchString, delimited(lookup.getLookupValue()), sequence).equals("")) {
+			System.out.println(lookup.getReturnedValue());
 			return lookup.getReturnedValue();
+		}
 		
 		return value;
 	}
 
 	private static String delimited(String lookupValue) {
-		String delimitor = "\\W";
+		String delimitor = "[\\W_]";
 		return  "^" + lookupValue + delimitor + "|" + delimitor + lookupValue + "$|" + delimitor + lookupValue + delimitor + "|^" + lookupValue + "$";
 	}		
 	

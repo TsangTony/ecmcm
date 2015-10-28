@@ -120,7 +120,8 @@
 					</p:dialog>
 					
 					<p:commandButton value="Preview" action="#{metadataExtraction.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-					<p:commandButton value="Run and Save" action="#{metadataExtraction.runAndSave}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+					<p:commandButton value="Save" action="#{metadataExtraction.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
+					<p:commandButton value="Run" action="#{metadataExtraction.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
 				
 					<br />
 					<br />

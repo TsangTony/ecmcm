@@ -67,7 +67,7 @@ public class GenerationManager {
 			int lastDocumentId = 0;
 			Element Lastelement = null;
 			
-			Element rootElement = doc.createElement("Data-set");
+			Element rootElement = doc.createElement("data-set");
 			doc.appendChild(rootElement);
 			
 			while ( rs.next() ) {
@@ -78,7 +78,7 @@ public class GenerationManager {
 				 source += rs.getNString(4) == null ? rs.getNString(5) : rs.getNString(4).replace("/", "\\") + "\\" + rs.getNString(5);
 				 String metadataName = rs.getString(6);
 				 String metadataValue = rs.getString(7);
-				 String document = rs.getString(8);
+				 String document = rs.getString(8).replace(" ", "_");
 				 String contentType = rs.getString(9);
 				 String owningBu = rs.getString(10);
 				 String owningDept = rs.getString(11);
@@ -109,7 +109,7 @@ public class GenerationManager {
 					docElement.appendChild(element);
 					
 					//DocumentClass
-					element = doc.createElement("Documet");
+					element = doc.createElement("Document");
 					element.setTextContent(document);
 					docElement.appendChild(element);
 					

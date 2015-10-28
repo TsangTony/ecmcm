@@ -113,18 +113,20 @@ public class ExtractionManager {
 	public static MetadataValue extractMetadata(IdentifiedDocInstance identifiedDocInstance, MetadataExtractionRules metadataExtractionRules) {
 		MetadataValue metadataValue = new MetadataValue();
 		metadataValue.setValue("");
-		StringBuilder content = new StringBuilder();
+		StringBuilder content = null;
 				
 		metadataExtractionRuleloop:
 		for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
+			System.out.println(identifiedDocInstance.getVolumePath() + "/" + identifiedDocInstance.getNameWithoutExtension());
+			System.out.println(metadataExtractionRule.getSource());
 			StringBuilder valueBase = new StringBuilder();
 			String searchSequence = "FIRST";
 			if (metadataExtractionRule.getSource().equals("File Path"))  {
-				valueBase.append(identifiedDocInstance.getFullPath());
+				valueBase.append(identifiedDocInstance.getVolumePath() + "/" + identifiedDocInstance.getNameWithoutExtension());
 				searchSequence = "LAST";
 			}
 			else if (metadataExtractionRule.getSource().equals("Content")) {
-				if (content.equals("")) {
+				if (content == null) {
 					valueBase.append(identifiedDocInstance.getContent());
 					content = valueBase;
 				}
@@ -139,10 +141,12 @@ public class ExtractionManager {
 			
 			if (valueBase.toString().equals(""))
 				continue metadataExtractionRuleloop;
-
+			
+			
 			if (metadataExtractionRules.isDefault()) {
 				lookupLoop:
 				for (Lookup lookup : metadataExtractionRules.getLookups()) {
+					
 					if (metadataExtractionRules.getMetadataProperty().getName().equals("Date") ||
 						metadataExtractionRules.getMetadataProperty().getName().equals("Month")||
 						metadataExtractionRules.getMetadataProperty().getName().equals("Year")) {
@@ -155,27 +159,49 @@ public class ExtractionManager {
 							outputSdf = new SimpleDateFormat("yyyy");
 						
 						SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
+						String dateFound = Util.findRegex(valueBase.toString(), lookup.getLookupValue(), searchSequence);
 						try {
-							String dateFound = Util.findRegex(valueBase.toString(), lookup.getLookupValue(), searchSequence);
-							if (dateFound != "") {
+							if (!dateFound.equals("")) {
 								Date dateParsed = inputSdf.parse(dateFound);
 								//TODO: from DB
-								Date upperLimit = outputSdf.parse("2020-12-31");
-								Date lowerLimit = outputSdf.parse("1940-01-01");
-								if (dateParsed.before(upperLimit) && dateParsed.after(lowerLimit))
+								Date upperLimit = null;
+								Date lowerLimit = null;
+								if ((metadataExtractionRules.getMetadataProperty().getName().equals("Year"))) {
+									upperLimit = outputSdf.parse("2020");
+									lowerLimit = outputSdf.parse("1940");							
+								}
+								else if ((metadataExtractionRules.getMetadataProperty().getName().equals("Date"))) {
+									upperLimit = outputSdf.parse("2020-12-31");
+									lowerLimit = outputSdf.parse("1940-01-01");
+								}
+								
+								if (metadataExtractionRules.getMetadataProperty().getName().equals("Month") || dateParsed.before(upperLimit) && dateParsed.after(lowerLimit)) {
 									metadataValue.setValue(outputSdf.format(dateParsed));
+									System.out.println("Parsed " + dateFound + " in " + lookup.getReturnedValue());
+									System.out.println("Value set: " + metadataValue.getValue());
+								}
 							}
 						} catch (ParseException e) {
 							continue lookupLoop;
 						}
 					}
-					else
+					else {
 						metadataValue.setValue(Util.findRegex(valueBase.toString(), lookup, searchSequence));
+						System.out.println(metadataValue.getValue());
+					}
+					
+					if (!metadataValue.getValue().equals("")) {
+						metadataValue.setMetadataExtractionRule(metadataExtractionRule);
+						break metadataExtractionRuleloop;
+					}	
 				}
 			}
-			else
+			else {
+				System.out.println(metadataExtractionRule.getRegex());
 				metadataValue.setValue(Util.findRegex(valueBase.toString(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), searchSequence));
-				
+			}
+			
+			System.out.println(metadataValue.getValue());
 			if (!metadataValue.getValue().equals("")) {
 				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 				break metadataExtractionRuleloop;
@@ -191,6 +217,7 @@ public class ExtractionManager {
 	}
 
 	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances, ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
+		int totalCount = 0;
 		int filePathCount = 0;
 		int contentCount = 0;
 		int defaultCount = 0;
@@ -202,21 +229,24 @@ public class ExtractionManager {
 					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
 					identifiedDocInstance.getMetadataValues().add(metadataValue);					
 					if (identifiedDocInstance.getSnapshotDeleted() == 0) {
+						totalCount++;
 						if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("File Path"))
 							filePathCount++;
 						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Content"))
 							contentCount++;
 						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Default"))
 							defaultCount++;
-					}			
+					}	
+					break;
 				}
 			}
+			System.out.println("No matching commence path when extracting metadata " + identifiedDocInstance.getId());
 		}
 		
-		if (filePathCount + contentCount < identifiedDocInstances.getLatestSnapshotInstances().size() * 0.8f)
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Content:" + Math.round(contentCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Default: " + Math.round(defaultCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%"));
+		if (filePathCount + contentCount < totalCount * 0.8f)
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / totalCount) + "%, Content:" + Math.round(contentCount * 100.0f / totalCount) + "%, Default: " + Math.round(defaultCount * 100.0f / totalCount) + "%"));
 		else
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Content:" + Math.round(contentCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%, Default: " + Math.round(defaultCount * 100.0f / identifiedDocInstances.getLatestSnapshotInstances().size()) + "%"));
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / totalCount) + "%, Content:" + Math.round(contentCount * 100.0f / totalCount) + "%, Default: " + Math.round(defaultCount * 100.0f / totalCount) + "%"));
 		
 		return identifiedDocInstances;
 		

@@ -14,6 +14,10 @@ public class MetadataExtractionRule extends DataTableElement {
 	private int successCount;	
 	private int commencePathId;
 
+	public MetadataExtractionRule() {
+		setSuccessCount(0);
+	}
+	
 	public int getId() {
 		return id;
 	}

@@ -3,7 +3,6 @@ package com.ibm.ecm.mm.bean;
 import java.util.ArrayList;
 
 import com.ibm.ecm.mm.model.Document;
-import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.ReportManager;
 

@@ -100,6 +100,7 @@ public class IdentificationManager {
 	}
 	
 	public static void saveIdentifiedDocInstances(Document document, HashSet<Long> existingIdentifiedDocInstaneIds, IdentifiedDocInstances identifiedDocInstances) {
+
 		
 		try {
 			

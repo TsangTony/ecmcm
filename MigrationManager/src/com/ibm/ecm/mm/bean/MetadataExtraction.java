@@ -2,6 +2,7 @@ package com.ibm.ecm.mm.bean;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.regex.PatternSyntaxException;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -162,7 +163,7 @@ public class MetadataExtraction {
 				getMetadataExtractionRules().setDefault(getMetadataExtractionRules().getRules().get(0).isDefault());
 			
 			getMetadataExtractionRules().setLookups(DataManager.getLookups(getMetadataExtractionRules().getMetadataProperty().getId()));
-					
+			
 			getMetadataExtractionRules().setHasDefaultRules(getMetadataExtractionRules().getLookups().size() > 0);
 			
 			setUseDefaultRule(getMetadataExtractionRules().isDefault());
@@ -197,7 +198,7 @@ public class MetadataExtraction {
 		
 	}
 	
-	public void preview() {
+	public boolean preview() {
 		try {
 			if (getCommencePath().getId() == 0) {
 				setMultipliedMetadataExtractionRules(new ArrayList<MetadataExtractionRules>());
@@ -217,19 +218,22 @@ public class MetadataExtraction {
 			else {
 				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getDocument(), getCommencePath()), getMetadataExtractionRules()));
 			}
+			return true;
+		}
+		catch (PatternSyntaxException e) {
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Your regex is wrong."));
+			return false;
 		}
 		catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 	
-	public void runAndSave() {
-		preview();
-		
+	public void save() {
 		if (getCommencePath().getId() == 0) {
 			DataManager.removeMetadataExtractionRule(getExistingMetadataExtractionRuleIds());
 			for (MetadataExtractionRules metadataExtractionRules : getMultipliedMetadataExtractionRules()) {
-				System.out.println(metadataExtractionRules.getRules().size() + " " + metadataExtractionRules.getCommencePathId());
 				DataManager.addMetadataExtractionRule(metadataExtractionRules.getRules(), metadataExtractionRules.getCommencePathId(), getMetadataExtractionRules().getMetadataProperty().getId(), isUseDefaultRule());
 			}
 		}
@@ -261,21 +265,23 @@ public class MetadataExtraction {
 				metadataExtractionRule.setNew(false);
 			}
 			
-			DataManager.updateMetadataExtractionRule(updateList);
-	
+			DataManager.updateMetadataExtractionRule(updateList);	
 			DataManager.addMetadataExtractionRule(insertList, getCommencePath().getId(), getMetadataExtractionRules().getMetadataProperty().getId(), isUseDefaultRule());
 		}
-		
-		/*
-		 * Update Metadata_Value
-		 */
-		
-		DataManager.removeMetadataValues(getDocument().getId(),getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId());
-		
-		DataManager.addMetadataValues(getIdentifiedDocInstances(),getDocument().getId());			
-		
-		FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
-
+	}
+	
+	public void run() {
+		if (preview()) {		
+			/*
+			 * Update Metadata_Value
+			 */
+			
+			DataManager.removeMetadataValues(getDocument().getId(),getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId());
+			
+			DataManager.addMetadataValues(getIdentifiedDocInstances(),getDocument().getId());			
+			
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
+		};
 	}
 	
 }
