@@ -12,6 +12,7 @@ import java.util.HashSet;
 import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
+import com.ibm.ecm.mm.model.DocumentClass;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.IdentifiedDocInstances;
@@ -32,7 +33,9 @@ public class DataManager {
 					+ "       document.bl_identification_rule, "
 					+ "       team.NAME, "
 					+ "       ig_document_class.NAME, "
-					+ "       ig_security_class.NAME "
+					+ "       ig_security_class.NAME, "
+					+ "       document.is_no_pdf, "
+					+ "       document.is_office_doc "
 					+ "FROM   document "
 					+ "left join team "
 					+ "on document.team_id = team.id "
@@ -55,6 +58,8 @@ public class DataManager {
 				document.setTeam(selectDocumentRS.getString(4));
 				document.setIgDocClass(selectDocumentRS.getString(5));
 				document.setIgSecClass(selectDocumentRS.getString(6));
+				document.setNoPdf(selectDocumentRS.getBoolean(7));
+				document.setOfficeDoc(selectDocumentRS.getBoolean(8));
 				documents.add(document);
 			}			
 		}
@@ -127,11 +132,11 @@ public class DataManager {
 			String query = ""
 					+ "SELECT metadata_property.id, "
 					+ "       metadata_property.NAME "
-					+ "FROM   Document "
+					+ "FROM   metadata_property "
 					+ "       LEFT JOIN [D_MP] "
-					+ "              ON Document.id = [D_MP].document_id "
-					+ "       LEFT JOIN metadata_property "
 					+ "              ON [D_MP].metadata_property_id = metadata_property.id "
+					+ "       LEFT JOIN Document "
+					+ "              ON Document.id = [D_MP].document_id "
 					+ "WHERE  document.id = ? "
 					+ "ORDER  BY metadata_property.id";
 			PreparedStatement selectMetadataPropertyStmt = conn.prepareStatement(query);
@@ -481,6 +486,7 @@ public class DataManager {
 					identifiedDocInstance.setVolume(rs.getString(4) == null ? null : rs.getString(4).trim());
 					identifiedDocInstance.setNew(false);
 					identifiedDocInstances.add(identifiedDocInstance);
+					preInstanceId = instanceId;
 				}
 				
 				MetadataValue metadataValue = new MetadataValue();
@@ -762,48 +768,37 @@ public class DataManager {
 		}	
 	}
 
-	public static HashSet<Long> addIdentifiedDocInstances(int documentId, HashSet<Long> existingIdentifiedDocInstanceIds, IdentifiedDocInstances identifiedDocInstances) {
-		HashSet<Long> newIds = new HashSet<Long>();
-		
-		System.out.println("existingIdentifiedDocInstaneIds :");
-		for (Long existingIdentifiedDocInstaneId : existingIdentifiedDocInstanceIds)
-			System.out.print(existingIdentifiedDocInstaneId + ",");
-		
+	public static void addIdentifiedDocInstances(int documentId, IdentifiedDocInstances identifiedDocInstances) {
 		try {
-			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");			
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
-									
-			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				if (!existingIdentifiedDocInstanceIds.contains(identifiedDocInstance.getId())) {
-					insertIdentifiedDocInstancStmt.setInt(1, documentId);
-					insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
-					insertIdentifiedDocInstancStmt.addBatch();
-				}
-				newIds.add(identifiedDocInstance.getId());
-			}
-
-			System.out.println("newIds :");
-			for (Long newId : newIds)
-				System.out.print(newId + ",");
+			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");
 			
-			HashSet<Long> removedIdentifiedDocInstanceIds = new HashSet<Long>();
-			removedIdentifiedDocInstanceIds.addAll(existingIdentifiedDocInstanceIds);
-			removedIdentifiedDocInstanceIds.removeAll(newIds);		
-			
-			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ? AND id = ?");
-			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
-			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
+			/*
+			 * Delete existing metadata value
+			 */
+			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ?");
 			deleteMetadataValueStmt.setInt(1, documentId);
-			for (Long removedIdentifiedDocInstanceId : removedIdentifiedDocInstanceIds) {
-				deleteIdentifiedDocInstanceStmt.setLong(2, removedIdentifiedDocInstanceId);
-				deleteIdentifiedDocInstanceStmt.addBatch();
-				deleteMetadataValueStmt.setLong(2, removedIdentifiedDocInstanceId);
-				deleteMetadataValueStmt.addBatch();
-			}
+			deleteMetadataValueStmt.execute();	
 			
-			insertIdentifiedDocInstancStmt.executeBatch();		
-			deleteMetadataValueStmt.executeBatch();		
-			deleteIdentifiedDocInstanceStmt.executeBatch();
+			/*
+			 * Delete existing identified doc instance
+			 */
+			
+			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ?");
+			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);			
+			deleteIdentifiedDocInstanceStmt.execute();
+			
+			/*
+			 * Insert identified doc instance
+			 */
+			
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
+			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+				insertIdentifiedDocInstancStmt.setInt(1, documentId);
+				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
+				insertIdentifiedDocInstancStmt.addBatch();
+			}			
+			insertIdentifiedDocInstancStmt.executeBatch();
+			
 		}
 		catch (SQLException e) {				
 			e.printStackTrace();
@@ -811,13 +806,11 @@ public class DataManager {
 		finally {
 			ConnectionManager.close("addIdentifiedDocInstances");
 		}
-		
-		return newIds;		
 	}
 	
 	
 	
-	public static IdentifiedDocInstances getDocInstances(Document document, boolean noPdf, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
+	public static IdentifiedDocInstances getDocInstances(Document document, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
 		
 		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();		
 		String query = "SELECT ";
@@ -834,21 +827,25 @@ public class DataManager {
 			
 			//TODO: IG rules from DB
 			
-			//extension		
-			query += "AND extension in ('doc','docx','dot','docm','dotx','dotm','docb',"
-				  +  "'xls','xlt','xlm','xlsx','xlsm','xltx','xltm','xlsb','xla','xll',"
-				  +  "'xlw','ppt','pot','pps','pptx','pptm','potx','potm','ppam','ppsx',"
-				  +  "'ppsm','sldx','sldm','VSD','VST','VSW','VDX','VSX','VTX','VSDX',"
-				  +  "'VSDM','VSSX','VSSM','VSTX','VSTM','VSL','pdf','csv'";
+			if (document.isOfficeDoc()) {
 			
-			if (document.getTeam().contains("Training")) {
-				query += ",'afc','wav','mp3','aif','rm','mid','aob','3gp','aiff','aac',"
-					  +  "'ape','au','flac','m4a','m4p','ra','raw','wma','mkv','flv','vob',"
-					  +  "'avi','mov','qt','wmv','rmvb','asf','mpg','mpeg','mp4',',mpe',"
-					  +  "'mpv','m2v','m4v','3g2','mxf','jpg','jpeg','tif','tiff','gif',"
-					  +  "'bmp','png','img','psd','cpt','ai','svg','ico'";
+				//extension		
+				query += "AND extension in ('doc','docx','dot','docm','dotx','dotm','docb',"
+					  +  "'xls','xlt','xlm','xlsx','xlsm','xltx','xltm','xlsb','xla','xll',"
+					  +  "'xlw','ppt','pot','pps','pptx','pptm','potx','potm','ppam','ppsx',"
+					  +  "'ppsm','sldx','sldm','VSD','VST','VSW','VDX','VSX','VTX','VSDX',"
+					  +  "'VSDM','VSSX','VSSM','VSTX','VSTM','VSL','pdf','csv'";
+				
+				if (document.getTeam().contains("Training")) {
+					query += ",'afc','wav','mp3','aif','rm','mid','aob','3gp','aiff','aac',"
+						  +  "'ape','au','flac','m4a','m4p','ra','raw','wma','mkv','flv','vob',"
+						  +  "'avi','mov','qt','wmv','rmvb','asf','mpg','mpeg','mp4',',mpe',"
+						  +  "'mpv','m2v','m4v','3g2','mxf','jpg','jpeg','tif','tiff','gif',"
+						  +  "'bmp','png','img','psd','cpt','ai','svg','ico'";
+				}
+				query += ") ";
+			
 			}
-			query += ") ";
 
 			//tilde
 			query += " AND name not like '~$%' ";
@@ -892,9 +889,7 @@ public class DataManager {
 		}		
 		
 		query += " ORDER BY snapshot, snapshot_deleted";
-		
-		System.out.println(query);
-		
+				
 		try {
 			Connection conn = ConnectionManager.getConnection("getDocInstances");	
 			Statement stmt = conn.createStatement();
@@ -922,7 +917,7 @@ public class DataManager {
 					
 					
 					//Ignore PDF
-					if (!fromSnippet && noPdf) {
+					if (!fromSnippet && document.isNoPdf()) {
 						if (identifiedDocInstance.getExtension().toUpperCase().equals("PDF"))	{	
 							pdfInstances.add(identifiedDocInstance);
 						}
@@ -963,7 +958,7 @@ public class DataManager {
 			ArrayList<IdentifiedDocInstance> tobeRemovedPdf = new ArrayList<IdentifiedDocInstance>();
 			
 			//noPdf
-			if (!fromSnippet && noPdf) {
+			if (!fromSnippet && document.isNoPdf()) {
 				if (pdfInstances.size() > 0) {
 					for (IdentifiedDocInstance pdfInstance : pdfInstances) {
 						for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
@@ -1009,5 +1004,35 @@ public class DataManager {
 		}
 	}
 
+	public static ArrayList<DocumentClass> getDocumentClasses() {
+		
+		ArrayList<DocumentClass> documentClasses = new ArrayList<DocumentClass>();		
+		try {	
+			Connection conn = ConnectionManager.getConnection("getDocumentClasses");	
+			String query = ""
+					+ "SELECT id, "
+					+ "       name "
+					+ "FROM   document_class "
+					+ "WHERE  parent_id != 124 AND parent_id != 0"
+					+ "ORDER  BY id";
+
+			PreparedStatement selectDocumentClassStmt = conn.prepareStatement(query);
+			ResultSet selectDocumentClassRS = selectDocumentClassStmt.executeQuery();
+			while (selectDocumentClassRS.next()) {					
+				DocumentClass documentClass = new DocumentClass();
+				documentClass.setId(selectDocumentClassRS.getInt(1));
+				documentClass.setName(selectDocumentClassRS.getString(2));	
+				documentClasses.add(documentClass);
+			}			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("getDocumentClasses");
+		}		
+		return documentClasses;
+	}
+	
 	
 }

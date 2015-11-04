@@ -61,13 +61,13 @@ public class ExtractionManager {
 			
 			
 			MetadataExtractionRule metadataExtractionRuleFP = new MetadataExtractionRule();
-			metadataExtractionRuleFP.setBlRule("Look up " + metadataProperty.getName());
+			metadataExtractionRuleFP.setBlRule("Retrieve the " + metadataProperty.getName() + " value");
 			metadataExtractionRuleFP.setSource("File Path");
 			metadataExtractionRuleFP.setPriority(1);
 			metadataExtractionRuleFP.setNew(true);
 			defaultMetadataExtractionRules.getRules().add(metadataExtractionRuleFP);
 			MetadataExtractionRule metadataExtractionRuleCT = new MetadataExtractionRule();
-			metadataExtractionRuleCT.setBlRule("Look up " + metadataProperty.getName());
+			metadataExtractionRuleCT.setBlRule("Retrieve the " + metadataProperty.getName() + " value");
 			metadataExtractionRuleCT.setSource("Content");
 			metadataExtractionRuleCT.setPriority(2);
 			metadataExtractionRuleCT.setNew(true);
@@ -117,8 +117,6 @@ public class ExtractionManager {
 				
 		metadataExtractionRuleloop:
 		for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
-			System.out.println(identifiedDocInstance.getVolumePath() + "/" + identifiedDocInstance.getNameWithoutExtension());
-			System.out.println(metadataExtractionRule.getSource());
 			StringBuilder valueBase = new StringBuilder();
 			String searchSequence = "FIRST";
 			if (metadataExtractionRule.getSource().equals("File Path"))  {
@@ -222,14 +220,14 @@ public class ExtractionManager {
 		int contentCount = 0;
 		int defaultCount = 0;
 		
-		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {	
+		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
 					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
 					identifiedDocInstance.getMetadataValues().add(metadataValue);					
 					if (identifiedDocInstance.getSnapshotDeleted() == 0) {
-						totalCount++;
+						totalCount++;	
 						if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("File Path"))
 							filePathCount++;
 						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Content"))
@@ -239,8 +237,7 @@ public class ExtractionManager {
 					}	
 					break;
 				}
-			}
-			System.out.println("No matching commence path when extracting metadata " + identifiedDocInstance.getId());
+			}			
 		}
 		
 		if (filePathCount + contentCount < totalCount * 0.8f)

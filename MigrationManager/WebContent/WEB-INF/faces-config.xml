@@ -11,8 +11,8 @@
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>
-		<managed-bean-name>metadataExtraction</managed-bean-name>
-		<managed-bean-class>com.ibm.ecm.mm.bean.MetadataExtraction</managed-bean-class>
+		<managed-bean-name>extractionBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.ExtractionBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>

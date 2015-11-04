@@ -13,11 +13,11 @@
 				<h:form>
 					<p:panelGrid id="optionPanel">
 						<p:row>
-							<p:column>Document</p:column>
+							<p:column>Document Class</p:column>
 							<p:column>
-								<p:selectOneMenu id="document" value="#{generationBean.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
-									<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
-									<f:selectItems value="#{generationBean.documents}" />
+								<p:selectOneMenu id="document" value="#{generationBean.documentClass}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+									<f:selectItem itemLabel="Select Document Class" noSelectionOption="true" />
+									<f:selectItems value="#{generationBean.documentClasses}" />
 									<p:ajax update="@this" />
 								</p:selectOneMenu>
 							</p:column>

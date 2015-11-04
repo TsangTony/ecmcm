@@ -9,6 +9,8 @@ public class Document extends DataTableElement {
 	private String igDocClass;
 	private String igSecClass;
 	private String team;
+	private boolean isNoPdf;
+	private boolean isOfficeDoc;
 	private DataTableArrayList<CommencePath> commencePaths;
 	private DataTableArrayList<IdentificationRule> identificationRules;
 	
@@ -82,6 +84,22 @@ public class Document extends DataTableElement {
 		this.team = team;
 	}
 	
+
+	public boolean isNoPdf() {
+		return isNoPdf;
+	}
+
+	public void setNoPdf(boolean isNoPdf) {
+		this.isNoPdf = isNoPdf;
+	}
+
+	public boolean isOfficeDoc() {
+		return isOfficeDoc;
+	}
+
+	public void setOfficeDoc(boolean isOfficeDoc) {
+		this.isOfficeDoc = isOfficeDoc;
+	}
 
 	public ArrayList<MetadataProperty> getMetadataProperties() {
 		return metadataProperties;

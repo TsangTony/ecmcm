@@ -88,7 +88,7 @@ public class IdentifiedDocInstance extends DataTableElement {
 		this.path = path;
 	}
 	public String getNameWithoutExtension() {
-		return getName().replace(getExtension(), "");
+		return getName().substring(0, getName().lastIndexOf("." + getExtension()));
 	}
 	public String getVolumePath() {
 		return getPath().equals("") ? getVolume() : getVolume() + "/" + getPath();
@@ -100,7 +100,7 @@ public class IdentifiedDocInstance extends DataTableElement {
 		return "\\\\" + getServer() + "/" + getFullPath();
 	}
 	public String getUnixMountedPath() {
-		return "/mnt/" + getFullPath();
+		return getPath().equals("") ? "/mnt/" + getVolume().toUpperCase() + "/" + getName() : "/mnt/" + getVolume().toUpperCase() + "/" + getPath() + "/" + getName();
 	}
 
 	public ArrayList<MetadataValue> getMetadataValues() {

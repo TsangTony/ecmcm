@@ -6,9 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.FacesContext;
 
 import com.ibm.ecm.mm.model.CommencePath;
@@ -25,14 +25,15 @@ public class IdentificationBean {
 	private ArrayList<Document> documents;
 	private Document document;
 	private IdentifiedDocInstances identifiedDocInstances;
-	private HashSet<Long> existingIdentifiedDocInstanceIds;
-	private boolean noPdf;
+	private String status;
 
 	public IdentificationBean() {
-		setDocuments(DataManager.getDocuments());
+		setDocuments(new ArrayList<Document>());
+		Document allDocuments = new Document();
+		allDocuments.setId(0);
+		getDocuments().add(allDocuments);
+		getDocuments().addAll(DataManager.getDocuments());		
 		setIdentifiedDocInstances(new IdentifiedDocInstances());
-		setExistingIdentifiedDocInstanceIds(new HashSet<Long>());
-		setNoPdf(false);
 	}
 	
 	public ArrayList<Document> getDocuments() {
@@ -53,24 +54,23 @@ public class IdentificationBean {
 	public void setIdentifiedDocInstances(IdentifiedDocInstances identifiedDocInstances) {
 		this.identifiedDocInstances = identifiedDocInstances;
 	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	
+	public boolean isDocumentSelected() {
+		return getDocument() != null && getDocument().getId() != 0;
+	}
+	
+	public boolean isAllDocumentsSelected() {
+		return getDocument() != null && getDocument().getId() == 0;
+	}
+
 	public ArrayList<IdentifiedDocInstance> getLatestSnapshotInstances() {
 		return getIdentifiedDocInstances().getLatestSnapshotInstances();
-	}
-
-	public HashSet<Long> getExistingIdentifiedDocInstanceIds() {
-		return existingIdentifiedDocInstanceIds;
-	}
-
-	public void setExistingIdentifiedDocInstanceIds(HashSet<Long> existingIdentifiedDocInstanceIds) {
-		this.existingIdentifiedDocInstanceIds = existingIdentifiedDocInstanceIds;
-	}
-
-	public boolean isNoPdf() {
-		return noPdf;
-	}
-
-	public void setNoPdf(boolean noPdf) {
-		this.noPdf = noPdf;
 	}
 
 	public int getCommencePathsLastIndex() {
@@ -85,12 +85,9 @@ public class IdentificationBean {
 		try {
 			getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
 			getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
-			getExistingIdentifiedDocInstanceIds().clear();
-			for (IdentifiedDocInstance identifiedDocInstance : DataManager.getIdentifiedDocInstances(getDocument())) {
-				getExistingIdentifiedDocInstanceIds().add(identifiedDocInstance.getId());
-			}
 		}
 		catch (Exception e) {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error",  e.getMessage()));
 			e.printStackTrace();
 		}
 	}
@@ -121,26 +118,30 @@ public class IdentificationBean {
 		
 	public void preview() {
 		try {
-			setIdentifiedDocInstances(IdentificationManager.identify(getDocument(),isNoPdf()));
+			setIdentifiedDocInstances(IdentificationManager.identify(getDocument()));
 		}
 		catch (Exception e) {
+			String message = e.getClass().getName();
+			if (e.getMessage() != null)
+				message += ": " + e.getMessage();
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", message));
 			e.printStackTrace();
 		}
 	}
 	
 	public void save() {
-		
-		
 		try {
-			Connection conn = ConnectionManager.getConnection("save");	
-			
+			Connection conn = ConnectionManager.getConnection("save");
+					
 			/*
-			 *  BL Identification Rule
+			 *  BL Identification Rule, is no pdf, is office doc
 			 */
 			
-			PreparedStatement updatDocumentStmt = conn.prepareStatement("UPDATE Document SET bl_identification_rule=? WHERE ID = ?");
+			PreparedStatement updatDocumentStmt = conn.prepareStatement("UPDATE Document SET bl_identification_rule=?, is_no_pdf=?, is_office_doc=? WHERE id = ?");
 			updatDocumentStmt.setString(1, getDocument().getBlIdentificationRule());
-			updatDocumentStmt.setInt(2, getDocument().getId());
+			updatDocumentStmt.setBoolean(2, getDocument().isNoPdf());
+			updatDocumentStmt.setBoolean(3, getDocument().isOfficeDoc());
+			updatDocumentStmt.setInt(4, getDocument().getId());
 			updatDocumentStmt.execute();
 			
 			
@@ -148,18 +149,26 @@ public class IdentificationBean {
 			 *  Commence Path
 			 */
 			
-			PreparedStatement deleteCommencePathStmt = conn.prepareStatement("DELETE FROM Commence_Path WHERE id = ?");
+			// Delete metadata value, metadata extraction rule and commence path
+			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE commence_path_id=?)");
+			PreparedStatement deleteMetadataExtractionRuleStmt = conn.prepareStatement("DELETE FROM Metadata_Extraction_Rule WHERE commence_path_id =?");
+			PreparedStatement deleteCommencePathStmt = conn.prepareStatement("DELETE FROM Commence_Path WHERE id = ?");	
+			
 			for (CommencePath commencePath : getDocument().getCommencePaths().getRemovedList()) {
+				deleteMetadataValueStmt.setInt(1, commencePath.getId());
+				deleteMetadataExtractionRuleStmt.setInt(1, commencePath.getId());
 				deleteCommencePathStmt.setInt(1, commencePath.getId());
+				deleteMetadataValueStmt.addBatch();
+				deleteMetadataExtractionRuleStmt.addBatch();
 				deleteCommencePathStmt.addBatch();
 			}
+			deleteMetadataValueStmt.executeBatch();			
+			deleteMetadataExtractionRuleStmt.executeBatch();
 			deleteCommencePathStmt.executeBatch();
 
-			getDocument().getCommencePaths().getRemovedList().clear();
+			getDocument().getCommencePaths().getRemovedList().clear();			
 			
-			//TODO: Delete Metadata_Extraction_Rule, Metadata_Value
-			
-
+			//insert and update commence path
 			PreparedStatement updateCommencePathStmt = conn.prepareStatement("UPDATE Commence_Path SET business_path=?, actual_path=? WHERE ID = ?");
 			PreparedStatement insertCommencePathStmt = conn.prepareStatement("INSERT INTO Commence_Path (business_path,actual_path,document_id) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			
@@ -168,13 +177,11 @@ public class IdentificationBean {
 					insertCommencePathStmt.setString(1, commencePath.getBusinessPath());
 					insertCommencePathStmt.setString(2, commencePath.getActualPath());
 					insertCommencePathStmt.setInt(3, getDocument().getId());
-					insertCommencePathStmt.execute();
-					
+					insertCommencePathStmt.execute();					
 					ResultSet commencePathIdRs = insertCommencePathStmt.getGeneratedKeys();
 					if (commencePathIdRs != null && commencePathIdRs.next()) {
 						commencePath.setId(commencePathIdRs.getInt(1));
-					}
-					
+					}					
 					commencePath.setNew(false);
 				}
 				else {
@@ -183,8 +190,7 @@ public class IdentificationBean {
 					updateCommencePathStmt.setInt(3, commencePath.getId());
 					updateCommencePathStmt.addBatch();
 				}
-			}
-			
+			}			
 			updateCommencePathStmt.executeBatch();
 			
 			/*
@@ -233,27 +239,80 @@ public class IdentificationBean {
 					updateIdentificationRuleStmt.setInt(8, identificationRule.getId());
 					updateIdentificationRuleStmt.addBatch();
 				}
-			}
-			
+			}			
 			updateIdentificationRuleStmt.executeBatch();
 			
 		}
-		catch (SQLException e) {				
+		catch (SQLException e) {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error",  e.getMessage()));
 			e.printStackTrace();
 		}
 		finally {
 			ConnectionManager.close("save");
-		}	
-					
-		String message = "Source Locations and Identification Rules are saved.";
+		}
 		
+		String message = "Source Locations and Identification Rules are saved.";
 		FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful",  message) );
 
 	}
-	
 
 	public void run() {
-		preview();
-		IdentificationManager.saveIdentifiedDocInstances(getDocument(), getExistingIdentifiedDocInstanceIds(), getIdentifiedDocInstances());
+		Severity severity = null;
+		String summary = null;
+		String message = "";
+		try {
+			setIdentifiedDocInstances(IdentificationManager.identify(getDocument()));
+			IdentificationManager.saveIdentifiedDocInstances(getDocument(), getIdentifiedDocInstances());
+			severity = FacesMessage.SEVERITY_INFO;
+			summary = "Successful";
+			message = getDocument().toString() + " is identified.";
+		}
+		catch (Exception e) {
+			severity = FacesMessage.SEVERITY_ERROR;
+			summary = e.getClass().getName();
+			if (e.getMessage() != null)
+				message += e.getMessage() + ".";
+			message += getDocument().toString() + " is not identified.";
+			e.printStackTrace();
+		}
+		finally {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
+		}
+	}
+	
+	public void runAll() {
+		String successDoc = "";
+		Severity severity = null;
+		String summary = null;
+		String message = "";
+		try {
+			for (Document document : getDocuments()) {
+				if (document.getId() != 0) {
+					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
+					document.setIdentificationRules(DataManager.getIdentificationRules(document.getId()));	
+					IdentificationManager.saveIdentifiedDocInstances(document, IdentificationManager.identify(document));
+					successDoc += document.getId() + ",";
+				}
+			}
+			successDoc = successDoc.substring(0,successDoc.length()-2);
+			severity = FacesMessage.SEVERITY_INFO;
+			summary = "Successful";
+			message = "The following documents are identified: " + successDoc;
+			
+		}
+		catch (Exception e) {
+			severity = FacesMessage.SEVERITY_ERROR;
+			summary = e.getClass().getName();
+			if (e.getMessage() != null)
+				message += e.getMessage() + ".";
+			if (successDoc.equals(""))
+				message += "No document is identified.";
+			else	
+				message += "Only the following documents are identified: " + successDoc;
+			e.printStackTrace();
+		}
+		finally {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
+		}
 	}
 }

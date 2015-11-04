@@ -7,51 +7,55 @@ import javax.faces.context.FacesContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ibm.ecm.mm.model.Document;
+import com.ibm.ecm.mm.model.DocumentClass;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.GenerationManager;
 
 public class GenerationBean {
 	
-	private ArrayList<Document> documents;
-	private Document document;
+	private ArrayList<DocumentClass> documentClasses;
+	private DocumentClass documentClass;
 	
 	public GenerationBean() {		
-		setDocuments(new ArrayList<Document>());
-		Document document = new Document();
-		document.setId(0);
-		getDocuments().add(document);
-		getDocuments().addAll(DataManager.getDocuments());
+		setDocumentClasses(new ArrayList<DocumentClass>());
+		DocumentClass documentClass = new DocumentClass();
+		documentClass.setId(0);
+		getDocumentClasses().add(documentClass);
+		getDocumentClasses().addAll(DataManager.getDocumentClasses());
 	}
 	
-	public ArrayList<Document> getDocuments() {
-		return documents;
+
+	public ArrayList<DocumentClass> getDocumentClasses() {
+		return documentClasses;
 	}
 
-	public void setDocuments(ArrayList<Document> documents) {
-		this.documents = documents;
+
+	public void setDocumentClasses(ArrayList<DocumentClass> documentClasses) {
+		this.documentClasses = documentClasses;
 	}
 
-	public Document getDocument() {
-		return document;
+
+	public DocumentClass getDocumentClass() {
+		return documentClass;
 	}
 
-	public void setDocument(Document document) {
-		this.document = document;
-	}
 
+	public void setDocumentClass(DocumentClass documentClass) {
+		this.documentClass = documentClass;
+	}
+	
 	public void generate() {		
 		FacesContext ctx = FacesContext.getCurrentInstance();
 		HttpServletResponse response = (HttpServletResponse) ctx.getExternalContext().getResponse();
 		
 		response.setContentType("text/xml");
-		response.setHeader("Content-Disposition", "attachment;filename=\"" + getDocument().toString() + ".xml\"");  
+		response.setHeader("Content-Disposition", "attachment;filename=\"" + getDocumentClass().getName() + ".xml\"");  
 
 		ServletOutputStream out;
 		
 		try {
 			out = response.getOutputStream();
-			out.write(GenerationManager.generate(getDocument().getId()));
+			out.write(GenerationManager.generate(getDocumentClass().getId()));
 			out.flush(); 
 		}
 		catch (IOException e) {
@@ -61,4 +65,6 @@ public class GenerationBean {
 			ctx.responseComplete();
 		}		
 	}
+
+
 }

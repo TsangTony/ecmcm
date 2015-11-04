@@ -1,7 +1,6 @@
 package com.ibm.ecm.mm.bean;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.regex.PatternSyntaxException;
 
 import javax.faces.application.FacesMessage;
@@ -18,7 +17,7 @@ import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.ExtractionManager;
 
-public class MetadataExtraction {
+public class ExtractionBean {
 	
 	private ArrayList<Document> documents;
 	private Document document;
@@ -26,15 +25,13 @@ public class MetadataExtraction {
 	private MetadataProperty metadataProperty;
 	private MetadataExtractionRules metadataExtractionRules;
 	private ArrayList<MetadataExtractionRules> multipliedMetadataExtractionRules;
-	private HashSet<Integer> existingMetadataExtractionRuleIds;
 	private boolean useDefaultRule;
 	private IdentifiedDocInstances identifiedDocInstances;
 	
-	public MetadataExtraction() {
+	public ExtractionBean() {
 		setDocuments(DataManager.getDocuments());
-		identifiedDocInstances = new IdentifiedDocInstances();
-		useDefaultRule = false;
-		existingMetadataExtractionRuleIds = new HashSet<Integer>();
+		setIdentifiedDocInstances(new IdentifiedDocInstances());
+		setUseDefaultRule(false);
 	}
 	
 	public ArrayList<Document> getDocuments() {
@@ -101,14 +98,6 @@ public class MetadataExtraction {
 		this.multipliedMetadataExtractionRules = multipliedMetadataExtractionRules;
 	}
 
-	public HashSet<Integer> getExistingMetadataExtractionRuleIds() {
-		return existingMetadataExtractionRuleIds;
-	}
-
-	public void setExistingMetadataExtractionRuleIds(HashSet<Integer> existingMetadataExtractionRuleIds) {
-		this.existingMetadataExtractionRuleIds = existingMetadataExtractionRuleIds;
-	}
-
 	public int getMetadataExtractionRulesLastIndex() {
 		return metadataExtractionRules.getRules().size()-1;
 	}
@@ -148,35 +137,45 @@ public class MetadataExtraction {
 	
 	public void optionSet() {
 		try {
+			
+			/*
+			 * TODO: if commence_path_id = 0
+			 * 			if custom rule exists, show the first commence path's rule
+			 * 			else, create new default rules
+			 */
 			setMetadataExtractionRules(new MetadataExtractionRules());
 			getMetadataExtractionRules().setMetadataProperty(getMetadataProperty());
 			getMetadataExtractionRules().setCommencePathId(getCommencePath().getId());
-			
 			getMetadataExtractionRules().setRules(DataManager.getMetadataExtractionRules(getDocument().getId(),getCommencePath().getId(),getMetadataProperty().getId()));
 			
-			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules())
-				getExistingMetadataExtractionRuleIds().add(metadataExtractionRule.getId());
-			
-			if (getMetadataExtractionRules().getRules().size() == 0)
-				getMetadataExtractionRules().setDefault(false);
-			else
-				getMetadataExtractionRules().setDefault(getMetadataExtractionRules().getRules().get(0).isDefault());
-			
 			getMetadataExtractionRules().setLookups(DataManager.getLookups(getMetadataExtractionRules().getMetadataProperty().getId()));
-			
 			getMetadataExtractionRules().setHasDefaultRules(getMetadataExtractionRules().getLookups().size() > 0);
+						
+			//set isDefault
+			getMetadataExtractionRules().setDefault(false);
+			for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules()) {
+				if (!metadataExtractionRule.isDefault()) {
+					break;
+				}
+				getMetadataExtractionRules().setDefault(true);
+			}
+			setUseDefaultRule(getMetadataExtractionRules().isDefault());			
 			
-			setUseDefaultRule(getMetadataExtractionRules().isDefault());
-			
-			if (isUseDefaultRule()) {				
-				getMetadataExtractionRules().setCustomRules(new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class));
+			if (isUseDefaultRule()) {
 				if (getCommencePath().getId() == 0)
-					getMetadataExtractionRules().setRules(ExtractionManager.createDefaultMetadataExtractionRules(getMetadataExtractionRules().getMetadataProperty(), getCommencePath().getId()).getRules());
+					getMetadataExtractionRules().setRules(ExtractionManager.createDefaultMetadataExtractionRules(getMetadataExtractionRules().getMetadataProperty(), getCommencePath().getId()).getRules());				
+				getMetadataExtractionRules().setCustomRules(new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class));
 				getMetadataExtractionRules().setDefaultRules(getMetadataExtractionRules().getRules());
 			}
 			else {
+				if (getCommencePath().getId() == 0) {					
+					DataTableArrayList<MetadataExtractionRule> metadataExtractionRules = new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class);
+					for (MetadataExtractionRule metadataExtractionRule : getMetadataExtractionRules().getRules())
+						if (!metadataExtractionRule.isDefault())
+							metadataExtractionRules.add(metadataExtractionRule);
+					getMetadataExtractionRules().setRules(metadataExtractionRules);
+				}
 				getMetadataExtractionRules().setDefaultRules(ExtractionManager.createDefaultMetadataExtractionRules(getMetadataExtractionRules().getMetadataProperty(), getCommencePath().getId()).getRules());		
-				getMetadataExtractionRules().setDefault(true);
 				getMetadataExtractionRules().setCustomRules(getMetadataExtractionRules().getRules());
 			}
 		}
@@ -232,7 +231,7 @@ public class MetadataExtraction {
 	
 	public void save() {
 		if (getCommencePath().getId() == 0) {
-			DataManager.removeMetadataExtractionRule(getExistingMetadataExtractionRuleIds());
+			DataManager.removeMetadataExtractionRule(getMetadataExtractionRules().getRules().getRemovedList());
 			for (MetadataExtractionRules metadataExtractionRules : getMultipliedMetadataExtractionRules()) {
 				DataManager.addMetadataExtractionRule(metadataExtractionRules.getRules(), metadataExtractionRules.getCommencePathId(), getMetadataExtractionRules().getMetadataProperty().getId(), isUseDefaultRule());
 			}

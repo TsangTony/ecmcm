@@ -1,12 +1,14 @@
 package com.ibm.ecm.mm.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -16,7 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class GenerationManager {
-	public static byte[] generate(int genDocumentId) {		
+	public static byte[] generate(int documentClassId) {		
 		try {		
 			Connection conn = ConnectionManager.getConnection("generate");
 			Statement stmt = conn.createStatement();
@@ -51,21 +53,22 @@ public class GenerationManager {
 						+ "   ON Document.ig_security_class_id = IG_Security_Class.id "
 						+ "WHERE Identified_Document_Instance.snapshot_deleted IS NULL";
 		    
-	        if (genDocumentId != 0) {
-	        	 query += " AND Document.id = " + genDocumentId;
+	        if (documentClassId != 0) {
+	        	 query += " AND Document_Class.id = " + documentClassId;
 	        }
 	        
 	        query += " ORDER BY Identified_Document_Instance.id";
 	        
 	        ResultSet rs = stmt.executeQuery(query);
 	        
-	        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();	        
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			Document doc = docBuilder.newDocument();
 			
 			long lastMigrationId = 0;
 			int lastDocumentId = 0;
 			Element Lastelement = null;
+			
 			
 			Element rootElement = doc.createElement("data-set");
 			doc.appendChild(rootElement);
@@ -85,7 +88,7 @@ public class GenerationManager {
 				 String secClass = rs.getString(12);
 				 int documentId = rs.getInt(13);
 	        	
-	        	if (migrationId == lastMigrationId && lastDocumentId==documentId) {	  
+	        	if (migrationId == lastMigrationId && lastDocumentId==documentId) {
 	    			if (metadataName != null) {
 						Element elementOfMetadata  = doc.createElement(metadataName);
 		    			elementOfMetadata.setTextContent(metadataValue);
@@ -100,12 +103,12 @@ public class GenerationManager {
 	    			
 	    			//Source
 	    			Element element = doc.createElement("Source");
-					element.setTextContent(source);
+					element.appendChild(doc.createCDATASection(source));
 					docElement.appendChild(element);
 					
 					//Destination
 					element = doc.createElement("Destination");
-					element.setTextContent(null);
+					element.setTextContent("\\CPA");
 					docElement.appendChild(element);
 					
 					//DocumentClass
@@ -160,13 +163,17 @@ public class GenerationManager {
 	        	}	
 	        }
 			
+			//String outputEncoding = "UTF-16";
+			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource domSource = new DOMSource(doc);
-			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			
-			StreamResult result =  new StreamResult(bos);
+			//transformer.setOutputProperty(OutputKeys.ENCODING, outputEncoding);
+			
+			StreamResult result =  new StreamResult(bos);//new OutputStreamWriter(bos, outputEncoding));
+			
 			transformer.transform(domSource, result);
 			
 			return bos.toByteArray();

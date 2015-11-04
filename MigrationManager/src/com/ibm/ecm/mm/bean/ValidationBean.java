@@ -1,16 +1,15 @@
 package com.ibm.ecm.mm.bean;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -21,7 +20,6 @@ import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.IdentifiedDocInstances;
 import com.ibm.ecm.mm.model.MetadataExtractionRule;
-import com.ibm.ecm.mm.model.MetadataExtractionRules;
 import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.model.MetadataValue;
 import com.ibm.ecm.mm.util.DataManager;
@@ -113,6 +111,12 @@ public class ValidationBean {
             //Reference File List   
             worksheet = workbook.getSheet("Reference File List");            
             
+            
+            //clear extra column
+            for (int j=metadataProperties.size()+2; j<18; j++) {
+            	worksheet.getRow(0).removeCell(worksheet.getRow(0).getCell(j));
+            }	  
+            
             int metadataCount = 0;
             for (MetadataProperty metadataProperty : metadataProperties) {
             	cell = worksheet.getRow(0).createCell(metadataCount+2);
@@ -143,6 +147,8 @@ public class ValidationBean {
 			            				System.out.println(metadataExtractionRule.getId() + " "+ metadataValue.getMetadataExtractionRule().getId());
 			            				if (metadataExtractionRule.getId() == metadataValue.getMetadataExtractionRule().getId()) {
 			            					metadataExtractionRule.setSuccessCount(metadataExtractionRule.getSuccessCount()+1);
+			            					if (metadataExtractionRule.getExample() == null)
+			            						metadataExtractionRule.setExample(metadataValue.getValue());
 			            				}
 			            			}
 		            			}
@@ -154,6 +160,10 @@ public class ValidationBean {
         		}
             }            
             
+            //autofilter
+            
+            CellRangeAddress range = new CellRangeAddress(0, identifiedDocInstances.size(), 0, metadataProperties.size()+1);
+			worksheet.setAutoFilter(range);
             
             //Metadata Extraction Rule
 			worksheet = workbook.getSheet("Validation Rules");	
@@ -167,6 +177,8 @@ public class ValidationBean {
     		for (MetadataProperty metadataProperty : metadataProperties) {
             	cell = worksheet.getRow(latestRow).getCell(0);
             	cell.setCellValue(metadataProperty.getName());
+            	
+            	int totalSccessCount = 0;
             	
             	ArrayList<MetadataExtractionRule> metadataExtractionRules = metadataExtractionRulesList.get(metadataCount);
             	
@@ -183,11 +195,18 @@ public class ValidationBean {
                 		cell.setCellValue(metadataExtractionRule.getDefaultValue());  
             		}
             		cell = worksheet.getRow(latestRow).getCell(2);
-            		cell.setCellValue(metadataExtractionRule.getBlRule());            		
+            		cell.setCellValue(metadataExtractionRule.getBlRule());
+            		
 
+                    //example
+        			cell = worksheet.getRow(latestRow).getCell(4);
+            		cell.setCellValue(metadataExtractionRule.getExample());
+            		
                     //success rate
         			cell = worksheet.getRow(latestRow).getCell(5);
             		cell.setCellFormula(metadataExtractionRule.getSuccessCount() + "/C2");
+            		
+            		totalSccessCount += metadataExtractionRule.getSuccessCount();
             		
             		latestRow++;
     			}
@@ -197,11 +216,17 @@ public class ValidationBean {
             		cell.setCellValue("File Path");   
             		cell = worksheet.getRow(latestRow).getCell(2);
             		cell.setCellValue("-");   
+            		cell = worksheet.getRow(latestRow).getCell(5);
+            		cell.setCellValue(0);   
             		latestRow++;   
             	}
             	if (noContentRule) {
             		cell = worksheet.getRow(latestRow).getCell(1);
             		cell.setCellValue("Content");    
+            		cell = worksheet.getRow(latestRow).getCell(2);
+            		cell.setCellValue("-");   
+            		cell = worksheet.getRow(latestRow).getCell(5);
+            		cell.setCellValue(0);   
             		latestRow++;
             	}
             	if (noDefaultRule) {
@@ -209,6 +234,8 @@ public class ValidationBean {
             		cell.setCellValue("Default");
             		cell = worksheet.getRow(latestRow).getCell(2);
             		cell.setCellValue("Leave Blank");   
+            		cell = worksheet.getRow(latestRow).getCell(5);
+            		cell.setCellFormula("(C2-" + totalSccessCount + ")/C2");
             		latestRow++;    
             	}
             	
@@ -225,10 +252,13 @@ public class ValidationBean {
             	metadataCount++;
     		}
     		
+    		if (metadataProperties.size() == 0)
+    			latestRow = 6;
+    		
+    		
             //clear extra rows
-            for (int j=latestRow; j<88; j++) {
+            for (int j=latestRow; j<88; j++)
             	worksheet.removeRow(worksheet.getRow(j));
-            }	  
             
             //set starting cell
             workbook.setActiveSheet(2);
