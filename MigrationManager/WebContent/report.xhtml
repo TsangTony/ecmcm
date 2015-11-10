@@ -82,6 +82,72 @@
 						        <h:outputText value="#{document.getS2SuccessRate(document.priority)}" />
 						    </p:column>
 						</p:dataTable>
+						
+						
+						<p:dataTable var="instance" value="#{reportBean.intraTeamDuplicates}" rows="20" paginator="true" 
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+							rowsPerPageTemplate="20,50,100" sortMode="multiple" filteredValue="#{reportBean.filteredInstance}"  rendered="#{reportBean.intraTeamDuplicateReport}">
+						    
+						    <p:column headerText="Team" sortBy="#{instance.document.team}" style="width: 14%" filterBy="#{instance.document.team}" filterMatchMode="contains">
+						        <h:outputText value="#{instance.document.team}" />
+						    </p:column>
+						    
+						    <p:column headerText="Document" sortBy="#{instance.document.id}" style="width: 18%" filterBy="#{instance.document}" filterMatchMode="contains">
+						        <h:outputText value="#{instance.document}" />
+						    </p:column>
+						    
+						    <p:column headerText="File Path" sortBy="#{instance.volumePath}" style="width: 25%" filterBy="#{instance.volumePath}" filterMatchMode="contains">
+						        <h:outputText value="#{instance.volumePath}" />
+						    </p:column>
+						    
+						    <p:column headerText="File Name" sortBy="#{instance.name}" style="width: 18%" filterBy="#{instance.name}" filterMatchMode="contains">
+						        <h:outputText value="#{instance.name}" />
+						    </p:column>
+						    
+						    <p:column headerText="Digest" sortBy="#{instance.digest}" style="width: 25%" filterBy="#{instance.digest}" filterMatchMode="contains">
+						        <h:outputText value="#{instance.digest}" />
+						    </p:column>
+						</p:dataTable>
+						
+						
+						<p:dataTable var="instancePair" value="#{reportBean.interTeamDuplicates}" rows="20" paginator="true" 
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
+							rowsPerPageTemplate="20,50,100" sortMode="multiple" filteredValue="#{reportBean.filteredInstancePair}"  rendered="#{reportBean.interTeamDuplicateReport}">
+						    
+						    <p:column headerText="Team" sortBy="#{instancePair.documentInstance1.document.team}" style="width: 14%" filterBy="#{instancePair.documentInstance1.document.team}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance1.document.team}" />
+						    </p:column>
+						    
+						    <p:column headerText="Document" sortBy="#{instancePair.documentInstance1.document.id}" style="width: 18%" filterBy="#{instancePair.documentInstance1.document}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance1.document}" />
+						    </p:column>
+						    
+						    <p:column headerText="File Path" sortBy="#{instancePair.documentInstance1.volumePath}" style="width: 25%" filterBy="#{instancePair.documentInstance1.volumePath}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance1.volumePath}" />
+						    </p:column>
+						    
+						    <p:column headerText="File Name" sortBy="#{instancePair.documentInstance1.name}" style="width: 18%" filterBy="#{instancePair.documentInstance1.name}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance1.name}" />
+						    </p:column>
+						    
+						    <p:column headerText="Team" sortBy="#{instancePair.documentInstance2.document.team}" style="width: 14%" filterBy="#{instancePair.documentInstance2.document.team}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance2.document.team}" />
+						    </p:column>
+						    
+						    <p:column headerText="Document" sortBy="#{instancePair.documentInstance2.document.id}" style="width: 18%" filterBy="#{instancePair.documentInstance2.document}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance2.document}" />
+						    </p:column>
+						    
+						    <p:column headerText="File Path" sortBy="#{instancePair.documentInstance2.volumePath}" style="width: 25%" filterBy="#{instancePair.documentInstance2.volumePath}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance2.volumePath}" />
+						    </p:column>
+						    
+						    <p:column headerText="File Name" sortBy="#{instancePair.documentInstance2.name}" style="width: 18%" filterBy="#{instancePair.documentInstance2.name}" filterMatchMode="contains">
+						        <h:outputText value="#{instancePair.documentInstance2.name}" />
+						    </p:column>
+						    
+						</p:dataTable>
+						
 					</p:panel>
 				</h:form>
     		</ui:define>

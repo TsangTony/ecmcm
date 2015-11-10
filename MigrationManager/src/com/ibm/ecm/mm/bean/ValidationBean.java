@@ -144,7 +144,6 @@ public class ValidationBean {
 		            		if (metadataValue.getValue() != null) {
 		            			for (ArrayList<MetadataExtractionRule> metadataExtractionRules : metadataExtractionRulesList) {
 			            			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
-			            				System.out.println(metadataExtractionRule.getId() + " "+ metadataValue.getMetadataExtractionRule().getId());
 			            				if (metadataExtractionRule.getId() == metadataValue.getMetadataExtractionRule().getId()) {
 			            					metadataExtractionRule.setSuccessCount(metadataExtractionRule.getSuccessCount()+1);
 			            					if (metadataExtractionRule.getExample() == null)
@@ -270,7 +269,7 @@ public class ValidationBean {
     		ExternalContext extCtx = ctx.getExternalContext();
     		
     		extCtx.setResponseContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    		extCtx.setResponseHeader("Content-Disposition", "attachment;filename=\"Content Migration Validation - " + getDocument().toString() + ".xlsx\"");
+    		extCtx.setResponseHeader("Content-Disposition", "attachment;filename=\"" + getDocument().toString() + ".xlsx\"");
     				
     		workbook.write(extCtx.getResponseOutputStream());
     		ctx.responseComplete();

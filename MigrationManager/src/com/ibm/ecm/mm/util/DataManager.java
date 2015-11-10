@@ -13,6 +13,7 @@ import com.ibm.ecm.mm.model.CommencePath;
 import com.ibm.ecm.mm.model.DataTableArrayList;
 import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.DocumentClass;
+import com.ibm.ecm.mm.model.DocumentInstancePair;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.IdentifiedDocInstances;
@@ -35,7 +36,8 @@ public class DataManager {
 					+ "       ig_document_class.NAME, "
 					+ "       ig_security_class.NAME, "
 					+ "       document.is_no_pdf, "
-					+ "       document.is_office_doc "
+					+ "       document.is_office_doc, "
+					+ "       document.include_linked_file "
 					+ "FROM   document "
 					+ "left join team "
 					+ "on document.team_id = team.id "
@@ -60,6 +62,7 @@ public class DataManager {
 				document.setIgSecClass(selectDocumentRS.getString(6));
 				document.setNoPdf(selectDocumentRS.getBoolean(7));
 				document.setOfficeDoc(selectDocumentRS.getBoolean(8));
+				document.setIncludeLinkedFile(selectDocumentRS.getBoolean(9));
 				documents.add(document);
 			}			
 		}
@@ -323,16 +326,22 @@ public class DataManager {
 						insertMetadataValueStmt.setLong(1, identifiedDocInstance.getId());
 						insertMetadataValueStmt.setString(2, metadataValue.getValue());
 						insertMetadataValueStmt.setInt(3, metadataValue.getMetadataExtractionRule().getId());
-						insertMetadataValueStmt.setInt(4, documentId);					
-						insertMetadataValueStmt.addBatch();
+						insertMetadataValueStmt.setInt(4, documentId);	
+						try {
+							insertMetadataValueStmt.execute();
+						}
+						catch (SQLException e) {
+							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues (" + identifiedDocInstance.getId() + "," + metadataValue.getValue() + "," + metadataValue.getMetadataExtractionRule().getId() + "," + documentId);
+						}
+						//insertMetadataValueStmt.addBatch();
 					}
 				}
 				
 				
 			}
-			insertMetadataValueStmt.executeBatch();
+			//insertMetadataValueStmt.executeBatch();
 		}
-		catch (SQLException e) {				
+		catch (SQLException e) {
 			e.printStackTrace();
 		}
 		finally {
@@ -405,7 +414,9 @@ public class DataManager {
 				identifiedDocInstance.setPath(rs.getString(4) == null ? null : rs.getString(4).trim());
 				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());	
 				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
+				identifiedDocInstance.setSnapshotDeleted(rs.getInt(7));
 				identifiedDocInstance.setNew(false);
+				identifiedDocInstance.setDocument(document);
 				if (commencePath != null)
 					identifiedDocInstance.setCommencePath(commencePath);
 				else {
@@ -422,7 +433,7 @@ public class DataManager {
 				
 				identifiedDocInstances.add(identifiedDocInstance);
 				
-				if (rs.getInt(7)==0)
+				if (identifiedDocInstance.getSnapshotDeleted()==0)
 					identifiedDocInstances.getLatestSnapshotInstances().add(identifiedDocInstance);
 			}
 		}
@@ -791,10 +802,11 @@ public class DataManager {
 			 * Insert identified doc instance
 			 */
 			
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id,origin_instance_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,?,? FROM All_Document_Instance WHERE id = ?");
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				insertIdentifiedDocInstancStmt.setInt(1, documentId);
-				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
+				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getOriginInstanceId());
+				insertIdentifiedDocInstancStmt.setLong(3, identifiedDocInstance.getId());
 				insertIdentifiedDocInstancStmt.addBatch();
 			}			
 			insertIdentifiedDocInstancStmt.executeBatch();
@@ -909,6 +921,7 @@ public class DataManager {
 				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
 				identifiedDocInstance.setServer(rs.getString(7) == null ? null : rs.getString(7).trim());
 				identifiedDocInstance.setSnapshotDeleted(rs.getInt(8));
+				identifiedDocInstance.setDocument(document);
 				
 				
 				if (fromSnippet ||
@@ -926,7 +939,7 @@ public class DataManager {
 					boolean hasCommencePath = false;
 					
 					for (CommencePath commencePath : document.getCommencePaths()) {						
-						if (identifiedDocInstance.getVolumePath().equals(commencePath.getActualPath()) || identifiedDocInstance.getVolumePath().startsWith(commencePath.getActualPath() + "/")) {
+						if (identifiedDocInstance.getVolumePath().toUpperCase().equals(commencePath.getActualPath().toUpperCase()) || identifiedDocInstance.getVolumePath().toUpperCase().startsWith(commencePath.getActualPath().toUpperCase() + "/")) {
 							identifiedDocInstance.setCommencePath(commencePath);
 							hasCommencePath = true;
 							break;
@@ -977,7 +990,7 @@ public class DataManager {
 			
 			identifiedDocInstances.removeAll(tobeRemovedPdf);
 			identifiedDocInstances.getLatestSnapshotInstances().removeAll(tobeRemovedPdf);
-			
+			identifiedDocInstances.setDigests(digests);
 		}
 		catch (SQLException e) {
 			System.err.println(e.getMessage() + " - " + query);
@@ -1004,8 +1017,7 @@ public class DataManager {
 		}
 	}
 
-	public static ArrayList<DocumentClass> getDocumentClasses() {
-		
+	public static ArrayList<DocumentClass> getDocumentClasses() {		
 		ArrayList<DocumentClass> documentClasses = new ArrayList<DocumentClass>();		
 		try {	
 			Connection conn = ConnectionManager.getConnection("getDocumentClasses");	
@@ -1032,6 +1044,210 @@ public class DataManager {
 			ConnectionManager.close("getDocumentClasses");
 		}		
 		return documentClasses;
+	}
+
+	public static ArrayList<IdentifiedDocInstance> getIntraTeamDuplicates() {
+		ArrayList<IdentifiedDocInstance> duplicates = new ArrayList<IdentifiedDocInstance>();		
+		try {	
+			Connection conn = ConnectionManager.getConnection("getIntraTeamDuplicates");	
+			String query = ""
+						+ "SELECT Team.name, "
+						+ "       Document.id, "
+						+ "       Document.name, "
+						+ "       Duplicates.digest, "
+						+ "       Identified_document_instance.id, "
+						+ "       Identified_document_instance.NAME, "
+						+ "       path, "
+						+ "       volume "
+						+ "FROM   Identified_document_instance "
+						+ "       LEFT JOIN Document "
+						+ "              ON Identified_document_instance.document_id = Document.id "
+						+ "	      LEFT JOIN Team "
+						+ "	             ON Document.team_id = Team.id "
+						+ "       INNER JOIN (SELECT team_id, "
+						+ "                          digest "
+						+ "                   FROM   Identified_document_instance "
+						+ "                          LEFT JOIN Document "
+						+ "                                 ON Identified_document_instance.document_id = "
+						+ "                                    Document.id "
+						+ "                   GROUP  BY team_id, "
+						+ "                             digest "
+						+ "                   HAVING Count(*) > 1) Duplicates "
+						+ "               ON Document.team_id = Duplicates.team_id "
+						+ "                  AND Identified_document_instance.digest = Duplicates.digest "
+						+ "ORDER  BY Duplicates.team_id, "
+						+ "          Duplicates.digest";
+
+
+			PreparedStatement stmt = conn.prepareStatement(query);
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {					
+				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
+				Document document = new Document();
+				document.setTeam(rs.getString(1));
+				document.setId(rs.getInt(2));
+				document.setName(rs.getString(3));
+				identifiedDocInstance.setDocument(document);
+				identifiedDocInstance.setDigest(rs.getString(4));
+				identifiedDocInstance.setId(rs.getLong(5));
+				identifiedDocInstance.setName(rs.getString(6));
+				identifiedDocInstance.setPath(rs.getString(7));
+				identifiedDocInstance.setVolume(rs.getString(8));
+				duplicates.add(identifiedDocInstance);
+			}			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("getIntraTeamDuplicates");
+		}		
+		return duplicates;
+	}
+	
+
+	public static ArrayList<DocumentInstancePair> getInterTeamDuplicates() {
+		ArrayList<DocumentInstancePair> duplicates = new ArrayList<DocumentInstancePair>();		
+		try {	
+			Connection conn = ConnectionManager.getConnection("getInterTeamDuplicates");	
+			String query = ""
+						+ "SELECT IDI1.digest, "
+						+ "       IDI1.team_name, "
+						+ "       IDI1.document_id, "
+						+ "       IDI1.document_name, "
+						+ "       IDI1.id, "
+						+ "       IDI1.NAME, "
+						+ "       IDI1.path, "
+						+ "       IDI1.volume, "
+						+ "       IDI2.team_name, "
+						+ "       IDI2.document_id, "
+						+ "       IDI2.document_name, "
+						+ "       IDI2.id, "
+						+ "       IDI2.NAME, "
+						+ "       IDI2.path, "
+						+ "       IDI2.volume "
+						+ "FROM   (SELECT Identified_document_instance.id, "
+						+ "               Identified_document_instance.document_id, "
+						+ "               Identified_document_instance.NAME, "
+						+ "               Identified_document_instance.path, "
+						+ "               Identified_document_instance.volume, "
+						+ "               Identified_document_instance.server, "
+						+ "               Identified_document_instance.digest, "
+						+ "               Document.team_id, "
+						+ "               Document.NAME AS document_name, "
+						+ "               Team.NAME     AS team_name "
+						+ "        FROM   Identified_document_instance "
+						+ "               LEFT JOIN Document "
+						+ "                      ON Identified_document_instance.document_id = Document.id "
+						+ "               LEFT JOIN Team "
+						+ "                      ON Document.team_id = Team.id "
+						+ "        WHERE  Identified_document_instance.snapshot_deleted IS NULL) AS IDI1, "
+						+ "       (SELECT Identified_document_instance.id, "
+						+ "               Identified_document_instance.document_id, "
+						+ "               Identified_document_instance.NAME, "
+						+ "               Identified_document_instance.path, "
+						+ "               Identified_document_instance.volume, "
+						+ "               Identified_document_instance.server, "
+						+ "               Identified_document_instance.digest, "
+						+ "               Document.team_id, "
+						+ "               Document.NAME AS document_name, "
+						+ "               Team.NAME     AS team_name "
+						+ "        FROM   Identified_document_instance "
+						+ "               LEFT JOIN Document "
+						+ "                      ON Identified_document_instance.document_id = Document.id "
+						+ "               LEFT JOIN Team "
+						+ "                      ON Document.team_id = Team.id "
+						+ "        WHERE  Identified_document_instance.snapshot_deleted IS NULL) AS IDI2 "
+						+ "WHERE  IDI1.digest = IDI2.digest "
+						+ "       AND IDI1.team_id != IDI2.team_id "
+						+ "ORDER  BY IDI1.digest, "
+						+ "          IDI1.team_id, "
+						+ "          IDI1.document_id, "
+						+ "          IDI1.id, "
+						+ "          IDI2.team_id, "
+						+ "          IDI2.document_id, "
+						+ "          IDI2.id";
+
+			PreparedStatement stmt = conn.prepareStatement(query);
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {					
+				DocumentInstancePair documentInstancePair = new DocumentInstancePair();
+				documentInstancePair.getDocumentInstance1().setDigest(rs.getString(1));
+				documentInstancePair.getDocumentInstance2().setDigest(rs.getString(1));				
+				
+				Document document1 = new Document();
+				document1.setTeam(rs.getString(2));
+				document1.setId(rs.getInt(3));
+				document1.setName(rs.getString(4));				
+				documentInstancePair.getDocumentInstance1().setDocument(document1);				
+				documentInstancePair.getDocumentInstance1().setId(rs.getLong(5));
+				documentInstancePair.getDocumentInstance1().setName(rs.getString(6));
+				documentInstancePair.getDocumentInstance1().setPath(rs.getString(7));
+				documentInstancePair.getDocumentInstance1().setVolume(rs.getString(8));
+				
+				Document document2 = new Document();
+				document2.setTeam(rs.getString(9));
+				document2.setId(rs.getInt(10));
+				document2.setName(rs.getString(11));				
+				documentInstancePair.getDocumentInstance2().setDocument(document2);				
+				documentInstancePair.getDocumentInstance2().setId(rs.getLong(12));
+				documentInstancePair.getDocumentInstance2().setName(rs.getString(13));
+				documentInstancePair.getDocumentInstance2().setPath(rs.getString(14));
+				documentInstancePair.getDocumentInstance2().setVolume(rs.getString(15));
+				
+				duplicates.add(documentInstancePair);
+			}			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("getInterTeamDuplicates");
+		}		
+		return duplicates;
+	}
+
+	public static IdentifiedDocInstance getDocInstance(Document document, String address) {
+		IdentifiedDocInstance identifiedDocInstance = null;
+		try {
+			Connection conn = ConnectionManager.getConnection("getDocInstance");
+			
+			String query = "SELECT id, server, volume, path, name, extension, snapshot_deleted, digest from All_Document_Instance WHERE '\\\\' + server + '/' + volume + '/' + CASE WHEN path is null THEN '' ELSE path + '/' END + name =? AND snapshot_deleted IS NULL";
+			PreparedStatement stmt = conn.prepareStatement(query);
+			stmt.setString(1, address);
+			
+			ResultSet rs = stmt.executeQuery();				
+			
+			if (rs.next()) {
+				identifiedDocInstance = new IdentifiedDocInstance();
+				identifiedDocInstance.setId(rs.getLong(1));
+				identifiedDocInstance.setServer(rs.getString(2) == null ? null : rs.getString(2).trim());
+				identifiedDocInstance.setVolume(rs.getString(3) == null ? null : rs.getString(3).trim());
+				identifiedDocInstance.setPath(rs.getString(4) == null ? null : rs.getString(4).trim());
+				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());	
+				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
+				identifiedDocInstance.setSnapshotDeleted(rs.getInt(7));
+				identifiedDocInstance.setDigest(rs.getString(8));
+				identifiedDocInstance.setNew(false);
+				identifiedDocInstance.setDocument(document);
+
+				for (CommencePath commencePath : document.getCommencePaths()) {
+					if (identifiedDocInstance.getVolumePath().startsWith(commencePath.getActualPath())) {
+						identifiedDocInstance.setCommencePath(commencePath);
+						break;
+					}
+					System.out.println("No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+				}
+			}
+		}
+		catch (SQLException e) {				
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("getDocInstance");
+		}
+		
+		return identifiedDocInstance;
 	}
 	
 	

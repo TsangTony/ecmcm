@@ -78,7 +78,7 @@ public class GenerationManager {
 				
 				 Long migrationId = rs.getLong(1);
 				 String source = "\\\\" + rs.getString(2) + "\\" + rs.getString(3) + "\\";
-				 source += rs.getNString(4) == null ? rs.getNString(5) : rs.getNString(4).replace("/", "\\") + "\\" + rs.getNString(5);
+				 source += rs.getNString(4) == null ? rs.getNString(5).trim() : rs.getNString(4).trim().replace("/", "\\") + "\\" + rs.getNString(5).trim();
 				 String metadataName = rs.getString(6);
 				 String metadataValue = rs.getString(7);
 				 String document = rs.getString(8).replace(" ", "_");
@@ -90,8 +90,8 @@ public class GenerationManager {
 	        	
 	        	if (migrationId == lastMigrationId && lastDocumentId==documentId) {
 	    			if (metadataName != null) {
-						Element elementOfMetadata  = doc.createElement(metadataName);
-		    			elementOfMetadata.setTextContent(metadataValue);
+						Element elementOfMetadata  = doc.createElement(metadataName.trim());
+		    			elementOfMetadata.setTextContent(metadataValue.trim());
 		    			Lastelement.appendChild(elementOfMetadata);
 	    			}
 				}
@@ -113,7 +113,7 @@ public class GenerationManager {
 					
 					//DocumentClass
 					element = doc.createElement("Document");
-					element.setTextContent(document);
+					element.setTextContent(document.trim());
 					docElement.appendChild(element);
 					
 					//BusinessMetadata
@@ -127,7 +127,7 @@ public class GenerationManager {
 
 					//Security Class
 					elementOfMetadata = doc.createElement("Security_Classification_IG");
-	    			elementOfMetadata.setTextContent(secClass);
+	    			elementOfMetadata.setTextContent(secClass.trim());
 	    			element.appendChild(elementOfMetadata);			    			
 
 					//SPI
@@ -137,24 +137,24 @@ public class GenerationManager {
 					
 					//owningDept
 					elementOfMetadata = doc.createElement("Owning_Dept_IG");
-	    			elementOfMetadata.setTextContent(owningDept);
+	    			elementOfMetadata.setTextContent(owningDept.trim());
 	    			element.appendChild(elementOfMetadata);	
 	    			
 					//Owning_Business_Unit
 					elementOfMetadata = doc.createElement("Owning_Business_Unit");
-	    			elementOfMetadata.setTextContent(owningBu);
+	    			elementOfMetadata.setTextContent(owningBu.trim());
 	    			element.appendChild(elementOfMetadata);	
 
 					//Content_Type
 					elementOfMetadata = doc.createElement("Content_Type");
-	    			elementOfMetadata.setTextContent(contentType);
+	    			elementOfMetadata.setTextContent(contentType.trim());
 	    			element.appendChild(elementOfMetadata);	
 	    			
 					//Metadata
 	    			if (metadataName != null) {
-						elementOfMetadata = doc.createElement(metadataName);
-		    			elementOfMetadata.setTextContent(metadataValue);
-		    			element.appendChild(elementOfMetadata);		
+						elementOfMetadata = doc.createElement(metadataName.trim());
+		    			elementOfMetadata.setTextContent(metadataValue.trim());
+		    			element.appendChild(elementOfMetadata);
 	    			}
 	    			
 	    			Lastelement = element;

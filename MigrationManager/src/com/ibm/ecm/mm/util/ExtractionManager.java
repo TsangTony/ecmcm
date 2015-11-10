@@ -111,6 +111,9 @@ public class ExtractionManager {
 	
 	
 	public static MetadataValue extractMetadata(IdentifiedDocInstance identifiedDocInstance, MetadataExtractionRules metadataExtractionRules) {
+
+		//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":   Start extracting metadata for " + identifiedDocInstance.getName());
+		
 		MetadataValue metadataValue = new MetadataValue();
 		metadataValue.setValue("");
 		StringBuilder content = null;
@@ -142,9 +145,14 @@ public class ExtractionManager {
 			
 			
 			if (metadataExtractionRules.isDefault()) {
+				
+				//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":   Start looking up value from " + metadataExtractionRule.getSource() + " for " + identifiedDocInstance.getName());
+				
 				lookupLoop:
 				for (Lookup lookup : metadataExtractionRules.getLookups()) {
 					
+					//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":     Looking up " + lookup.getLookupValue() + " for " + identifiedDocInstance.getName());
+										
 					if (metadataExtractionRules.getMetadataProperty().getName().equals("Date") ||
 						metadataExtractionRules.getMetadataProperty().getName().equals("Month")||
 						metadataExtractionRules.getMetadataProperty().getName().equals("Year")) {
@@ -174,9 +182,7 @@ public class ExtractionManager {
 								}
 								
 								if (metadataExtractionRules.getMetadataProperty().getName().equals("Month") || dateParsed.before(upperLimit) && dateParsed.after(lowerLimit)) {
-									metadataValue.setValue(outputSdf.format(dateParsed));
-									System.out.println("Parsed " + dateFound + " in " + lookup.getReturnedValue());
-									System.out.println("Value set: " + metadataValue.getValue());
+									metadataValue.setValue(outputSdf.format(dateParsed));									
 								}
 							}
 						} catch (ParseException e) {
@@ -184,22 +190,20 @@ public class ExtractionManager {
 						}
 					}
 					else {
-						metadataValue.setValue(Util.findRegex(valueBase.toString(), lookup, searchSequence));
-						System.out.println(metadataValue.getValue());
+						metadataValue.setValue(Util.findRegex(valueBase.toString(), lookup, searchSequence));						
 					}
 					
 					if (!metadataValue.getValue().equals("")) {
+						//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":   Value is set for " + identifiedDocInstance.getName() + " : " + metadataValue.getValue());
 						metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 						break metadataExtractionRuleloop;
 					}	
 				}
 			}
 			else {
-				System.out.println(metadataExtractionRule.getRegex());
 				metadataValue.setValue(Util.findRegex(valueBase.toString(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), searchSequence));
 			}
 			
-			System.out.println(metadataValue.getValue());
 			if (!metadataValue.getValue().equals("")) {
 				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 				break metadataExtractionRuleloop;
@@ -220,7 +224,10 @@ public class ExtractionManager {
 		int contentCount = 0;
 		int defaultCount = 0;
 		
+		int count = 1;
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+			System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": Extracting metadata " + count + "/" + identifiedDocInstances.size());
+					
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
@@ -237,7 +244,10 @@ public class ExtractionManager {
 					}	
 					break;
 				}
+				
+				System.gc();
 			}			
+			count++;
 		}
 		
 		if (filePathCount + contentCount < totalCount * 0.8f)

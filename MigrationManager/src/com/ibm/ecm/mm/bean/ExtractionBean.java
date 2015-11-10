@@ -27,6 +27,7 @@ public class ExtractionBean {
 	private ArrayList<MetadataExtractionRules> multipliedMetadataExtractionRules;
 	private boolean useDefaultRule;
 	private IdentifiedDocInstances identifiedDocInstances;
+	private String status;
 	
 	public ExtractionBean() {
 		setDocuments(DataManager.getDocuments());
@@ -89,6 +90,14 @@ public class ExtractionBean {
 	public void setMetadataExtractionRules(MetadataExtractionRules metadataExtractionRules) {
 		this.metadataExtractionRules = metadataExtractionRules;
 	}	
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 	public ArrayList<MetadataExtractionRules> getMultipliedMetadataExtractionRules() {
 		return multipliedMetadataExtractionRules;
@@ -175,7 +184,8 @@ public class ExtractionBean {
 							metadataExtractionRules.add(metadataExtractionRule);
 					getMetadataExtractionRules().setRules(metadataExtractionRules);
 				}
-				getMetadataExtractionRules().setDefaultRules(ExtractionManager.createDefaultMetadataExtractionRules(getMetadataExtractionRules().getMetadataProperty(), getCommencePath().getId()).getRules());		
+				if (getMetadataExtractionRules().getHasDefault())
+					getMetadataExtractionRules().setDefaultRules(ExtractionManager.createDefaultMetadataExtractionRules(getMetadataExtractionRules().getMetadataProperty(), getCommencePath().getId()).getRules());		
 				getMetadataExtractionRules().setCustomRules(getMetadataExtractionRules().getRules());
 			}
 		}
@@ -212,6 +222,7 @@ public class ExtractionBean {
 						getMultipliedMetadataExtractionRules().add(metadataExtractionRules);
 					}
 				}
+				setStatus("1");				
 				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getDocument(), getCommencePath()), getMultipliedMetadataExtractionRules()));
 			}
 			else {
@@ -273,7 +284,7 @@ public class ExtractionBean {
 		if (preview()) {		
 			/*
 			 * Update Metadata_Value
-			 */
+			 */	
 			
 			DataManager.removeMetadataValues(getDocument().getId(),getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId());
 			

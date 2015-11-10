@@ -39,6 +39,8 @@ public class IdentifiedDocInstance extends DataTableElement {
 	private CommencePath commencePath;
 	private String snippet;
 	private int snapshotDeleted;
+	private Document document;
+	private long originInstanceId;
 	
 	public IdentifiedDocInstance() {
 		setMetadataValues(new ArrayList<MetadataValue>());
@@ -88,7 +90,9 @@ public class IdentifiedDocInstance extends DataTableElement {
 		this.path = path;
 	}
 	public String getNameWithoutExtension() {
-		return getName().substring(0, getName().lastIndexOf("." + getExtension()));
+		if (getExtension()!=null)
+			return getName().substring(0, getName().lastIndexOf("." + getExtension()));
+		return getName();
 	}
 	public String getVolumePath() {
 		return getPath().equals("") ? getVolume() : getVolume() + "/" + getPath();
@@ -142,7 +146,16 @@ public class IdentifiedDocInstance extends DataTableElement {
 				fis = new FileInputStream(file.getAbsolutePath());
 			}
 			catch (FileNotFoundException e) {
-				System.err.println("Cannot read content from " + getUnixMountedPath() +" because the file is not found.");
+				String log = "DOC-" + getDocument().getId() + ": Cannot found " + getFullyQualifiedPath();
+				if (getSnapshotDeleted() > 0) {
+					log += " as expected";
+					System.out.println(log);
+				}
+				else {
+					log += " unexpectedly";
+					System.out.println(log);		
+					System.err.println(log);				
+				}
 				return content;
 			}
 		}
@@ -206,12 +219,18 @@ public class IdentifiedDocInstance extends DataTableElement {
 					}
 				}
 			}
+			else if (getExtension().toUpperCase().equals("TXT")) {
+				int contentByte;
+				while ((contentByte = fis.read()) != -1) {
+					content += String.valueOf((char) contentByte);
+				}
+			}
 			else {
-				System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due unsupported file format.");	
+				//System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to unsupported file format.");	
 			}	
 		}
 		catch (Exception e) {
-			System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to error.");
+			System.err.println("DOC-" + getDocument().getId() + ":Cannot read content from " + getName() + " ("+ getId() +") due to error.");
 		}
 		finally {
 			try {
@@ -258,4 +277,21 @@ public class IdentifiedDocInstance extends DataTableElement {
 	public void setSnapshotDeleted(int snapshotDeleted) {
 		this.snapshotDeleted = snapshotDeleted;
 	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public long getOriginInstanceId() {
+		return originInstanceId;
+	}
+
+	public void setOriginInstanceId(long originInstanceId) {
+		this.originInstanceId = originInstanceId;
+	}
+
 }

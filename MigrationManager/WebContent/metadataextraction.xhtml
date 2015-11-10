@@ -101,9 +101,9 @@
 				            	</p:cellEditor>
 						    </p:column>
 						    <p:column style="width: 10%">    						    				
-							    <p:commandButton icon="ui-icon-closethick" action="#{extractionBean.metadataExtractionRules.rules.remove(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{!metadataExtraction.ruleEditable}" style="width: 2em" />			    				
-							    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{extractionBean.metadataExtractionRules.rules.moveUp(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq 0 || !metadataExtraction.ruleEditable}" style="width: 2em"  />
-							    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{extractionBean.metadataExtractionRules.rules.moveDown(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq metadataExtraction.metadataExtractionRulesLastIndex || !metadataExtraction.ruleEditable}" style="width: 2em" />
+							    <p:commandButton icon="ui-icon-closethick" action="#{extractionBean.metadataExtractionRules.rules.remove(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" style="width: 2em" />			    				
+							    <p:commandButton icon="ui-icon-arrowthick-1-n" action="#{extractionBean.metadataExtractionRules.rules.moveUp(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq 0}" style="width: 2em"  />
+							    <p:commandButton icon="ui-icon-arrowthick-1-s" action="#{extractionBean.metadataExtractionRules.rules.moveDown(metadataExtractionRule)}" update="metadataExtractionRules" ajax="true" disabled="#{rowIndex eq extractionBean.metadataExtractionRulesLastIndex}" style="width: 2em" />
 							</p:column>
 							<p:ajax event="cellEdit" update="@this" />
 						</p:dataTable>
@@ -116,7 +116,7 @@
 					<br />
 					
 					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
-						<h:outputText value="Extracting Metadata..." />
+						<h:outputText value="#{extractionBean.status}" />
 					</p:dialog>
 					
 					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
@@ -128,8 +128,7 @@
 					
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
 					
-					<p:panel header="Preview Result" toggleable="true">
-						
+					<p:panel header="Preview Result" toggleable="true">						
 						<p:dataTable id="preview" var="identifiedDocInstance" value="#{extractionBean.latestSnapshotInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
 						        <h:outputText value="#{identifiedDocInstance.path}" />
@@ -143,8 +142,7 @@
 						    <p:column headerText="Source" sortBy="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}">
 						        <h:outputText value="#{identifiedDocInstance.metadataValue.metadataExtractionRule.source}" />
 						    </p:column>
-						</p:dataTable>
-					
+						</p:dataTable>					
 					</p:panel>
 				
 				</h:form>

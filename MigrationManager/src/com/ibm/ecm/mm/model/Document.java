@@ -11,6 +11,7 @@ public class Document extends DataTableElement {
 	private String team;
 	private boolean isNoPdf;
 	private boolean isOfficeDoc;
+	private boolean includeLinkedFile;
 	private DataTableArrayList<CommencePath> commencePaths;
 	private DataTableArrayList<IdentificationRule> identificationRules;
 	
@@ -99,6 +100,14 @@ public class Document extends DataTableElement {
 
 	public void setOfficeDoc(boolean isOfficeDoc) {
 		this.isOfficeDoc = isOfficeDoc;
+	}
+
+	public boolean isIncludeLinkedFile() {
+		return includeLinkedFile;
+	}
+
+	public void setIncludeLinkedFile(boolean includeLinkedFile) {
+		this.includeLinkedFile = includeLinkedFile;
 	}
 
 	public ArrayList<MetadataProperty> getMetadataProperties() {

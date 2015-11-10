@@ -34,8 +34,9 @@
 					<br />
 					
 					<p:commandButton value="Run All Documents" action="#{identificationBean.runAll}" update="growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.allDocumentsSelected}" />	
-					
-					
+					<p:spacer width="5" height="10" /> 
+					<p:commandButton value="Run All and Extract Metadata" action="#{identificationBean.runExtractAll}" update="growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.allDocumentsSelected}" />	
+										
 					<p:panel id="commencePathPanel" header="Source Locations" toggleable="true" rendered="#{identificationBean.documentSelected}">
 					
 						<p:dataTable id="commencePaths" var="commencePath" value="#{identificationBean.document.commencePaths}" editable="true" editMode="cell" rowIndexVar="rowIndex">
@@ -168,6 +169,13 @@
 						<h:outputText id="noPdfTxt" value="Ignore PDF" />
 						<p:tooltip for="noPdfCb,noPdfTxt" value="Ignore the PDF version if two files with identical names exist in the same folder" />						
 						
+						<p:selectBooleanCheckbox id="includeLinkedFileCb" value="#{identificationBean.document.includeLinkedFile}">
+						    <p:ajax event="change" update="@this" />
+						</p:selectBooleanCheckbox>
+						<p:spacer width="5" height="10" /> 
+						<h:outputText id="includeLinkedFileTxt" value="Include linked files" />
+						<p:tooltip for="includeLinkedFileCb,includeLinkedFileTxt" value="Include all files that the identified PowerPoint files link to, recurrsively" />						
+						
 					</p:panel>
 						
 					<br />
@@ -179,8 +187,8 @@
 					<p:spacer width="5" height="10" /> 
 					<p:commandButton value="Run" action="#{identificationBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
 					<p:spacer width="5" height="10" /> 
-					<p:commandButton value="Run and Extract Metadata" action="#{identificationBean.runAndExtract}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
-						
+					<p:commandButton value="Run And Extract Metadata" action="#{identificationBean.runAndExtract}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
+					
 					<br />
 					<br />
 					

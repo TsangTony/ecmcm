@@ -3,6 +3,8 @@ package com.ibm.ecm.mm.bean;
 import java.util.ArrayList;
 
 import com.ibm.ecm.mm.model.Document;
+import com.ibm.ecm.mm.model.DocumentInstancePair;
+import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.ReportManager;
 
@@ -10,16 +12,15 @@ import com.ibm.ecm.mm.util.ReportManager;
 public class ReportBean {
 	private ArrayList<Document> documents;
 	private ArrayList<Document> filteredDocument;
-	private boolean documentStatusReport;
-	private boolean metadataStatusReport;
+	private ArrayList<IdentifiedDocInstance> filteredInstance;
+	private ArrayList<DocumentInstancePair> filteredInstancePair;
 	private ArrayList<String> reports;
 	private String report;
 
 	public ReportBean() {
 		setDocuments(DataManager.getDocumentStatusReport());
-		setDocumentStatusReport(false);
-		setMetadataStatusReport(false);
 		setReports(ReportManager.getReports());
+		setReport("");
 	}
 	
 	public ArrayList<Document> getDocuments() {
@@ -44,6 +45,14 @@ public class ReportBean {
 		}
 		return documents;
 	}
+	
+	public ArrayList<IdentifiedDocInstance> getIntraTeamDuplicates() {
+		return DataManager.getIntraTeamDuplicates();
+	}
+	
+	public ArrayList<DocumentInstancePair> getInterTeamDuplicates() {
+		return DataManager.getInterTeamDuplicates();
+	}
 
 	public void setDocuments(ArrayList<Document> documents) {
 		this.documents = documents;
@@ -57,20 +66,36 @@ public class ReportBean {
 		this.filteredDocument = filteredDocument;
 	}
 
-	public boolean isDocumentStatusReport() {
-		return documentStatusReport;
+	public ArrayList<IdentifiedDocInstance> getFilteredInstance() {
+		return filteredInstance;
 	}
 
-	public void setDocumentStatusReport(boolean documentStatusReport) {
-		this.documentStatusReport = documentStatusReport;
+	public void setFilteredInstance(ArrayList<IdentifiedDocInstance> filteredInstance) {
+		this.filteredInstance = filteredInstance;
+	}
+
+	public ArrayList<DocumentInstancePair> getFilteredInstancePair() {
+		return filteredInstancePair;
+	}
+
+	public void setFilteredInstancePair(ArrayList<DocumentInstancePair> filteredInstancePair) {
+		this.filteredInstancePair = filteredInstancePair;
+	}
+
+	public boolean isDocumentStatusReport() {
+		return getReport().equals(ReportManager.DOCUMENT_STATUS_REPORT);
 	}
 
 	public boolean isMetadataStatusReport() {
-		return metadataStatusReport;
+		return getReport().equals(ReportManager.METADATA_STATUS_REPORT);
 	}
 
-	public void setMetadataStatusReport(boolean metadataStatusReport) {
-		this.metadataStatusReport = metadataStatusReport;
+	public boolean isIntraTeamDuplicateReport() {
+		return getReport().equals(ReportManager.INTRA_TEAM_DUPLICATE_REPORT);
+	}
+
+	public boolean isInterTeamDuplicateReport() {
+		return getReport().equals(ReportManager.INTER_TEAM_DUPLICATE_REPORT);
 	}
 
 	public ArrayList<String> getReports() {
@@ -90,14 +115,7 @@ public class ReportBean {
 	}
 	
 	public void reportSelected() {
-		if (getReport().equals(ReportManager.DOCUMENT_STATUS_REPORT)) {
-			setDocumentStatusReport(true);
-			setMetadataStatusReport(false);
-		}
-		else if (getReport().equals(ReportManager.METADATA_STATUS_REPORT)) {
-			setDocumentStatusReport(false);
-			setMetadataStatusReport(true);
-		}
+		
 		
 	}
 	

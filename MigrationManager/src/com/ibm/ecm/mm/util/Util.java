@@ -30,8 +30,6 @@ public class Util {
 			if (matcher.find())
 				value = matcher.group();
 		}
-		if (!value.equals(""))
-			System.out.println("Value found :" + value);
 		return value;
 	}
 	
@@ -58,10 +56,8 @@ public class Util {
 	public static String findRegex(String searchString, Lookup lookup, String sequence) {
 		String value = "";
 		
-		if (!findRegex(searchString, delimited(lookup.getLookupValue()), sequence).equals("")) {
-			System.out.println(lookup.getReturnedValue());
+		if (!findRegex(searchString, delimited(lookup.getLookupValue()), sequence).equals(""))
 			return lookup.getReturnedValue();
-		}
 		
 		return value;
 	}

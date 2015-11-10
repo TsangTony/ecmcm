@@ -132,16 +132,17 @@ public class IdentificationBean {
 	public void save() {
 		try {
 			Connection conn = ConnectionManager.getConnection("save");
-					
+			
 			/*
-			 *  BL Identification Rule, is no pdf, is office doc
+			 *  BL Identification Rule, is no pdf, is office doc, include linked file
 			 */
 			
-			PreparedStatement updatDocumentStmt = conn.prepareStatement("UPDATE Document SET bl_identification_rule=?, is_no_pdf=?, is_office_doc=? WHERE id = ?");
+			PreparedStatement updatDocumentStmt = conn.prepareStatement("UPDATE Document SET bl_identification_rule=?, is_no_pdf=?, is_office_doc=?, include_linked_file=? WHERE id = ?");
 			updatDocumentStmt.setString(1, getDocument().getBlIdentificationRule());
 			updatDocumentStmt.setBoolean(2, getDocument().isNoPdf());
 			updatDocumentStmt.setBoolean(3, getDocument().isOfficeDoc());
-			updatDocumentStmt.setInt(4, getDocument().getId());
+			updatDocumentStmt.setBoolean(4, getDocument().isIncludeLinkedFile());
+			updatDocumentStmt.setInt(5, getDocument().getId());
 			updatDocumentStmt.execute();
 			
 			
@@ -261,8 +262,34 @@ public class IdentificationBean {
 		String summary = null;
 		String message = "";
 		try {
+			System.out.println("DOC-" + getDocument().getId() + ": Run Identification 1/2 ");
 			setIdentifiedDocInstances(IdentificationManager.identify(getDocument()));
-			IdentificationManager.saveIdentifiedDocInstances(getDocument(), getIdentifiedDocInstances());
+			System.out.println("DOC-" + getDocument().getId() + ": Run Identification 2/2 ");
+			IdentificationManager.saveIdentifiedDocInstances(getDocument(), getIdentifiedDocInstances(), false);
+			severity = FacesMessage.SEVERITY_INFO;
+			summary = "Successful";
+			message = getDocument().toString() + " is identified.";
+		}
+		catch (Exception e) {
+			severity = FacesMessage.SEVERITY_ERROR;
+			summary = e.getClass().getName();
+			if (e.getMessage() != null)
+				message += e.getMessage() + ".";
+			message += getDocument().toString() + " is not identified.";
+			e.printStackTrace();
+		}
+		finally {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
+		}
+	}
+	
+	public void runAndExtract() {
+		Severity severity = null;
+		String summary = null;
+		String message = "";
+		try {
+			setIdentifiedDocInstances(IdentificationManager.identify(getDocument()));
+			IdentificationManager.saveIdentifiedDocInstances(getDocument(), getIdentifiedDocInstances(), false);
 			severity = FacesMessage.SEVERITY_INFO;
 			summary = "Successful";
 			message = getDocument().toString() + " is identified.";
@@ -290,7 +317,7 @@ public class IdentificationBean {
 				if (document.getId() != 0) {
 					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
 					document.setIdentificationRules(DataManager.getIdentificationRules(document.getId()));	
-					IdentificationManager.saveIdentifiedDocInstances(document, IdentificationManager.identify(document));
+					IdentificationManager.saveIdentifiedDocInstances(document, IdentificationManager.identify(document), false);
 					successDoc += document.getId() + ",";
 				}
 			}
@@ -309,6 +336,43 @@ public class IdentificationBean {
 				message += "No document is identified.";
 			else	
 				message += "Only the following documents are identified: " + successDoc;
+			e.printStackTrace();
+		}
+		finally {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
+		}
+	}
+	
+
+	public void runExtractAll() {
+		String successDoc = "";
+		Severity severity = null;
+		String summary = null;
+		String message = "";
+		try {
+			for (Document document : getDocuments()) {
+				if (document.getId() != 0) {
+					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
+					document.setIdentificationRules(DataManager.getIdentificationRules(document.getId()));	
+					IdentificationManager.saveIdentifiedDocInstances(document, IdentificationManager.identify(document), true);
+					successDoc += document.getId() + ",";
+				}
+			}
+			successDoc = successDoc.substring(0,successDoc.length()-2);
+			severity = FacesMessage.SEVERITY_INFO;
+			summary = "Successful";
+			message = "The following documents are identified and metadata are extracted: " + successDoc;
+			
+		}
+		catch (Exception e) {
+			severity = FacesMessage.SEVERITY_ERROR;
+			summary = e.getClass().getName();
+			if (e.getMessage() != null)
+				message += e.getMessage() + ".";
+			if (successDoc.equals(""))
+				message += "No document is identified.";
+			else	
+				message += "Only the following documents are identified and metadata are extracted: " + successDoc;
 			e.printStackTrace();
 		}
 		finally {
