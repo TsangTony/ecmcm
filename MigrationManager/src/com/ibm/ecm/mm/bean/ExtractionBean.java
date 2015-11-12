@@ -222,7 +222,6 @@ public class ExtractionBean {
 						getMultipliedMetadataExtractionRules().add(metadataExtractionRules);
 					}
 				}
-				setStatus("1");				
 				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getDocument(), getCommencePath()), getMultipliedMetadataExtractionRules()));
 			}
 			else {

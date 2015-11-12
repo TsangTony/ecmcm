@@ -225,8 +225,10 @@ public class ExtractionManager {
 		int defaultCount = 0;
 		
 		int count = 1;
+		boolean commencePathMatch = false;
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-			System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": Extracting metadata " + count + "/" + identifiedDocInstances.size());
+			if (count % 50 == 0)
+				System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": Extracting metadata " + count + "/" + identifiedDocInstances.size());
 					
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
@@ -242,12 +244,16 @@ public class ExtractionManager {
 						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Default"))
 							defaultCount++;
 					}	
+					commencePathMatch = true;
 					break;
 				}
+			}		
+			if (!commencePathMatch) {
+				System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": No commence path matching metadata extraction rule for " + identifiedDocInstance.getFullyQualifiedPath());
 				
-				System.gc();
-			}			
+			}
 			count++;
+			System.gc();
 		}
 		
 		if (filePathCount + contentCount < totalCount * 0.8f)

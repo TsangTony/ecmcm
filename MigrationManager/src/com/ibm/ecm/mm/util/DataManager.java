@@ -388,6 +388,7 @@ public class DataManager {
 	}	
 
 	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath) {
+		System.out.println("DOC-" + document.getId() + ": Getting identified document instances");
 		if (commencePath!=null && commencePath.getId()==0)
 			commencePath = null;
 		
@@ -423,11 +424,11 @@ public class DataManager {
 					for (CommencePath docCommencePath : document.getCommencePaths()) {
 						if (docCommencePath.getId()==0)
 							continue;
-						if (identifiedDocInstance.getVolumePath().startsWith(docCommencePath.getActualPath())) {
+						if (identifiedDocInstance.getVolumePath().toUpperCase().startsWith(docCommencePath.getActualPath().toUpperCase())) {
 							identifiedDocInstance.setCommencePath(docCommencePath);
 							break;
 						}
-						System.out.println("No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+						System.out.println("DOC-" + document.getId() + ": No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
 					}
 				}
 				
@@ -716,6 +717,7 @@ public class DataManager {
 						+ "                            metadata_extraction_rule.metadata_property_id) S2XMP "
 						+ "              ON document.id = S2XMP.document_id "
 						+ "                 AND metadata_property.id = S2XMP.metadata_property_id "
+						+ "WHERE  Document.is_cm_qualified = 1 "
 						+ "ORDER  BY document.id";
 
 			

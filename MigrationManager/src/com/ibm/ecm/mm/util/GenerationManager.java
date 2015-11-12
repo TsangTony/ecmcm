@@ -51,7 +51,8 @@ public class GenerationManager {
 						+ "   ON Document.team_id = Team.id"
 						+ " LEFT JOIN IG_Security_Class"
 						+ "   ON Document.ig_security_class_id = IG_Security_Class.id "
-						+ "WHERE Identified_Document_Instance.snapshot_deleted IS NULL";
+						+ "WHERE Identified_Document_Instance.snapshot_deleted IS NULL"
+			            + "  AND Document.release = 1 ";
 		    
 	        if (documentClassId != 0) {
 	        	 query += " AND Document_Class.id = " + documentClassId;

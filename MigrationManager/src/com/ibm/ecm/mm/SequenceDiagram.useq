@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence-diagram version="1.1.8" icons="true">  
+  <object id="1" language="java" name="com.ibm.ecm.mm.bean.ExtractionBean" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/bean/ExtractionBean.java" binary="false" label="extractionBean" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="81" y="0"/>    
+    <execution id="2">      
+      <position height="429" width="0" x="0" y="318"/>    
+    </execution>    
+    <execution id="4">      
+      <position height="366" width="0" x="0" y="360"/>    
+    </execution>    
+    <execution id="9">      
+      <position height="219" width="0" x="0" y="81"/>    
+    </execution>    
+    <execution id="11">      
+      <position height="156" width="0" x="0" y="123"/>    
+    </execution>    
+    <execution id="14">      
+      <position height="84" width="0" x="0" y="771"/>    
+    </execution>    
+    <execution id="16">      
+      <position height="21" width="0" x="0" y="813"/>    
+    </execution>    
+    <execution id="17">      
+      <position height="806" width="0" x="0" y="887"/>    
+    </execution>    
+    <execution id="19">      
+      <position height="743" width="0" x="0" y="929"/>    
+    </execution>    
+    <execution id="21">      
+      <position height="668" width="0" x="0" y="983"/>    
+    </execution>    
+    <execution id="28">      
+      <position height="2616" width="0" x="0" y="1741"/>    
+    </execution>    
+    <execution id="30">      
+      <position height="2553" width="0" x="0" y="1783"/>    
+    </execution>  
+  </object>  
+  <object id="35" language="java" name="com.ibm.ecm.mm.util.ExtractionManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/ExtractionManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="27">      
+      <position height="345" width="0" x="0" y="1285"/>    
+    </execution>    
+    <execution id="32">      
+      <position height="2450" width="0" x="0" y="1823"/>    
+    </execution>    
+    <execution id="41">      
+      <position height="2383" width="0" x="0" y="1869"/>    
+    </execution>  
+  </object>  
+  <object id="138" language="java" name="com.ibm.ecm.mm.model.MetadataValue" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/model/MetadataValue.java" binary="false" label="metadataValue" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="43">      
+      <position height="21" width="0" x="0" y="1900"/>    
+    </execution>    
+    <execution id="45">      
+      <position height="21" width="0" x="0" y="1942"/>    
+    </execution>    
+    <execution id="61">      
+      <position height="21" width="0" x="0" y="2278"/>    
+    </execution>    
+    <execution id="65">      
+      <position height="21" width="0" x="0" y="2362"/>    
+    </execution>    
+    <execution id="115">      
+      <position height="21" width="0" x="0" y="3748"/>    
+    </execution>    
+    <execution id="119">      
+      <position height="21" width="0" x="0" y="3832"/>    
+    </execution>    
+    <execution id="123">      
+      <position height="21" width="0" x="0" y="3916"/>    
+    </execution>    
+    <execution id="125">      
+      <position height="21" width="0" x="0" y="3958"/>    
+    </execution>    
+    <execution id="127">      
+      <position height="21" width="0" x="0" y="4000"/>    
+    </execution>    
+    <execution id="135">      
+      <position height="21" width="0" x="0" y="4168"/>    
+    </execution>    
+    <execution id="137">      
+      <position height="21" width="0" x="0" y="4210"/>    
+    </execution>  
+  </object>  
+  <object id="139" language="java" name="com.ibm.ecm.mm.model.MetadataExtractionRules" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/model/MetadataExtractionRules.java" binary="false" 
+    label="metadataExtractionRules" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="47">      
+      <position height="21" width="0" x="0" y="1984"/>    
+    </execution>    
+    <execution id="67">      
+      <position height="21" width="0" x="0" y="2404"/>    
+    </execution>    
+    <execution id="69">      
+      <position height="21" width="0" x="0" y="2446"/>    
+    </execution>    
+    <execution id="71">      
+      <position height="21" width="0" x="0" y="2488"/>    
+    </execution>    
+    <execution id="73">      
+      <position height="21" width="0" x="0" y="2572"/>    
+    </execution>    
+    <execution id="75">      
+      <position height="21" width="0" x="0" y="2656"/>    
+    </execution>    
+    <execution id="79">      
+      <position height="21" width="0" x="0" y="2782"/>    
+    </execution>    
+    <execution id="83">      
+      <position height="21" width="0" x="0" y="2908"/>    
+    </execution>    
+    <execution id="97">      
+      <position height="21" width="0" x="0" y="3244"/>    
+    </execution>    
+    <execution id="103">      
+      <position height="21" width="0" x="0" y="3412"/>    
+    </execution>    
+    <execution id="109">      
+      <position height="21" width="0" x="0" y="3580"/>    
+    </execution>  
+  </object>  
+  <object id="140" language="java" name="com.ibm.ecm.mm.model.MetadataExtractionRule" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/model/MetadataExtractionRule.java" binary="false" 
+    label="metadataExtractionRule" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="49">      
+      <position height="21" width="0" x="0" y="2026"/>    
+    </execution>    
+    <execution id="55">      
+      <position height="21" width="0" x="0" y="2152"/>    
+    </execution>    
+    <execution id="59">      
+      <position height="21" width="0" x="0" y="2236"/>    
+    </execution>    
+    <execution id="63">      
+      <position height="21" width="0" x="0" y="2320"/>    
+    </execution>    
+    <execution id="131">      
+      <position height="21" width="0" x="0" y="4084"/>    
+    </execution>    
+    <execution id="133">      
+      <position height="21" width="0" x="0" y="4126"/>    
+    </execution>  
+  </object>  
+  <object id="141" language="java" name="com.ibm.ecm.mm.model.IdentifiedDocInstance" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/model/IdentifiedDocInstance.java" binary="false" 
+    label="identifiedDocInstance" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="51">      
+      <position height="21" width="0" x="0" y="2068"/>    
+    </execution>    
+    <execution id="53">      
+      <position height="21" width="0" x="0" y="2110"/>    
+    </execution>    
+    <execution id="57">      
+      <position height="21" width="0" x="0" y="2194"/>    
+    </execution>  
+  </object>  
+  <object id="142" language="java" name="java.text.SimpleDateFormat" project="MigrationManager" 
+    file="C:/Program Files/Java/jre7/lib/rt.jar" binary="true" label="outputSdf" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="77">      
+      <position height="21" width="0" x="0" y="2740"/>    
+    </execution>    
+    <execution id="81">      
+      <position height="21" width="0" x="0" y="2866"/>    
+    </execution>    
+    <execution id="85">      
+      <position height="21" width="0" x="0" y="2992"/>    
+    </execution>    
+    <execution id="99">      
+      <position height="21" width="0" x="0" y="3328"/>    
+    </execution>    
+    <execution id="101">      
+      <position height="21" width="0" x="0" y="3370"/>    
+    </execution>    
+    <execution id="105">      
+      <position height="21" width="0" x="0" y="3496"/>    
+    </execution>    
+    <execution id="107">      
+      <position height="21" width="0" x="0" y="3538"/>    
+    </execution>    
+    <execution id="117">      
+      <position height="21" width="0" x="0" y="3790"/>    
+    </execution>  
+  </object>  
+  <object id="143" language="java" name="java.text.SimpleDateFormat" project="MigrationManager" 
+    file="C:/Program Files/Java/jre7/lib/rt.jar" binary="true" label="inputSdf" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="87">      
+      <position height="21" width="0" x="0" y="3034"/>    
+    </execution>    
+    <execution id="95">      
+      <position height="21" width="0" x="0" y="3202"/>    
+    </execution>  
+  </object>  
+  <object id="144" language="java" name="com.ibm.ecm.mm.model.Lookup" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/model/Lookup.java" binary="false" label="lookup" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="89">      
+      <position height="21" width="0" x="0" y="3076"/>    
+    </execution>    
+    <execution id="93">      
+      <position height="21" width="0" x="0" y="3160"/>    
+    </execution>  
+  </object>  
+  <object id="145" language="java" name="com.ibm.ecm.mm.util.Util" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/Util.java" binary="false" label="&lt;static&gt;" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="91">      
+      <position height="21" width="0" x="0" y="3118"/>    
+    </execution>    
+    <execution id="121">      
+      <position height="21" width="0" x="0" y="3874"/>    
+    </execution>    
+    <execution id="129">      
+      <position height="21" width="0" x="0" y="4042"/>    
+    </execution>  
+  </object>  
+  <object id="146" language="java" name="java.util.Date" project="MigrationManager" 
+    file="C:/Program Files/Java/jre7/lib/rt.jar" binary="true" label="dateParsed" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="111">      
+      <position height="21" width="0" x="0" y="3664"/>    
+    </execution>    
+    <execution id="113">      
+      <position height="21" width="0" x="0" y="3706"/>    
+    </execution>  
+  </object>  
+  <object id="147" language="java" name="com.ibm.ecm.mm.util.DataManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/DataManager.java" binary="false" label="&lt;static&gt;" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="6">      
+      <position height="115" width="0" x="0" y="397"/>    
+    </execution>    
+    <execution id="8">      
+      <position height="159" width="0" x="0" y="546"/>    
+    </execution>    
+    <execution id="13">      
+      <position height="107" width="0" x="0" y="151"/>    
+    </execution>    
+    <execution id="23">      
+      <position height="75" width="0" x="0" y="1021"/>    
+    </execution>    
+    <execution id="25">      
+      <position height="118" width="0" x="0" y="1126"/>    
+    </execution>    
+    <execution id="34">      
+      <position height="21" width="0" x="0" y="4294"/>    
+    </execution>    
+    <execution id="37">      
+      <position height="155" width="0" x="0" y="1319"/>    
+    </execution>    
+    <execution id="39">      
+      <position height="110" width="0" x="0" y="1499"/>    
+    </execution>  
+  </object>  
+  <object id="176" language="java" name="com.ibm.ecm.mm.util.ConnectionManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/ConnectionManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="163">      
+      <position height="21" width="0" x="0" y="1054"/>    
+    </execution>    
+    <execution id="161">      
+      <position height="21" width="0" x="0" y="1021"/>    
+    </execution>    
+    <execution id="165">      
+      <position height="21" width="0" x="0" y="1166"/>    
+    </execution>    
+    <execution id="167">      
+      <position height="21" width="0" x="0" y="1202"/>    
+    </execution>    
+    <execution id="157">      
+      <position height="21" width="0" x="0" y="177"/>    
+    </execution>    
+    <execution id="159">      
+      <position height="21" width="0" x="0" y="216"/>    
+    </execution>    
+    <execution id="149">      
+      <position height="21" width="0" x="0" y="431"/>    
+    </execution>    
+    <execution id="151">      
+      <position height="21" width="0" x="0" y="470"/>    
+    </execution>    
+    <execution id="153">      
+      <position height="21" width="0" x="0" y="609"/>    
+    </execution>    
+    <execution id="155">      
+      <position height="21" width="0" x="0" y="663"/>    
+    </execution>    
+    <execution id="169">      
+      <position height="21" width="0" x="0" y="1382"/>    
+    </execution>    
+    <execution id="171">      
+      <position height="21" width="0" x="0" y="1432"/>    
+    </execution>    
+    <execution id="173">      
+      <position height="21" width="0" x="0" y="1520"/>    
+    </execution>    
+    <execution id="175">      
+      <position height="21" width="0" x="0" y="1567"/>    
+    </execution>  
+  </object>  
+  <message id="3" operation="documentSelected():void">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>  
+  <message id="5" operation="getCommencePaths(int):com.ibm.ecm.mm.model.DataTableArrayList&lt;CommencePath&gt;">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="6"/>  
+  </message>  
+  <message id="7" operation="getMetadataPropreties(int):java.util.ArrayList&lt;MetadataProperty&gt;">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="8"/>  
+  </message>  
+  <message id="10" operation="ExtractionBean()">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="11"/>  
+  </message>  
+  <message id="12" operation="getDocuments():java.util.ArrayList&lt;Document&gt;">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="13"/>  
+  </message>  
+  <message id="15" operation="commencePathSelected():void">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="16"/>  
+  </message>  
+  <message id="18" operation="metadataPropertySeletced():void">    
+    <end type="SOURCE" refId="17"/>    
+    <end type="TARGET" refId="19"/>  
+  </message>  
+  <message id="20" operation="optionSet():void">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="21"/>  
+  </message>  
+  <message id="22" 
+    operation="getMetadataExtractionRules(int,int,int):com.ibm.ecm.mm.model.DataTableArrayList&lt;MetadataExtractionRule&gt;">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="23"/>  
+  </message>  
+  <message id="24" operation="getLookups(int):java.util.ArrayList&lt;Lookup&gt;">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="25"/>  
+  </message>  
+  <message id="26" 
+    operation="createDefaultMetadataExtractionRules(com.ibm.ecm.mm.model.MetadataProperty,int):com.ibm.ecm.mm.model.MetadataExtractionRules">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="27"/>  
+  </message>  
+  <message id="29" operation="preview():boolean">    
+    <end type="SOURCE" refId="28"/>    
+    <end type="TARGET" refId="30"/>  
+  </message>  
+  <message id="31" 
+    operation="extractMetadata(com.ibm.ecm.mm.model.IdentifiedDocInstances,java.util.ArrayList&lt;com.ibm.ecm.mm.model.MetadataExtractionRules&gt;):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="32"/>  
+  </message>  
+  <message id="33" 
+    operation="getIdentifiedDocInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.CommencePath):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="34"/>  
+  </message>  
+  <message id="36" operation="getLookups(int):java.util.ArrayList&lt;Lookup&gt;">    
+    <end type="SOURCE" refId="27"/>    
+    <end type="TARGET" refId="37"/>  
+  </message>  
+  <message id="38" 
+    operation="addMetadataExtractionRule(java.util.ArrayList&lt;com.ibm.ecm.mm.model.MetadataExtractionRule&gt;,int,int,boolean):void">    
+    <end type="SOURCE" refId="27"/>    
+    <end type="TARGET" refId="39"/>  
+  </message>  
+  <message id="40" 
+    operation="extractMetadata(com.ibm.ecm.mm.model.IdentifiedDocInstance,com.ibm.ecm.mm.model.MetadataExtractionRules):com.ibm.ecm.mm.model.MetadataValue">    
+    <end type="SOURCE" refId="32"/>    
+    <end type="TARGET" refId="41"/>  
+  </message>  
+  <message id="42" operation="MetadataValue()">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="43"/>  
+  </message>  
+  <message id="44" operation="setValue(java.lang.String):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="45"/>  
+  </message>  
+  <message id="46" operation="getRules():com.ibm.ecm.mm.model.DataTableArrayList&lt;MetadataExtractionRule&gt;">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="47"/>  
+  </message>  
+  <message id="48" operation="getSource():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="49"/>  
+  </message>  
+  <message id="50" operation="getVolumePath():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="51"/>  
+  </message>  
+  <message id="52" operation="getNameWithoutExtension():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="53"/>  
+  </message>  
+  <message id="54" operation="getSource():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="55"/>  
+  </message>  
+  <message id="56" operation="getContent():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="57"/>  
+  </message>  
+  <message id="58" operation="getSource():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="59"/>  
+  </message>  
+  <message id="60" operation="setValue(java.lang.String):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="61"/>  
+  </message>  
+  <message id="62" operation="getDefaultValue():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="63"/>  
+  </message>  
+  <message id="64" operation="setMetadataExtractionRule(com.ibm.ecm.mm.model.MetadataExtractionRule):void">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="65"/>  
+  </message>  
+  <message id="66" operation="isDefault():boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="67"/>  
+  </message>  
+  <message id="68" operation="getLookups():java.util.ArrayList&lt;Lookup&gt;">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="69"/>  
+  </message>  
+  <message id="70" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="71"/>  
+  </message>  
+  <message id="72" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="73"/>  
+  </message>  
+  <message id="74" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="75"/>  
+  </message>  
+  <message id="76" operation="SimpleDateFormat(java.lang.String)">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="77"/>  
+  </message>  
+  <message id="78" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="79"/>  
+  </message>  
+  <message id="80" operation="SimpleDateFormat(java.lang.String)">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="81"/>  
+  </message>  
+  <message id="82" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="83"/>  
+  </message>  
+  <message id="84" operation="SimpleDateFormat(java.lang.String)">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="85"/>  
+  </message>  
+  <message id="86" operation="SimpleDateFormat(java.lang.String)">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="87"/>  
+  </message>  
+  <message id="88" operation="getReturnedValue():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="89"/>  
+  </message>  
+  <message id="90" operation="findRegex(java.lang.String,java.lang.String,java.lang.String):java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="91"/>  
+  </message>  
+  <message id="92" operation="getLookupValue():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="93"/>  
+  </message>  
+  <message id="94" operation="parse(java.lang.String):java.util.Date">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="95"/>  
+  </message>  
+  <message id="96" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="97"/>  
+  </message>  
+  <message id="98" operation="parse(java.lang.String):java.util.Date">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="99"/>  
+  </message>  
+  <message id="100" operation="parse(java.lang.String):java.util.Date">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="101"/>  
+  </message>  
+  <message id="102" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="103"/>  
+  </message>  
+  <message id="104" operation="parse(java.lang.String):java.util.Date">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="105"/>  
+  </message>  
+  <message id="106" operation="parse(java.lang.String):java.util.Date">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="107"/>  
+  </message>  
+  <message id="108" operation="getMetadataProperty():com.ibm.ecm.mm.model.MetadataProperty">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="109"/>  
+  </message>  
+  <message id="110" operation="before(java.util.Date):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="111"/>  
+  </message>  
+  <message id="112" operation="after(java.util.Date):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="113"/>  
+  </message>  
+  <message id="114" operation="setValue(java.lang.String):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="115"/>  
+  </message>  
+  <message id="116" operation="format(java.util.Date):java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="117"/>  
+  </message>  
+  <message id="118" operation="setValue(java.lang.String):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="119"/>  
+  </message>  
+  <message id="120" 
+    operation="findRegex(java.lang.String,com.ibm.ecm.mm.model.Lookup,java.lang.String):java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="121"/>  
+  </message>  
+  <message id="122" operation="getValue():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="123"/>  
+  </message>  
+  <message id="124" operation="setMetadataExtractionRule(com.ibm.ecm.mm.model.MetadataExtractionRule):void">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="125"/>  
+  </message>  
+  <message id="126" operation="setValue(java.lang.String):boolean">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="127"/>  
+  </message>  
+  <message id="128" operation="findRegex(java.lang.String,java.lang.String,int,java.lang.String):java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="129"/>  
+  </message>  
+  <message id="130" operation="getRegex():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="131"/>  
+  </message>  
+  <message id="132" operation="getCapGroup():int">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="133"/>  
+  </message>  
+  <message id="134" operation="getValue():java.lang.String">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="135"/>  
+  </message>  
+  <message id="136" operation="setMetadataExtractionRule(com.ibm.ecm.mm.model.MetadataExtractionRule):void">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="137"/>  
+  </message>  
+  <message id="148" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="149"/>  
+  </message>  
+  <message id="150" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="151"/>  
+  </message>  
+  <message id="152" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="153"/>  
+  </message>  
+  <message id="154" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="155"/>  
+  </message>  
+  <message id="156" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="157"/>  
+  </message>  
+  <message id="158" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="159"/>  
+  </message>  
+  <message id="160" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="23"/>    
+    <end type="TARGET" refId="161"/>  
+  </message>  
+  <message id="162" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="23"/>    
+    <end type="TARGET" refId="163"/>  
+  </message>  
+  <message id="164" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="165"/>  
+  </message>  
+  <message id="166" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="167"/>  
+  </message>  
+  <message id="168" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="37"/>    
+    <end type="TARGET" refId="169"/>  
+  </message>  
+  <message id="170" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="37"/>    
+    <end type="TARGET" refId="171"/>  
+  </message>  
+  <message id="172" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="39"/>    
+    <end type="TARGET" refId="173"/>  
+  </message>  
+  <message id="174" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="39"/>    
+    <end type="TARGET" refId="175"/>  
+  </message>
+</sequence-diagram>

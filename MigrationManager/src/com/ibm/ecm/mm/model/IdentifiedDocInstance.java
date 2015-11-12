@@ -149,7 +149,7 @@ public class IdentifiedDocInstance extends DataTableElement {
 				String log = "DOC-" + getDocument().getId() + ": Cannot found " + getFullyQualifiedPath();
 				if (getSnapshotDeleted() > 0) {
 					log += " as expected";
-					System.out.println(log);
+					//System.out.println(log);
 				}
 				else {
 					log += " unexpectedly";

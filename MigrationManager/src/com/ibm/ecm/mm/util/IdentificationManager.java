@@ -79,11 +79,12 @@ public class IdentificationManager {
 			 * If there is content rule, read the content and write to dbo.Identified_Doc_Instance.snippet first. After that,
 			 * apply the rules and identify from dbo.Identified_Doc_Instance;
 			 */
-			
+
+			System.out.println("DOC-" + document.getId() + ": Step 1 of 6 Querying the database");
 			identifiedDocInstances = DataManager.getDocInstances(document, false, true);
 			int count = 1;
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				System.out.println("DOC-" + document.getId() + ": Step 1 of 5 Looking into content " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "%");
+				System.out.println("DOC-" + document.getId() + ": Step 2 of 6 Looking into content " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "%");
 				String content = identifiedDocInstance.getContent();
 				if (!content.equals("")) {
 					for (IdentificationRule contentRule : contentRules) {
@@ -98,20 +99,20 @@ public class IdentificationManager {
 				}
 				count++;
 			}
-			System.out.println("DOC-" + document.getId() + ": Step 2 of 5 Writing into Snippet table");
+			System.out.println("DOC-" + document.getId() + ": Step 3 of 6 Writing into Snippet table");
 			DataManager.addSnippet(document.getId(), identifiedDocInstances);
-			System.out.println("DOC-" + document.getId() + ": Step 3 of 5 Querying Snippet table");
+			System.out.println("DOC-" + document.getId() + ": Step 4 of 6 Querying Snippet table");
 			identifiedDocInstances = DataManager.getDocInstances(document, true, false);
-			System.out.println("DOC-" + document.getId() + ": Step 4 of 5 Clearing Snippet table");
+			System.out.println("DOC-" + document.getId() + ": Step 5 of 6 Clearing Snippet table");
 			DataManager.removeSnippet(document.getId());
-			System.out.println("DOC-" + document.getId() + ": Step 5 of 5 Linked file analysis");
+			System.out.println("DOC-" + document.getId() + ": Step 6 of 6 Linked file analysis");
 		}
 		
 		if (document.isIncludeLinkedFile()) {
 			IdentifiedDocInstances linkedDocumentInstances = new IdentifiedDocInstances();
 			int count = 1;
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				System.out.println("DOC-" + document.getId() + ": Identifying linked files " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "%");
+				System.out.println("DOC-" + document.getId() + ": Identifying linked files " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "% - " + identifiedDocInstance.getFullyQualifiedPath());
 				IdentifiedDocInstances newLinkedDocumentInstances = getLinkedDocumentInstances(document,identifiedDocInstance,identifiedDocInstances.getDigests());
 				linkedDocumentInstances.addAll(newLinkedDocumentInstances);
 				linkedDocumentInstances.getLatestSnapshotInstances().addAll(newLinkedDocumentInstances.getLatestSnapshotInstances());
@@ -136,7 +137,7 @@ public class IdentificationManager {
 
 	private static IdentifiedDocInstances getLinkedDocumentInstances(Document document, IdentifiedDocInstance identifiedDocInstance, HashMap<String, Integer> digests) {
 		
-		System.out.println("DOC-" + document.getId() + ": Identifying linked files from " + identifiedDocInstance.getFullyQualifiedPath());
+		//System.out.println("DOC-" + document.getId() + ": Identifying linked files from " + identifiedDocInstance.getFullyQualifiedPath());
 				
 		IdentifiedDocInstances newLinkedDocumentInstances = new IdentifiedDocInstances();
 		ArrayList<String> linksFound = new ArrayList<String>();
@@ -160,7 +161,7 @@ public class IdentificationManager {
 				String log = "DOC-" + document.getId() + ": Cannot found " + identifiedDocInstance.getFullyQualifiedPath();
 				if (identifiedDocInstance.getSnapshotDeleted() > 0) {
 					log += " as expected";
-					System.out.println(log);
+					//System.out.println(log);
 				}
 				else {
 					log += " unexpectedly";
@@ -174,22 +175,24 @@ public class IdentificationManager {
 		try {
 			if (identifiedDocInstance.getExtension().toUpperCase().equals("PPT") ||
 				identifiedDocInstance.getExtension().toUpperCase().equals("PPS")) {
-				System.out.println("DOC-" + document.getId() + ": reading content from " + identifiedDocInstance.getFullyQualifiedPath());
+				//System.out.println("DOC-" + document.getId() + ": reading content from " + identifiedDocInstance.getFullyQualifiedPath());
 				SlideShow slideShow = new SlideShow(fis);
 				Slide[] slides = slideShow.getSlides();
 				for (Slide slide : slides) {
 					TextRun[] textRuns = slide.getTextRuns();
 					for (TextRun textRun : textRuns) {
-						Hyperlink[] hyperlinks = textRun.getHyperlinks();
-						for (Hyperlink hyperlink : hyperlinks)
-							if (hyperlink.getAddress() != null)
-								linksFound.add(hyperlink.getAddress());		
+						if (textRun != null) {
+							Hyperlink[] hyperlinks = textRun.getHyperlinks();
+							for (Hyperlink hyperlink : hyperlinks)
+								if (hyperlink != null && hyperlink.getAddress() != null)
+									linksFound.add(hyperlink.getAddress());		
+						}
 					}
 				}	
 			}
 			else if (identifiedDocInstance.getExtension().toUpperCase().equals("PPTX") ||
 					identifiedDocInstance.getExtension().toUpperCase().equals("PPSX")) {	
-				System.out.println("DOC-" + document.getId() + ": reading content from " + identifiedDocInstance.getFullyQualifiedPath());
+				//System.out.println("DOC-" + document.getId() + ": reading content from " + identifiedDocInstance.getFullyQualifiedPath());
 				XMLSlideShow slideShow = new XMLSlideShow(fis);
 				XSLFSlide[] slides = slideShow.getSlides();
 				for (XSLFSlide slide : slides) {
@@ -216,26 +219,40 @@ public class IdentificationManager {
 			}
 			
 			for (String link : linksFound) {
+				link = link.replace("file:///cpadm001.corp.cathaypacific.com/clk/APPFOLDER", "\\\\10.210.225.24");
+				link = link.replace("file:///clkcbt01", "\\\\10.210.225.24");
+				
 				link = link.replace("\\", "/");
 				if (link.startsWith("//"))
 					link.replaceFirst("//","\\\\");
 
 				link = link.replace("%20", " ");
 				
-				if (!link.contains("/"))
+				if (link.startsWith("../")) {
+					String prefix = "\\\\" + identifiedDocInstance.getServer() + "/" + identifiedDocInstance.getVolumePath();
+					while (link.startsWith("../")) {
+						prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+						link = link.replaceFirst("../", "");
+					}
+					link = prefix + "/" + link;
+				}
+				
+				if (!link.startsWith("\\\\")) {
 					link = "\\\\" + identifiedDocInstance.getServer() + "/" + identifiedDocInstance.getVolumePath() + "/" + link;
-
-				System.out.println(" Link found " + link);	
+				}
 				
-				
+					
 				IdentifiedDocInstance newIdentifiedDocInstance = DataManager.getDocInstance(document,link);		
-				if (newIdentifiedDocInstance != null) {
+				if (newIdentifiedDocInstance == null) {
+					System.out.println("DOC-" + document.getId() + ":  Invalid link: " + link);
+				}
+				else {	
 					if ((digests.containsKey(newIdentifiedDocInstance.getDigest()) &&
 							digests.get(newIdentifiedDocInstance.getDigest()) > 0) ||
 						 !digests.containsKey(newIdentifiedDocInstance.getDigest())) {
 						
 					    digests.put(identifiedDocInstance.getDigest(),Integer.valueOf(identifiedDocInstance.getSnapshotDeleted()));
-						System.out.println(" Link is qualified " + link);
+						System.out.println("DOC-" + document.getId() + ":  Qualified link: " + link);
 						
 						newIdentifiedDocInstance.setOriginInstanceId(identifiedDocInstance.getId());
 						newLinkedDocumentInstances.add(newIdentifiedDocInstance);
@@ -246,11 +263,14 @@ public class IdentificationManager {
 						newLinkedDocumentInstances.addAll(instancesLinkedToNewIdentifiedDocInstance);
 						newLinkedDocumentInstances.getLatestSnapshotInstances().addAll(instancesLinkedToNewIdentifiedDocInstance);
 					}
+					else {
+						System.out.println("DOC-" + document.getId() + ":  Duplicated link: " + link);				
+					}
 				}
 			}
 		}
 		catch (Exception e) {
-			System.out.println("Cannot read content from " + identifiedDocInstance.getFullyQualifiedPath() + " due to error: " + e.getClass().getName() + " " + e.getMessage());
+			System.out.println("DOC-" + document.getId() + ": Cannot read content from " + identifiedDocInstance.getFullyQualifiedPath() + " due to error: " + e.getClass().getName() + " " + e.getMessage());
 			e.printStackTrace();
 		}
 		finally {
