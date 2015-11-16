@@ -18,7 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class GenerationManager {
-	public static byte[] generate(int documentClassId) {		
+	public static byte[] generate(int documentClassId) {
 		try {		
 			Connection conn = ConnectionManager.getConnection("generate");
 			Statement stmt = conn.createStatement();

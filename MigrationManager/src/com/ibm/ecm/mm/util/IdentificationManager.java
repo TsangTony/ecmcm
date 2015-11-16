@@ -31,6 +31,7 @@ import com.ibm.ecm.mm.model.Document;
 import com.ibm.ecm.mm.model.IdentificationRule;
 import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.IdentifiedDocInstances;
+import com.ibm.ecm.mm.model.MetadataValue;
 
 public class IdentificationManager {
 
@@ -110,10 +111,15 @@ public class IdentificationManager {
 		
 		if (document.isIncludeLinkedFile()) {
 			IdentifiedDocInstances linkedDocumentInstances = new IdentifiedDocInstances();
+			HashMap<String, IdentifiedDocInstance> digests = new HashMap<String, IdentifiedDocInstance>();
+			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
+				digests.put(identifiedDocInstance.getDigest(), identifiedDocInstance);
+			}
+			
 			int count = 1;
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				System.out.println("DOC-" + document.getId() + ": Identifying linked files " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "% - " + identifiedDocInstance.getFullyQualifiedPath());
-				IdentifiedDocInstances newLinkedDocumentInstances = getLinkedDocumentInstances(document,identifiedDocInstance,identifiedDocInstances.getDigests());
+				IdentifiedDocInstances newLinkedDocumentInstances = getLinkedDocumentInstances(document,identifiedDocInstance,digests);
 				linkedDocumentInstances.addAll(newLinkedDocumentInstances);
 				linkedDocumentInstances.getLatestSnapshotInstances().addAll(newLinkedDocumentInstances.getLatestSnapshotInstances());
 				count++;
@@ -135,7 +141,7 @@ public class IdentificationManager {
 	}
 
 
-	private static IdentifiedDocInstances getLinkedDocumentInstances(Document document, IdentifiedDocInstance identifiedDocInstance, HashMap<String, Integer> digests) {
+	private static IdentifiedDocInstances getLinkedDocumentInstances(Document document, IdentifiedDocInstance identifiedDocInstance, HashMap<String, IdentifiedDocInstance> digests) {
 		
 		//System.out.println("DOC-" + document.getId() + ": Identifying linked files from " + identifiedDocInstance.getFullyQualifiedPath());
 				
@@ -183,9 +189,11 @@ public class IdentificationManager {
 					for (TextRun textRun : textRuns) {
 						if (textRun != null) {
 							Hyperlink[] hyperlinks = textRun.getHyperlinks();
-							for (Hyperlink hyperlink : hyperlinks)
-								if (hyperlink != null && hyperlink.getAddress() != null)
-									linksFound.add(hyperlink.getAddress());		
+							if (hyperlinks != null) {
+								for (Hyperlink hyperlink : hyperlinks)
+									if (hyperlink != null && hyperlink.getAddress() != null)
+										linksFound.add(hyperlink.getAddress());
+							}
 						}
 					}
 				}	
@@ -219,8 +227,9 @@ public class IdentificationManager {
 			}
 			
 			for (String link : linksFound) {
-				link = link.replace("file:///cpadm001.corp.cathaypacific.com/clk/APPFOLDER", "\\\\10.210.225.24");
-				link = link.replace("file:///clkcbt01", "\\\\10.210.225.24");
+				System.out.println(link);
+				link = link.replace("file://///cpadm001.corp.cathaypacific.com/clk/APPFOLDER", "\\\\10.210.225.24");
+				link = link.replace("file://///clkcbt01", "\\\\10.210.225.24");
 				
 				link = link.replace("\\", "/");
 				if (link.startsWith("//"))
@@ -246,15 +255,19 @@ public class IdentificationManager {
 				if (newIdentifiedDocInstance == null) {
 					System.out.println("DOC-" + document.getId() + ":  Invalid link: " + link);
 				}
-				else {	
-					if ((digests.containsKey(newIdentifiedDocInstance.getDigest()) &&
-							digests.get(newIdentifiedDocInstance.getDigest()) > 0) ||
-						 !digests.containsKey(newIdentifiedDocInstance.getDigest())) {
-						
-					    digests.put(identifiedDocInstance.getDigest(),Integer.valueOf(identifiedDocInstance.getSnapshotDeleted()));
-						System.out.println("DOC-" + document.getId() + ":  Qualified link: " + link);
-						
-						newIdentifiedDocInstance.setOriginInstanceId(identifiedDocInstance.getId());
+				else {
+				    MetadataValue metadataValue = new MetadataValue();
+				    metadataValue.setValue(String.valueOf(identifiedDocInstance.getId()));
+				    
+					if (digests.containsKey(newIdentifiedDocInstance.getDigest()) &&
+						digests.get(newIdentifiedDocInstance.getDigest()).getSnapshotDeleted() > 0 ||
+						!digests.containsKey(newIdentifiedDocInstance.getDigest())) {						
+					    System.out.println("DOC-" + document.getId() + ":  Qualified link: " + link);
+
+					    newIdentifiedDocInstance.getMetadataValues().add(metadataValue);
+					    digests.put(newIdentifiedDocInstance.getDigest(), newIdentifiedDocInstance);
+					    
+						//newIdentifiedDocInstance.setOriginInstanceId(identifiedDocInstance.getId());
 						newLinkedDocumentInstances.add(newIdentifiedDocInstance);
 						if (newIdentifiedDocInstance.getSnapshotDeleted()==0)
 							newLinkedDocumentInstances.getLatestSnapshotInstances().add(newIdentifiedDocInstance);
@@ -264,8 +277,14 @@ public class IdentificationManager {
 						newLinkedDocumentInstances.getLatestSnapshotInstances().addAll(instancesLinkedToNewIdentifiedDocInstance);
 					}
 					else {
-						System.out.println("DOC-" + document.getId() + ":  Duplicated link: " + link);				
+						System.out.println("DOC-" + document.getId() + ":  Duplicated link: " + link);		
+						ArrayList<MetadataValue> metadataValues = digests.get(newIdentifiedDocInstance.getDigest()).getMetadataValues();
+						if (metadataValues.size() > 0)
+							metadataValues.get(0).setValue(metadataValues.get(0).getValue() + "," + metadataValue.getValue());					
+						else
+							metadataValues.add(metadataValue);
 					}
+					
 				}
 			}
 		}
@@ -289,7 +308,8 @@ public class IdentificationManager {
 
 
 	public static void saveIdentifiedDocInstances(Document document, IdentifiedDocInstances identifiedDocInstances, boolean extractMetadata) {
-		DataManager.addIdentifiedDocInstances(document.getId(), identifiedDocInstances);
+		DataManager.addIdentifiedDocInstances(document, identifiedDocInstances);
+		
 			
 		/*
 		 *  Metadata Extraction

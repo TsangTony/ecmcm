@@ -227,12 +227,13 @@ public class ExtractionManager {
 		int count = 1;
 		boolean commencePathMatch = false;
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-			if (count % 50 == 0)
-				System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": Extracting metadata " + count + "/" + identifiedDocInstances.size());
-					
+				
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
-				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
+				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {					
+					if (count % 50 == 0)
+						System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": Extracting metadata (" + metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/" + identifiedDocInstances.size());
+											
 					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
 					identifiedDocInstance.getMetadataValues().add(metadataValue);					
 					if (identifiedDocInstance.getSnapshotDeleted() == 0) {

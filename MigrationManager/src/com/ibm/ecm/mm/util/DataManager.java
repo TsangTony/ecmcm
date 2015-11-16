@@ -383,9 +383,9 @@ public class DataManager {
 		return sources;
 	}
 	
-	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document) {
-		return getIdentifiedDocInstances(document,null);
-	}	
+	//public static IdentifiedDocInstances getIdentifiedDocInstances(Document document) {
+	//	return getIdentifiedDocInstances(document,null);
+	//}	
 
 	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath) {
 		System.out.println("DOC-" + document.getId() + ": Getting identified document instances");
@@ -396,7 +396,7 @@ public class DataManager {
 		try {
 			Connection conn = ConnectionManager.getConnection("getIdentifiedDocInstances");
 			
-			String query = "SELECT id, server, volume, path, name, extension, snapshot_deleted from Identified_Document_Instance where document_id = ?";
+			String query = "SELECT id, server, volume, path, name, extension, snapshot_deleted from Identified_Document_Instance where document_id = ? AND snapshot_deleted is null";
 			if (commencePath != null)
 				query += " AND volume + '/' + ISNULL(path,'') LIKE ?";
 			
@@ -781,7 +781,7 @@ public class DataManager {
 		}	
 	}
 
-	public static void addIdentifiedDocInstances(int documentId, IdentifiedDocInstances identifiedDocInstances) {
+	public static void addIdentifiedDocInstances(Document document, IdentifiedDocInstances identifiedDocInstances) {
 		try {
 			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");
 			
@@ -789,7 +789,7 @@ public class DataManager {
 			 * Delete existing metadata value
 			 */
 			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ?");
-			deleteMetadataValueStmt.setInt(1, documentId);
+			deleteMetadataValueStmt.setInt(1, document.getId());
 			deleteMetadataValueStmt.execute();	
 			
 			/*
@@ -797,21 +797,34 @@ public class DataManager {
 			 */
 			
 			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ?");
-			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);			
+			deleteIdentifiedDocInstanceStmt.setInt(1, document.getId());			
 			deleteIdentifiedDocInstanceStmt.execute();
 			
 			/*
-			 * Insert identified doc instance
-			 */
+			 * Insert identified doc instance and metadata value
+			 */		
 			
 			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id,origin_instance_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,?,? FROM All_Document_Instance WHERE id = ?");
+			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,document_id) VALUES (?,?,?)");
+							
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				insertIdentifiedDocInstancStmt.setInt(1, documentId);
+				insertIdentifiedDocInstancStmt.setInt(1, document.getId());
 				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getOriginInstanceId());
 				insertIdentifiedDocInstancStmt.setLong(3, identifiedDocInstance.getId());
 				insertIdentifiedDocInstancStmt.addBatch();
-			}			
+				
+				if (document.isIncludeLinkedFile() && identifiedDocInstance.getMetadataValues().size() > 0) {
+					for (MetadataValue metadataValue : identifiedDocInstance.getMetadataValues()) {
+						insertMetadataValueStmt.setLong(1, identifiedDocInstance.getId());
+						insertMetadataValueStmt.setString(2, metadataValue.getValue());
+						insertMetadataValueStmt.setInt(3, document.getId());	
+						insertMetadataValueStmt.addBatch();
+					}
+				}
+			}
+			
 			insertIdentifiedDocInstancStmt.executeBatch();
+			insertMetadataValueStmt.executeBatch();
 			
 		}
 		catch (SQLException e) {				
