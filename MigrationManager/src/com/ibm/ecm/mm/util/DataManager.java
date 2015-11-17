@@ -388,7 +388,7 @@ public class DataManager {
 	//}	
 
 	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath) {
-		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   1/2 Getting identified document instances");
+		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Step 1 of 3 Getting identified document instances");
 		if (commencePath!=null && commencePath.getId()==0)
 			commencePath = null;
 		

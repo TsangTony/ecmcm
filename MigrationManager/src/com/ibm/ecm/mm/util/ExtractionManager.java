@@ -231,7 +231,7 @@ public class ExtractionManager {
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {					
-					System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId() + ":   2/2 Extracting metadata (" + metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/" + identifiedDocInstances.size());
+					System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId() + ": Step 2 of 3 Extracting metadata (" + metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/" + identifiedDocInstances.size());
 											
 					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
 					System.gc();

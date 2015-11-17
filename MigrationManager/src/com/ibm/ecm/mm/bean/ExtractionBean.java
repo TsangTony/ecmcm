@@ -284,12 +284,11 @@ public class ExtractionBean {
 		
 		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Metadata Extraction Started.");
 	
-		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Step 1 of 2 Extracting metadata");
 		if (preview()) {		
 			/*
 			 * Update Metadata_Value
 			 */	
-			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Step 2 of 2 Saving metadata");
+			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Step 3 of 3 Saving metadata");
 			
 			DataManager.removeMetadataValues(getDocument().getId(),getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId());
 			
