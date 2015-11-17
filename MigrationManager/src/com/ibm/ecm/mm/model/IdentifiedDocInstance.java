@@ -193,14 +193,14 @@ public class IdentifiedDocInstance extends DataTableElement {
 				wb = new HSSFWorkbook(fis);
 				for (int i=0; i < wb.getNumberOfSheets(); i++) {
 					HSSFSheet ws = wb.getSheetAt(i);
-					Iterator<Row> rowItr = ws.rowIterator();
-					while (rowItr.hasNext()) {
-						HSSFRow row = (HSSFRow) rowItr.next();
+					for (int rowCount = 0; rowCount < Math.min(ws.getPhysicalNumberOfRows(), 100); rowCount++) {
+						HSSFRow row = ws.getRow(rowCount);
 						Iterator<Cell> cellItr = row.cellIterator();
 						while (cellItr.hasNext()) {
 							HSSFCell cell = (HSSFCell) cellItr.next();
 							content += cell.toString() + "\n";
 						}
+					
 					}
 				}
 			}
@@ -208,9 +208,8 @@ public class IdentifiedDocInstance extends DataTableElement {
 				xwb = new XSSFWorkbook(fis);
 				for (int i=0; i < xwb.getNumberOfSheets(); i++) {
 					XSSFSheet ws = xwb.getSheetAt(i);
-					Iterator<Row> rowItr = ws.rowIterator();
-					while (rowItr.hasNext()) {
-						XSSFRow row = (XSSFRow) rowItr.next();
+					for (int rowCount = 0; rowCount < Math.min(ws.getPhysicalNumberOfRows(), 100); rowCount++) {
+						XSSFRow row = ws.getRow(rowCount);
 						Iterator<Cell> cellItr = row.cellIterator();
 						while (cellItr.hasNext()) {
 							XSSFCell cell = (XSSFCell) cellItr.next();

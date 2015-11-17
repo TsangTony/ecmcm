@@ -12,9 +12,9 @@ public class ConnectionManager {
 		
 		//System.out.println(method + " get connection");
 		
-		//connectionString = "jdbc:sqlserver://127.0.0.1:1433;database=ECMCM;user=sa;password=P@ssw0rd";
+		connectionString = "jdbc:sqlserver://127.0.0.1:1433;database=ECMCM;user=sa;password=P@ssw0rd";
 		
-		connectionString = "jdbc:sqlserver://10.209.134.82:1433;database=ECMCM;user=sa;password=P@ssw0rd"; 
+		//connectionString = "jdbc:sqlserver://10.209.134.82:1433;database=ECMCM;user=sa;password=P@ssw0rd"; 
 		
 		try {
 			conn = DriverManager.getConnection(connectionString);
