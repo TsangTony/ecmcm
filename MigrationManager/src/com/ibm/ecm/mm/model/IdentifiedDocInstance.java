@@ -10,22 +10,28 @@ import java.util.Iterator;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
+import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+
+import com.ibm.ecm.mm.util.Util;
 
 public class IdentifiedDocInstance extends DataTableElement {
 	private long id;
@@ -153,8 +159,8 @@ public class IdentifiedDocInstance extends DataTableElement {
 				}
 				else {
 					log += " unexpectedly";
-					System.out.println(log);		
-					System.err.println(log);				
+					System.out.println(Util.getTimeStamp() + log);		
+					System.err.println(Util.getTimeStamp() + log);				
 				}
 				return content;
 			}
@@ -166,8 +172,7 @@ public class IdentifiedDocInstance extends DataTableElement {
 				PDFTextStripper stripper = new PDFTextStripper();
 				pdfDocument = PDDocument.load(file);
 				content = stripper.getText(pdfDocument);
-			}
-			
+			}			
 			else if (getExtension().toUpperCase().equals("DOC")) {
 				HWPFDocument document = new HWPFDocument(fis);
 				docExtractor = new WordExtractor(document);
@@ -189,39 +194,17 @@ public class IdentifiedDocInstance extends DataTableElement {
 				pptxExtractor = new XSLFPowerPointExtractor(ppt);
 				content	= pptxExtractor.getText(true,true,true);
 			}
-			else if (getExtension().toUpperCase().equals("XLS")) {
+			else if (getExtension().toUpperCase().equals("XLS")) {				
 				wb = new HSSFWorkbook(fis);
-				for (int i=0; i < wb.getNumberOfSheets(); i++) {
-					HSSFSheet ws = wb.getSheetAt(i);
-					Iterator<Row> rowItr = ws.rowIterator();
-					int rowCount = 0;
-					while (rowItr.hasNext() && rowCount < 100) {
-						HSSFRow row = (HSSFRow) rowItr.next();
-						Iterator<Cell> cellItr = row.cellIterator();
-						while (cellItr.hasNext()) {
-							HSSFCell cell = (HSSFCell) cellItr.next();
-							content += cell.toString() + "\n";
-						}
-						rowCount++;					
-					}
-				}
+				ExcelExtractor xlsExtractor = new ExcelExtractor(wb);				
+				content = xlsExtractor.getText();
+				xlsExtractor.close();
 			}
 			else if (getExtension().toUpperCase().equals("XLSX")) {
 				xwb = new XSSFWorkbook(fis);
-				for (int i=0; i < xwb.getNumberOfSheets(); i++) {
-					XSSFSheet ws = xwb.getSheetAt(i);
-					Iterator<Row> rowItr = ws.rowIterator();
-					int rowCount = 0;
-					while (rowItr.hasNext() && rowCount < 100) {
-						XSSFRow row = (XSSFRow) rowItr.next();
-						Iterator<Cell> cellItr = row.cellIterator();
-						while (cellItr.hasNext()) {
-							XSSFCell cell = (XSSFCell) cellItr.next();
-							content += cell.toString() + "\n";
-						}
-						rowCount++;				
-					}
-				}
+				XSSFExcelExtractor xlsxExtractor = new XSSFExcelExtractor(xwb);	
+				content = xlsxExtractor.getText();
+				xlsxExtractor.close();
 			}
 			else if (getExtension().toUpperCase().equals("TXT")) {
 				int contentByte;
@@ -233,8 +216,11 @@ public class IdentifiedDocInstance extends DataTableElement {
 				//System.err.println("Cannot read content from " + getName() + " ("+ getId() +") due to unsupported file format.");	
 			}	
 		}
+		catch (OutOfMemoryError e) {
+			System.err.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ":Cannot read content from " + getName() + " ("+ getId() +") because the file is too big.");
+		}
 		catch (Exception e) {
-			System.err.println("DOC-" + getDocument().getId() + ":Cannot read content from " + getName() + " ("+ getId() +") due to error.");
+			System.err.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ":Cannot read content from " + getName() + " ("+ getId() +") due to error. " + e.getMessage());
 		}
 		finally {
 			try {

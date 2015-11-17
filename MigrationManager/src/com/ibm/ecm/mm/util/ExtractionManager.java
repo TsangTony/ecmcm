@@ -231,10 +231,11 @@ public class ExtractionManager {
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {					
-					if (count % 50 == 0)
-						System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": Extracting metadata (" + metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/" + identifiedDocInstances.size());
+					System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId() + ":   2/2 Extracting metadata (" + metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/" + identifiedDocInstances.size());
 											
 					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
+					System.gc();
+					
 					identifiedDocInstance.getMetadataValues().add(metadataValue);					
 					if (identifiedDocInstance.getSnapshotDeleted() == 0) {
 						totalCount++;	
@@ -250,7 +251,7 @@ public class ExtractionManager {
 				}
 			}		
 			if (!commencePathMatch) {
-				System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ": No commence path matching metadata extraction rule for " + identifiedDocInstance.getFullyQualifiedPath());
+				System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId() + ": No commence path matching metadata extraction rule for " + identifiedDocInstance.getFullyQualifiedPath());
 				
 			}
 			count++;

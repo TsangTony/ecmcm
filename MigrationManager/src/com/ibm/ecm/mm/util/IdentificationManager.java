@@ -61,6 +61,7 @@ public class IdentificationManager {
 	
 	
 	public static IdentifiedDocInstances identify(Document document) throws SQLException {
+		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Run Identification 1/2 identifying... ");
 		IdentifiedDocInstances identifiedDocInstances = null;
 		ArrayList<IdentificationRule> contentRules = new ArrayList<IdentificationRule>();		
 		
@@ -70,9 +71,9 @@ public class IdentificationManager {
 					contentRules.add(identificationRule);
 
 		if (contentRules.size() == 0) {
-			System.out.println("DOC-" + document.getId() + ": Step 1 of 2 Querying the database");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 1 of 2 Querying the database");
 			identifiedDocInstances = DataManager.getDocInstances(document, false, false);
-			System.out.println("DOC-" + document.getId() + ": Step 2 of 2 Linked file analysis");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 2 of 2 Linked file analysis");
 		}
 		else {
 			
@@ -81,11 +82,11 @@ public class IdentificationManager {
 			 * apply the rules and identify from dbo.Identified_Doc_Instance;
 			 */
 
-			System.out.println("DOC-" + document.getId() + ": Step 1 of 6 Querying the database");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 1 of 6 Querying the database");
 			identifiedDocInstances = DataManager.getDocInstances(document, false, true);
 			int count = 1;
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				System.out.println("DOC-" + document.getId() + ": Step 2 of 6 Looking into content " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "%");
+				System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 2 of 6 Looking into content " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "%");
 				String content = identifiedDocInstance.getContent();
 				if (!content.equals("")) {
 					for (IdentificationRule contentRule : contentRules) {
@@ -100,13 +101,13 @@ public class IdentificationManager {
 				}
 				count++;
 			}
-			System.out.println("DOC-" + document.getId() + ": Step 3 of 6 Writing into Snippet table");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 3 of 6 Writing into Snippet table");
 			DataManager.addSnippet(document.getId(), identifiedDocInstances);
-			System.out.println("DOC-" + document.getId() + ": Step 4 of 6 Querying Snippet table");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 4 of 6 Querying Snippet table");
 			identifiedDocInstances = DataManager.getDocInstances(document, true, false);
-			System.out.println("DOC-" + document.getId() + ": Step 5 of 6 Clearing Snippet table");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 5 of 6 Clearing Snippet table");
 			DataManager.removeSnippet(document.getId());
-			System.out.println("DOC-" + document.getId() + ": Step 6 of 6 Linked file analysis");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 6 of 6 Linked file analysis");
 		}
 		
 		if (document.isIncludeLinkedFile()) {
@@ -118,7 +119,7 @@ public class IdentificationManager {
 			
 			int count = 1;
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				System.out.println("DOC-" + document.getId() + ": Identifying linked files " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "% - " + identifiedDocInstance.getFullyQualifiedPath());
+				System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":     Identifying linked files " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "% - " + identifiedDocInstance.getFullyQualifiedPath());
 				IdentifiedDocInstances newLinkedDocumentInstances = getLinkedDocumentInstances(document,identifiedDocInstance,digests);
 				linkedDocumentInstances.addAll(newLinkedDocumentInstances);
 				linkedDocumentInstances.getLatestSnapshotInstances().addAll(newLinkedDocumentInstances.getLatestSnapshotInstances());
@@ -227,7 +228,7 @@ public class IdentificationManager {
 			}
 			
 			for (String link : linksFound) {
-				System.out.println(link);
+				//System.out.println(link);
 				link = link.replace("file://///cpadm001.corp.cathaypacific.com/clk/APPFOLDER", "\\\\10.210.225.24");
 				link = link.replace("file://///clkcbt01", "\\\\10.210.225.24");
 				
@@ -308,6 +309,8 @@ public class IdentificationManager {
 
 
 	public static void saveIdentifiedDocInstances(Document document, IdentifiedDocInstances identifiedDocInstances, boolean extractMetadata) {
+
+		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Run Identification 2/2 saving... ");
 		DataManager.addIdentifiedDocInstances(document, identifiedDocInstances);
 		
 			

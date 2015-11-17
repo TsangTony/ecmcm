@@ -18,6 +18,7 @@ import com.ibm.ecm.mm.model.IdentifiedDocInstance;
 import com.ibm.ecm.mm.model.IdentifiedDocInstances;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.IdentificationManager;
+import com.ibm.ecm.mm.util.Util;
 import com.ibm.ecm.mm.util.ConnectionManager;
 
 public class IdentificationBean {
@@ -262,13 +263,14 @@ public class IdentificationBean {
 		String summary = null;
 		String message = "";
 		try {
-			System.out.println("DOC-" + getDocument().getId() + ": Run Identification 1/2 ");
+			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Identification Started. ");
 			setIdentifiedDocInstances(IdentificationManager.identify(getDocument()));
-			System.out.println("DOC-" + getDocument().getId() + ": Run Identification 2/2 ");
 			IdentificationManager.saveIdentifiedDocInstances(getDocument(), getIdentifiedDocInstances(), false);
 			severity = FacesMessage.SEVERITY_INFO;
 			summary = "Successful";
 			message = getDocument().toString() + " is identified.";
+			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Identification Completed. ");
+			
 		}
 		catch (Exception e) {
 			severity = FacesMessage.SEVERITY_ERROR;

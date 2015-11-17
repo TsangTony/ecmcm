@@ -388,7 +388,7 @@ public class DataManager {
 	//}	
 
 	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath) {
-		System.out.println("DOC-" + document.getId() + ": Getting identified document instances");
+		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   1/2 Getting identified document instances");
 		if (commencePath!=null && commencePath.getId()==0)
 			commencePath = null;
 		
@@ -428,7 +428,7 @@ public class DataManager {
 							identifiedDocInstance.setCommencePath(docCommencePath);
 							break;
 						}
-						System.out.println("DOC-" + document.getId() + ": No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+						System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
 					}
 				}
 				
@@ -965,7 +965,7 @@ public class DataManager {
 						String log = identifiedDocInstance.getFullyQualifiedPath() + " has no matching commence path :";
 						for (CommencePath commencePath : document.getCommencePaths())
 							log += commencePath.getActualPath() + ";";
-						System.out.println(log);
+						System.out.println(Util.getTimeStamp() + log);
 					}		
 					
 					if ((digests.containsKey(identifiedDocInstance.getDigest()) &&
@@ -1008,7 +1008,7 @@ public class DataManager {
 			identifiedDocInstances.setDigests(digests);
 		}
 		catch (SQLException e) {
-			System.err.println(e.getMessage() + " - " + query);
+			System.err.println(Util.getTimeStamp() + e.getMessage() + " - " + query);
 		}
 		finally {
 			ConnectionManager.close("getDocInstances");
@@ -1251,7 +1251,7 @@ public class DataManager {
 						identifiedDocInstance.setCommencePath(commencePath);
 						break;
 					}
-					System.out.println("No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+					System.out.println(Util.getTimeStamp() + "No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
 				}
 			}
 		}

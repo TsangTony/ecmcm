@@ -1,4 +1,6 @@
 package com.ibm.ecm.mm.util;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,5 +68,12 @@ public class Util {
 		String delimitor = "[\\W_]";
 		return  "^" + lookupValue + delimitor + "|" + delimitor + lookupValue + "$|" + delimitor + lookupValue + delimitor + "|^" + lookupValue + "$";
 	}		
+	
+	public static String getTimeStamp() {
+	    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    Date now = new Date();
+	    String strDate = sdfDate.format(now);
+	    return "[" + strDate + "] ";
+	}
 	
 }

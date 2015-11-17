@@ -16,6 +16,7 @@ import com.ibm.ecm.mm.model.MetadataExtractionRules;
 import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.util.DataManager;
 import com.ibm.ecm.mm.util.ExtractionManager;
+import com.ibm.ecm.mm.util.Util;
 
 public class ExtractionBean {
 	
@@ -280,10 +281,15 @@ public class ExtractionBean {
 	}
 	
 	public void run() {
+		
+		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Metadata Extraction Started.");
+	
+		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Step 1 of 2 Extracting metadata");
 		if (preview()) {		
 			/*
 			 * Update Metadata_Value
 			 */	
+			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Step 2 of 2 Saving metadata");
 			
 			DataManager.removeMetadataValues(getDocument().getId(),getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId());
 			
@@ -291,6 +297,9 @@ public class ExtractionBean {
 			
 			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
 		};
+		
+		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Metadata Extraction Completed.");
+		
 	}
 	
 }
