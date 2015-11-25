@@ -358,10 +358,15 @@ public class ExtractionBean {
 		System.out.format("%tT DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Started.", Calendar.getInstance());
 	
 		runExtraction(getSelectedDocument(), getCommencePath(), getMetadataExtractionRules());
+
+		setPreview(true);
 		
 		System.out.println(Util.getTimeStamp() + "DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Completed.");
 
 		FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
+		
+
+	
 	}
 	
 	public void runBatch() {
