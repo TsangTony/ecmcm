@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence-diagram version="1.1.8" icons="true" automaticImage="PNG">  
+  <object id="1" language="java" name="com.ibm.ecm.mm.bean.IdentificationBean" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/bean/IdentificationBean.java" binary="false" label="identificationBean" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="106" y="0"/>    
+    <execution id="2">      
+      <position height="215" width="0" x="0" y="78"/>    
+    </execution>    
+    <execution id="4">      
+      <position height="152" width="0" x="0" y="120"/>    
+    </execution>    
+    <execution id="7">      
+      <position height="338" width="0" x="0" y="306"/>    
+    </execution>    
+    <execution id="9">      
+      <position height="275" width="0" x="0" y="348"/>    
+    </execution>    
+    <execution id="14">      
+      <position height="1024" width="0" x="0" y="654"/>    
+    </execution>    
+    <execution id="16">      
+      <position height="961" width="0" x="0" y="696"/>    
+    </execution>    
+    <execution id="19">      
+      <position height="177" width="0" x="0" y="1679"/>    
+    </execution>    
+    <execution id="21">      
+      <position height="114" width="0" x="0" y="1721"/>    
+    </execution>    
+    <execution id="26">      
+      <position height="1254" width="0" x="0" y="1864"/>    
+    </execution>    
+    <execution id="28">      
+      <position height="1191" width="0" x="0" y="1906"/>    
+    </execution>  
+  </object>  
+  <object id="33" language="java" name="com.ibm.ecm.mm.util.IdentificationManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/IdentificationManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="18">      
+      <position height="914" width="0" x="0" y="722"/>    
+    </execution>    
+    <execution id="45">      
+      <position height="301" width="0" x="0" y="1314"/>    
+    </execution>    
+    <execution id="51">      
+      <position height="21" width="0" x="0" y="1573"/>    
+    </execution>    
+    <execution id="30">      
+      <position height="931" width="0" x="0" y="1951"/>    
+    </execution>    
+    <execution id="32">      
+      <position height="153" width="0" x="0" y="2923"/>    
+    </execution>    
+    <execution id="63">      
+      <position height="287" width="0" x="0" y="2574"/>    
+    </execution>    
+    <execution id="71">      
+      <position height="21" width="7" x="204" y="2819"/>    
+    </execution>  
+  </object>  
+  <object id="72" language="java" name="com.ibm.ecm.mm.model.IdentifiedDocInstance" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/model/IdentifiedDocInstance.java" binary="false" 
+    label="identifiedDocInstance" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="55">      
+      <position height="63" width="0" x="0" y="2104"/>    
+    </execution>    
+    <execution id="37">      
+      <position height="63" width="146" x="284" y="856"/>    
+    </execution>    
+    <execution id="49">      
+      <position height="63" width="146" x="284" y="1462"/>    
+    </execution>    
+    <execution id="69">      
+      <position height="63" width="146" x="284" y="2702"/>    
+    </execution>  
+  </object>  
+  <object id="81" language="java" name="org.apache.pdfbox.util.PDFTextStripper" project="MigrationManager" 
+    file="C:/GitHub/ECMCM/MigrationManager/WebContent/WEB-INF/lib/pdfbox-1.8.10.jar" binary="true" label="stripper" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="74">      
+      <position height="21" width="115" x="434" y="2125"/>    
+    </execution>    
+    <execution id="76">      
+      <position height="21" width="115" x="434" y="877"/>    
+    </execution>    
+    <execution id="78">      
+      <position height="21" width="115" x="434" y="1483"/>    
+    </execution>    
+    <execution id="80">      
+      <position height="21" width="115" x="434" y="2723"/>    
+    </execution>  
+  </object>  
+  <object id="82" language="java" name="com.ibm.ecm.mm.util.DataManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/DataManager.java" binary="false" label="&lt;static&gt;" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="6">      
+      <position height="101" width="0" x="0" y="150"/>    
+    </execution>    
+    <execution id="11">      
+      <position height="95" width="0" x="0" y="385"/>    
+    </execution>    
+    <execution id="13">      
+      <position height="99" width="0" x="0" y="503"/>    
+    </execution>    
+    <execution id="35">      
+      <position height="92" width="0" x="0" y="748"/>    
+    </execution>    
+    <execution id="39">      
+      <position height="92" width="0" x="0" y="943"/>    
+    </execution>    
+    <execution id="41">      
+      <position height="93" width="0" x="0" y="1051"/>    
+    </execution>    
+    <execution id="43">      
+      <position height="96" width="0" x="0" y="1155"/>    
+    </execution>    
+    <execution id="47">      
+      <position height="104" width="0" x="0" y="1341"/>    
+    </execution>    
+    <execution id="65">      
+      <position height="101" width="0" x="0" y="2954"/>    
+    </execution>    
+    <execution id="53">      
+      <position height="95" width="0" x="0" y="1989"/>    
+    </execution>    
+    <execution id="57">      
+      <position height="97" width="0" x="0" y="2195"/>    
+    </execution>    
+    <execution id="59">      
+      <position height="94" width="0" x="0" y="2317"/>    
+    </execution>    
+    <execution id="61">      
+      <position height="96" width="0" x="0" y="2427"/>    
+    </execution>    
+    <execution id="67">      
+      <position height="97" width="99" x="553" y="2595"/>    
+    </execution>  
+  </object>  
+  <object id="139" language="java" name="com.ibm.ecm.mm.util.ConnectionManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/ConnectionManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="84">      
+      <position height="21" width="0" x="0" y="177"/>    
+    </execution>    
+    <execution id="86">      
+      <position height="21" width="0" x="0" y="209"/>    
+    </execution>    
+    <execution id="88">      
+      <position height="21" width="0" x="0" y="408"/>    
+    </execution>    
+    <execution id="90">      
+      <position height="21" width="0" x="0" y="438"/>    
+    </execution>    
+    <execution id="92">      
+      <position height="21" width="0" x="0" y="529"/>    
+    </execution>    
+    <execution id="94">      
+      <position height="21" width="0" x="0" y="560"/>    
+    </execution>    
+    <execution id="100">      
+      <position height="21" width="0" x="0" y="964"/>    
+    </execution>    
+    <execution id="102">      
+      <position height="21" width="0" x="0" y="993"/>    
+    </execution>    
+    <execution id="104">      
+      <position height="21" width="0" x="0" y="1068"/>    
+    </execution>    
+    <execution id="106">      
+      <position height="21" width="0" x="0" y="1102"/>    
+    </execution>    
+    <execution id="108">      
+      <position height="21" width="0" x="0" y="1176"/>    
+    </execution>    
+    <execution id="110">      
+      <position height="21" width="0" x="0" y="1209"/>    
+    </execution>    
+    <execution id="96">      
+      <position height="21" width="0" x="0" y="766"/>    
+    </execution>    
+    <execution id="98">      
+      <position height="21" width="0" x="0" y="798"/>    
+    </execution>    
+    <execution id="112">      
+      <position height="21" width="0" x="0" y="1362"/>    
+    </execution>    
+    <execution id="114">      
+      <position height="21" width="0" x="0" y="1403"/>    
+    </execution>    
+    <execution id="23">      
+      <position height="21" width="0" x="0" y="1752"/>    
+    </execution>    
+    <execution id="25">      
+      <position height="21" width="0" x="0" y="1793"/>    
+    </execution>    
+    <execution id="116">      
+      <position height="21" width="0" x="0" y="2981"/>    
+    </execution>    
+    <execution id="118">      
+      <position height="21" width="0" x="0" y="3013"/>    
+    </execution>    
+    <execution id="120">      
+      <position height="21" width="137" x="656" y="2010"/>    
+    </execution>    
+    <execution id="122">      
+      <position height="21" width="137" x="656" y="2042"/>    
+    </execution>    
+    <execution id="124">      
+      <position height="21" width="137" x="656" y="2216"/>    
+    </execution>    
+    <execution id="126">      
+      <position height="21" width="137" x="656" y="2250"/>    
+    </execution>    
+    <execution id="128">      
+      <position height="21" width="137" x="656" y="2338"/>    
+    </execution>    
+    <execution id="130">      
+      <position height="21" width="137" x="656" y="2369"/>    
+    </execution>    
+    <execution id="132">      
+      <position height="21" width="137" x="656" y="2448"/>    
+    </execution>    
+    <execution id="134">      
+      <position height="21" width="137" x="656" y="2481"/>    
+    </execution>    
+    <execution id="136">      
+      <position height="21" width="137" x="656" y="2616"/>    
+    </execution>    
+    <execution id="138">      
+      <position height="21" width="137" x="656" y="2650"/>    
+    </execution>  
+  </object>  
+  <message id="3" operation="IdentificationBean()">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>  
+  <message id="5" operation="getDocuments():java.util.ArrayList&lt;Document&gt;">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="6"/>  
+  </message>  
+  <message id="8" operation="documentSelected():void">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="9"/>  
+  </message>  
+  <message id="10" operation="getCommencePaths(int):com.ibm.ecm.mm.model.DataTableArrayList&lt;CommencePath&gt;">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="11"/>  
+  </message>  
+  <message id="12" 
+    operation="getIdentificationRules(int):com.ibm.ecm.mm.model.DataTableArrayList&lt;IdentificationRule&gt;">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="13"/>  
+  </message>  
+  <message id="15" operation="preview():void">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="16"/>  
+  </message>  
+  <message id="17" operation="identify(com.ibm.ecm.mm.model.Document):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="18"/>  
+  </message>  
+  <message id="20" operation="save():void">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="21"/>  
+  </message>  
+  <message id="22" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="23"/>  
+  </message>  
+  <message id="24" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="25"/>  
+  </message>  
+  <message id="27" operation="run():void">    
+    <end type="SOURCE" refId="26"/>    
+    <end type="TARGET" refId="28"/>  
+  </message>  
+  <message id="29" operation="identify(com.ibm.ecm.mm.model.Document):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="28"/>    
+    <end type="TARGET" refId="30"/>  
+  </message>  
+  <message id="31" 
+    operation="saveIdentifiedDocInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.IdentifiedDocInstances,boolean):void">    
+    <end type="SOURCE" refId="28"/>    
+    <end type="TARGET" refId="32"/>  
+  </message>  
+  <message id="34" 
+    operation="getDocInstances(com.ibm.ecm.mm.model.Document,boolean,boolean):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="35"/>  
+  </message>  
+  <message id="36" operation="getContent():java.lang.String">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="37"/>  
+  </message>  
+  <message id="38" operation="addSnippet(int,com.ibm.ecm.mm.model.IdentifiedDocInstances):void">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="39"/>  
+  </message>  
+  <message id="40" 
+    operation="getDocInstances(com.ibm.ecm.mm.model.Document,boolean,boolean):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="41"/>  
+  </message>  
+  <message id="42" operation="removeSnippet(int):void">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="43"/>  
+  </message>  
+  <message id="44" 
+    operation="getLinkedDocumentInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.IdentifiedDocInstance,java.util.HashMap&lt;java.lang.String,com.ibm.ecm.mm.model.IdentifiedDocInstance&gt;):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="45"/>  
+  </message>  
+  <message id="46" 
+    operation="getDocInstance(com.ibm.ecm.mm.model.Document,java.lang.String):com.ibm.ecm.mm.model.IdentifiedDocInstance">    
+    <end type="SOURCE" refId="45"/>    
+    <end type="TARGET" refId="47"/>  
+  </message>  
+  <message id="48" operation="getContent():java.lang.String">    
+    <end type="SOURCE" refId="45"/>    
+    <end type="TARGET" refId="49"/>  
+  </message>  
+  <message id="50" 
+    operation="getLinkedDocumentInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.IdentifiedDocInstance,java.util.HashMap&lt;java.lang.String,com.ibm.ecm.mm.model.IdentifiedDocInstance&gt;):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="45"/>    
+    <end type="TARGET" refId="51"/>  
+  </message>  
+  <message id="52" 
+    operation="getDocInstances(com.ibm.ecm.mm.model.Document,boolean,boolean):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="53"/>  
+  </message>  
+  <message id="54" operation="getContent():java.lang.String">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="55"/>  
+  </message>  
+  <message id="56" operation="addSnippet(int,com.ibm.ecm.mm.model.IdentifiedDocInstances):void">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="57"/>  
+  </message>  
+  <message id="58" 
+    operation="getDocInstances(com.ibm.ecm.mm.model.Document,boolean,boolean):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="59"/>  
+  </message>  
+  <message id="60" operation="removeSnippet(int):void">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="61"/>  
+  </message>  
+  <message id="62" 
+    operation="getLinkedDocumentInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.IdentifiedDocInstance,java.util.HashMap&lt;java.lang.String,com.ibm.ecm.mm.model.IdentifiedDocInstance&gt;):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="63"/>  
+  </message>  
+  <message id="64" 
+    operation="addIdentifiedDocInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.IdentifiedDocInstances):void">    
+    <end type="SOURCE" refId="32"/>    
+    <end type="TARGET" refId="65"/>  
+  </message>  
+  <message id="66" 
+    operation="getDocInstance(com.ibm.ecm.mm.model.Document,java.lang.String):com.ibm.ecm.mm.model.IdentifiedDocInstance">    
+    <end type="SOURCE" refId="63"/>    
+    <end type="TARGET" refId="67"/>  
+  </message>  
+  <message id="68" operation="getContent():java.lang.String">    
+    <end type="SOURCE" refId="63"/>    
+    <end type="TARGET" refId="69"/>  
+  </message>  
+  <message id="70" 
+    operation="getLinkedDocumentInstances(com.ibm.ecm.mm.model.Document,com.ibm.ecm.mm.model.IdentifiedDocInstance,java.util.HashMap&lt;java.lang.String,com.ibm.ecm.mm.model.IdentifiedDocInstance&gt;):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="63"/>    
+    <end type="TARGET" refId="71"/>  
+  </message>  
+  <message id="73" operation="getText(org.apache.pdfbox.cos.COSDocument):java.lang.String">    
+    <end type="SOURCE" refId="55"/>    
+    <end type="TARGET" refId="74"/>  
+  </message>  
+  <message id="75" operation="getText(org.apache.pdfbox.cos.COSDocument):java.lang.String">    
+    <end type="SOURCE" refId="37"/>    
+    <end type="TARGET" refId="76"/>  
+  </message>  
+  <message id="77" operation="getText(org.apache.pdfbox.cos.COSDocument):java.lang.String">    
+    <end type="SOURCE" refId="49"/>    
+    <end type="TARGET" refId="78"/>  
+  </message>  
+  <message id="79" operation="getText(org.apache.pdfbox.cos.COSDocument):java.lang.String">    
+    <end type="SOURCE" refId="69"/>    
+    <end type="TARGET" refId="80"/>  
+  </message>  
+  <message id="83" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="84"/>  
+  </message>  
+  <message id="85" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="86"/>  
+  </message>  
+  <message id="87" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="88"/>  
+  </message>  
+  <message id="89" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="90"/>  
+  </message>  
+  <message id="91" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="92"/>  
+  </message>  
+  <message id="93" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="94"/>  
+  </message>  
+  <message id="95" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="35"/>    
+    <end type="TARGET" refId="96"/>  
+  </message>  
+  <message id="97" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="35"/>    
+    <end type="TARGET" refId="98"/>  
+  </message>  
+  <message id="99" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="39"/>    
+    <end type="TARGET" refId="100"/>  
+  </message>  
+  <message id="101" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="39"/>    
+    <end type="TARGET" refId="102"/>  
+  </message>  
+  <message id="103" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="104"/>  
+  </message>  
+  <message id="105" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="106"/>  
+  </message>  
+  <message id="107" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="43"/>    
+    <end type="TARGET" refId="108"/>  
+  </message>  
+  <message id="109" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="43"/>    
+    <end type="TARGET" refId="110"/>  
+  </message>  
+  <message id="111" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="47"/>    
+    <end type="TARGET" refId="112"/>  
+  </message>  
+  <message id="113" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="47"/>    
+    <end type="TARGET" refId="114"/>  
+  </message>  
+  <message id="115" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="65"/>    
+    <end type="TARGET" refId="116"/>  
+  </message>  
+  <message id="117" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="65"/>    
+    <end type="TARGET" refId="118"/>  
+  </message>  
+  <message id="119" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="53"/>    
+    <end type="TARGET" refId="120"/>  
+  </message>  
+  <message id="121" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="53"/>    
+    <end type="TARGET" refId="122"/>  
+  </message>  
+  <message id="123" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="57"/>    
+    <end type="TARGET" refId="124"/>  
+  </message>  
+  <message id="125" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="57"/>    
+    <end type="TARGET" refId="126"/>  
+  </message>  
+  <message id="127" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="59"/>    
+    <end type="TARGET" refId="128"/>  
+  </message>  
+  <message id="129" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="59"/>    
+    <end type="TARGET" refId="130"/>  
+  </message>  
+  <message id="131" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="61"/>    
+    <end type="TARGET" refId="132"/>  
+  </message>  
+  <message id="133" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="61"/>    
+    <end type="TARGET" refId="134"/>  
+  </message>  
+  <message id="135" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="67"/>    
+    <end type="TARGET" refId="136"/>  
+  </message>  
+  <message id="137" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="67"/>    
+    <end type="TARGET" refId="138"/>  
+  </message>
+</sequence-diagram>

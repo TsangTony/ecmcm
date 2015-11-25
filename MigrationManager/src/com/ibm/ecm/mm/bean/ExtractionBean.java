@@ -1,6 +1,7 @@
 package com.ibm.ecm.mm.bean;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.regex.PatternSyntaxException;
 
 import javax.faces.application.FacesMessage;
@@ -19,9 +20,12 @@ import com.ibm.ecm.mm.util.ExtractionManager;
 import com.ibm.ecm.mm.util.Util;
 
 public class ExtractionBean {
-	
+
+	private String mode;
 	private ArrayList<Document> documents;
-	private Document document;
+	private ArrayList<Document> filteredDocuments;
+	private ArrayList<Document> selectedDocuments;
+	private Document selectedDocument;
 	private CommencePath commencePath;
 	private MetadataProperty metadataProperty;
 	private MetadataExtractionRules metadataExtractionRules;
@@ -29,13 +33,24 @@ public class ExtractionBean {
 	private boolean useDefaultRule;
 	private IdentifiedDocInstances identifiedDocInstances;
 	private String status;
+	private boolean isPreview;
 	
 	public ExtractionBean() {
 		setDocuments(DataManager.getDocuments());
 		setIdentifiedDocInstances(new IdentifiedDocInstances());
 		setUseDefaultRule(false);
+		setFilteredDocuments(new ArrayList<Document>());
+		setPreview(false);
 	}
 	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
 	public ArrayList<Document> getDocuments() {
 		return documents;
 	}
@@ -43,11 +58,27 @@ public class ExtractionBean {
 		this.documents = documents;
 	}
 	
-	public Document getDocument() {
-		return document;
+	public ArrayList<Document> getFilteredDocuments() {
+		return filteredDocuments;
 	}
-	public void setDocument(Document document) {
-		this.document = document;
+
+	public void setFilteredDocuments(ArrayList<Document> filteredDocuments) {
+		this.filteredDocuments = filteredDocuments;
+	}
+
+	public ArrayList<Document> getSelectedDocuments() {
+		return selectedDocuments;
+	}
+
+	public void setSelectedDocuments(ArrayList<Document> selectedDocuments) {
+		this.selectedDocuments = selectedDocuments;
+	}
+
+	public Document getSelectedDocument() {
+		return selectedDocument;
+	}
+	public void setSelectedDocument(Document selectedDocument) {
+		this.selectedDocument = selectedDocument;
 	}
 	public CommencePath getCommencePath() {
 		return commencePath;
@@ -120,29 +151,42 @@ public class ExtractionBean {
 		return DataManager.getSources();
 	}
 	
+	public boolean isDocumentSelected() {
+		return getSelectedDocument() != null;
+	}
+	
+	
 	public void documentSelected() {
-		getDocument().setCommencePaths(new DataTableArrayList<CommencePath>(CommencePath.class));
-		CommencePath commencePath = new CommencePath();
-		commencePath.setId(0);
-		getDocument().getCommencePaths().add(commencePath);
-		getDocument().getCommencePaths().addAll(DataManager.getCommencePaths(getDocument().getId()));
+		//getSelectedDocument().setCommencePaths(new DataTableArrayList<CommencePath>(CommencePath.class));
+		//CommencePath commencePath = new CommencePath();
+		//commencePath.setId(0);
+		//getSelectedDocument().getCommencePaths().add(commencePath);
+		//getSelectedDocument().getCommencePaths().addAll(DataManager.getCommencePaths(getSelectedDocument().getId()));
+		getSelectedDocument().setCommencePaths(DataManager.getCommencePaths(getSelectedDocument().getId()));
 		setCommencePath(null);
 		setMetadataProperty(null);
 		setMetadataExtractionRules(null);
-		getDocument().getMetadataProperties().clear();
-		for (MetadataProperty metadataProperty : DataManager.getMetadataPropreties(getDocument().getId()))			
-			getDocument().getMetadataProperties().add(metadataProperty);
+		getSelectedDocument().getMetadataProperties().clear();
+		for (MetadataProperty metadataProperty : DataManager.getMetadataPropreties(getSelectedDocument().getId()))			
+			getSelectedDocument().getMetadataProperties().add(metadataProperty);
+		setPreview(false);
 	}
 	
 	public void commencePathSelected() {
+		setPreview(false);
 		if (getMetadataProperty() != null)
 			optionSet();			
 	}
 
 	
 	public void metadataPropertySeletced() {
+		setPreview(false);
 		if (getCommencePath() != null)
 			optionSet();		
+	}
+
+	public boolean isOptionSet() {
+		return getMetadataProperty() != null && getCommencePath() != null;
 	}
 	
 	public void optionSet() {
@@ -156,7 +200,7 @@ public class ExtractionBean {
 			setMetadataExtractionRules(new MetadataExtractionRules());
 			getMetadataExtractionRules().setMetadataProperty(getMetadataProperty());
 			getMetadataExtractionRules().setCommencePathId(getCommencePath().getId());
-			getMetadataExtractionRules().setRules(DataManager.getMetadataExtractionRules(getDocument().getId(),getCommencePath().getId(),getMetadataProperty().getId()));
+			getMetadataExtractionRules().setRules(DataManager.getMetadataExtractionRules(getSelectedDocument().getId(),getCommencePath().getId(),getMetadataProperty().getId()));
 			
 			getMetadataExtractionRules().setLookups(DataManager.getLookups(getMetadataExtractionRules().getMetadataProperty().getId()));
 			getMetadataExtractionRules().setHasDefaultRules(getMetadataExtractionRules().getLookups().size() > 0);
@@ -208,11 +252,19 @@ public class ExtractionBean {
 		
 	}
 	
+	public boolean isPreview() {
+		return isPreview;
+	}
+	
+	public void setPreview(boolean isPreview) {
+		this.isPreview = isPreview;
+	}
+	
 	public boolean preview() {
 		try {
-			if (getCommencePath().getId() == 0) {
+			/*if (getCommencePath().getId() == 0) {
 				setMultipliedMetadataExtractionRules(new ArrayList<MetadataExtractionRules>());
-				for (CommencePath commencePath : getDocument().getCommencePaths()) {
+				for (CommencePath commencePath : getSelectedDocument().getCommencePaths()) {
 					if (commencePath.getId() != 0) {
 						MetadataExtractionRules metadataExtractionRules = new MetadataExtractionRules();
 						metadataExtractionRules.setCommencePathId(commencePath.getId());
@@ -223,11 +275,12 @@ public class ExtractionBean {
 						getMultipliedMetadataExtractionRules().add(metadataExtractionRules);
 					}
 				}
-				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getDocument(), getCommencePath()), getMultipliedMetadataExtractionRules()));
+				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getSelectedDocument(), getCommencePath()), getMultipliedMetadataExtractionRules()));
 			}
-			else {
-				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getDocument(), getCommencePath()), getMetadataExtractionRules()));
-			}
+			else {*/
+				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getSelectedDocument(), getCommencePath()), getMetadataExtractionRules()));
+			//}
+			setPreview(true);
 			return true;
 		}
 		catch (PatternSyntaxException e) {
@@ -280,25 +333,80 @@ public class ExtractionBean {
 		}
 	}
 	
-	public void run() {
+	public void runExtraction(Document document, CommencePath commencePath, MetadataExtractionRules metadataExtractionRules) {
 		
-		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Metadata Extraction Started.");
-	
-		if (preview()) {		
+		
+		setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(document, commencePath), metadataExtractionRules));
+		
+		//if (preview()) {		
 			/*
 			 * Update Metadata_Value
 			 */	
-			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Step 3 of 3 Saving metadata");
+			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Step 3 of 3 Saving metadata");
 			
-			DataManager.removeMetadataValues(getDocument().getId(),getCommencePath().getId(),getMetadataExtractionRules().getMetadataProperty().getId());
+			DataManager.removeMetadataValues(document.getId(),commencePath.getId(),metadataExtractionRules.getMetadataProperty().getId());
 			
-			DataManager.addMetadataValues(getIdentifiedDocInstances(),getDocument().getId());			
+			DataManager.addMetadataValues(getIdentifiedDocInstances(),document.getId());			
 			
-			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
-		};
+		//};
 		
-		System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Metadata Extraction Completed.");
 		
+	}
+	
+	public void run() {
+
+		System.out.format("%tT DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Started.", Calendar.getInstance());
+	
+		runExtraction(getSelectedDocument(), getCommencePath(), getMetadataExtractionRules());
+		
+		System.out.println(Util.getTimeStamp() + "DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Completed.");
+
+		FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
+	}
+	
+	public void runBatch() {
+		try {
+			
+			System.out.format("%tT Run Batch Metadata Extraction Started.", Calendar.getInstance());
+		
+			int docCount = 0;
+			
+			for (Document document : getSelectedDocuments()) {
+				docCount++;
+				
+				System.out.format("%tT " + docCount + "/" + getSelectedDocuments().size() + " DOC-" + document.getId() + ": Running Metadata Extraction", Calendar.getInstance());
+			
+				document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
+				for (CommencePath commencePath : document.getCommencePaths()) {
+					document.setMetadataProperties(DataManager.getMetadataPropreties(document.getId()));
+					for (MetadataProperty metadataProperty : document.getMetadataProperties()) {
+						MetadataExtractionRules metadataExtractionRules = new MetadataExtractionRules();
+						metadataExtractionRules.setMetadataProperty(metadataProperty);
+						metadataExtractionRules.setCommencePathId(commencePath.getId());
+						metadataExtractionRules.setRules(DataManager.getMetadataExtractionRules(document.getId(),commencePath.getId(),metadataProperty.getId()));
+	
+						metadataExtractionRules.setLookups(DataManager.getLookups(metadataExtractionRules.getMetadataProperty().getId()));
+						metadataExtractionRules.setHasDefaultRules(metadataExtractionRules.getLookups().size() > 0);
+	
+						//set isDefault
+						metadataExtractionRules.setDefault(false);
+						for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
+							if (!metadataExtractionRule.isDefault()) {
+								break;
+							}
+							metadataExtractionRules.setDefault(true);
+						}
+	
+						runExtraction(document,commencePath,metadataExtractionRules);
+	
+					}
+				}		
+			}
+			System.out.format("%tT Run Batch Metadata Extraction Ended.", Calendar.getInstance());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

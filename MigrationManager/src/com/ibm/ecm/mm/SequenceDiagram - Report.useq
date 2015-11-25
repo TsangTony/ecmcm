@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence-diagram version="1.1.8" icons="true" automaticImage="PNG">  
+  <object id="1" language="java" name="com.ibm.ecm.mm.bean.ReportBean" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/bean/ReportBean.java" binary="false" label="reportBean" type="class" 
+    autoSize="true">    
+    <position height="-1" width="-1" x="103" y="0"/>    
+    <execution id="2">      
+      <position height="253" width="0" x="0" y="78"/>    
+    </execution>    
+    <execution id="4">      
+      <position height="190" width="0" x="0" y="120"/>    
+    </execution>    
+    <execution id="9">      
+      <position height="223" width="0" x="0" y="346"/>    
+    </execution>    
+    <execution id="11">      
+      <position height="160" width="0" x="0" y="388"/>    
+    </execution>    
+    <execution id="14">      
+      <position height="215" width="0" x="0" y="590"/>    
+    </execution>    
+    <execution id="16">      
+      <position height="152" width="0" x="0" y="632"/>    
+    </execution>  
+  </object>  
+  <object id="19" language="java" name="com.ibm.ecm.mm.util.ReportManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/ReportManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="8">      
+      <position height="21" width="0" x="0" y="268"/>    
+    </execution>  
+  </object>  
+  <object id="20" language="java" name="com.ibm.ecm.mm.util.DataManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/DataManager.java" binary="false" label="&lt;static&gt;" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="6">      
+      <position height="105" width="0" x="0" y="145"/>    
+    </execution>    
+    <execution id="13">      
+      <position height="108" width="0" x="0" y="419"/>    
+    </execution>    
+    <execution id="18">      
+      <position height="100" width="0" x="0" y="663"/>    
+    </execution>  
+  </object>  
+  <object id="33" language="java" name="com.ibm.ecm.mm.util.ConnectionManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/ConnectionManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="22">      
+      <position height="21" width="0" x="0" y="168"/>    
+    </execution>    
+    <execution id="24">      
+      <position height="21" width="0" x="0" y="208"/>    
+    </execution>    
+    <execution id="26">      
+      <position height="21" width="0" x="0" y="444"/>    
+    </execution>    
+    <execution id="28">      
+      <position height="21" width="0" x="0" y="485"/>    
+    </execution>    
+    <execution id="30">      
+      <position height="21" width="137" x="333" y="684"/>    
+    </execution>    
+    <execution id="32">      
+      <position height="21" width="137" x="333" y="721"/>    
+    </execution>  
+  </object>  
+  <message id="3" operation="ReportBean()">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>  
+  <message id="5" operation="getDocumentStatusReport():java.util.ArrayList&lt;Document&gt;">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="6"/>  
+  </message>  
+  <message id="7" operation="getReports():java.util.ArrayList&lt;String&gt;">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="8"/>  
+  </message>  
+  <message id="10" operation="getInterTeamDuplicates():java.util.ArrayList&lt;DocumentInstancePair&gt;">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="11"/>  
+  </message>  
+  <message id="12" operation="getInterTeamDuplicates():java.util.ArrayList&lt;DocumentInstancePair&gt;">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="13"/>  
+  </message>  
+  <message id="15" operation="getIntraTeamDuplicates():java.util.ArrayList&lt;IdentifiedDocInstance&gt;">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="16"/>  
+  </message>  
+  <message id="17" operation="getIntraTeamDuplicates():java.util.ArrayList&lt;IdentifiedDocInstance&gt;">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="18"/>  
+  </message>  
+  <message id="21" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="22"/>  
+  </message>  
+  <message id="23" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="24"/>  
+  </message>  
+  <message id="25" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="26"/>  
+  </message>  
+  <message id="27" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="28"/>  
+  </message>  
+  <message id="29" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="30"/>  
+  </message>  
+  <message id="31" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="32"/>  
+  </message>
+</sequence-diagram>

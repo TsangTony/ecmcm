@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence-diagram version="1.1.8" icons="true" automaticImage="PNG">  
+  <object id="1" language="java" name="com.ibm.ecm.mm.bean.ValidationBean" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/bean/ValidationBean.java" binary="false" label="validationBean" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="103" y="0"/>    
+    <execution id="2">      
+      <position height="225" width="0" x="0" y="85"/>    
+    </execution>    
+    <execution id="4">      
+      <position height="162" width="0" x="0" y="127"/>    
+    </execution>    
+    <execution id="7">      
+      <position height="826" width="0" x="0" y="326"/>    
+    </execution>    
+    <execution id="9">      
+      <position height="763" width="0" x="0" y="368"/>    
+    </execution>  
+  </object>  
+  <object id="26" language="java" name="org.apache.poi.xssf.usermodel.XSSFWorkbook" project="MigrationManager" 
+    file="C:/GitHub/ECMCM/MigrationManager/WebContent/WEB-INF/lib/poi-ooxml-3.12-20150511.jar" binary="true" 
+    label="workbook" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="11">      
+      <position height="21" width="0" x="0" y="409"/>    
+    </execution>    
+    <execution id="25">      
+      <position height="21" width="0" x="0" y="1089"/>    
+    </execution>  
+  </object>  
+  <object id="27" language="java" name="javax.faces.context.ExternalContext" project="MigrationManager" 
+    file="C:/IBM/WAS Liberty/dev/api/spec/com.ibm.ws.javaee.jsf.2.0_1.0.9.jar" binary="true" label="extCtx" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="21">      
+      <position height="21" width="0" x="0" y="998"/>    
+    </execution>    
+    <execution id="23">      
+      <position height="21" width="0" x="0" y="1040"/>    
+    </execution>  
+  </object>  
+  <object id="28" language="java" name="com.ibm.ecm.mm.util.DataManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/DataManager.java" binary="false" label="&lt;static&gt;" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="6">      
+      <position height="109" width="0" x="0" y="159"/>    
+    </execution>    
+    <execution id="13">      
+      <position height="99" width="0" x="0" y="468"/>    
+    </execution>    
+    <execution id="15">      
+      <position height="97" width="0" x="0" y="604"/>    
+    </execution>    
+    <execution id="17">      
+      <position height="95" width="0" x="0" y="739"/>    
+    </execution>    
+    <execution id="19">      
+      <position height="99" width="0" x="0" y="870"/>    
+    </execution>  
+  </object>  
+  <object id="49" language="java" name="com.ibm.ecm.mm.util.ConnectionManager" project="MigrationManager" 
+    file="/MigrationManager/src/com/ibm/ecm/mm/util/ConnectionManager.java" binary="false" label="&lt;static&gt;" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="30">      
+      <position height="21" width="0" x="0" y="194"/>    
+    </execution>    
+    <execution id="32">      
+      <position height="21" width="0" x="0" y="226"/>    
+    </execution>    
+    <execution id="34">      
+      <position height="21" width="137" x="523" y="489"/>    
+    </execution>    
+    <execution id="36">      
+      <position height="21" width="137" x="523" y="525"/>    
+    </execution>    
+    <execution id="38">      
+      <position height="21" width="137" x="523" y="625"/>    
+    </execution>    
+    <execution id="40">      
+      <position height="21" width="137" x="523" y="659"/>    
+    </execution>    
+    <execution id="42">      
+      <position height="21" width="137" x="523" y="760"/>    
+    </execution>    
+    <execution id="44">      
+      <position height="21" width="137" x="523" y="792"/>    
+    </execution>    
+    <execution id="46">      
+      <position height="21" width="137" x="523" y="891"/>    
+    </execution>    
+    <execution id="48">      
+      <position height="21" width="137" x="523" y="927"/>    
+    </execution>  
+  </object>  
+  <message id="3" operation="ValidationBean()">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>  
+  <message id="5" operation="getDocuments():java.util.ArrayList&lt;Document&gt;">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="6"/>  
+  </message>  
+  <message id="8" operation="generate():void">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="9"/>  
+  </message>  
+  <message id="10" operation="getSheet(java.lang.String):org.apache.poi.xssf.usermodel.XSSFSheet">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="11"/>  
+  </message>  
+  <message id="12" 
+    operation="getIdentifiedDocInstancesWithMetadataValues(int):com.ibm.ecm.mm.model.IdentifiedDocInstances">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="13"/>  
+  </message>  
+  <message id="14" operation="getCommencePaths(int):com.ibm.ecm.mm.model.DataTableArrayList&lt;CommencePath&gt;">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="15"/>  
+  </message>  
+  <message id="16" operation="getMetadataPropreties(int):java.util.ArrayList&lt;MetadataProperty&gt;">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="17"/>  
+  </message>  
+  <message id="18" 
+    operation="getMetadataExtractionRules(int,int,int):com.ibm.ecm.mm.model.DataTableArrayList&lt;MetadataExtractionRule&gt;">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="19"/>  
+  </message>  
+  <message id="20" operation="setResponseContentType(java.lang.String):void">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="21"/>  
+  </message>  
+  <message id="22" operation="setResponseHeader(java.lang.String,java.lang.String):void">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="23"/>  
+  </message>  
+  <message id="24" operation="write(java.io.OutputStream):void">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="25"/>  
+  </message>  
+  <message id="29" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="30"/>  
+  </message>  
+  <message id="31" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="32"/>  
+  </message>  
+  <message id="33" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="34"/>  
+  </message>  
+  <message id="35" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="36"/>  
+  </message>  
+  <message id="37" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="38"/>  
+  </message>  
+  <message id="39" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="40"/>  
+  </message>  
+  <message id="41" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="17"/>    
+    <end type="TARGET" refId="42"/>  
+  </message>  
+  <message id="43" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="17"/>    
+    <end type="TARGET" refId="44"/>  
+  </message>  
+  <message id="45" operation="getConnection(java.lang.String):java.sql.Connection">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="46"/>  
+  </message>  
+  <message id="47" operation="close(java.lang.String):void">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="48"/>  
+  </message>
+</sequence-diagram>

@@ -70,7 +70,7 @@ public class Util {
 	}		
 	
 	public static String getTimeStamp() {
-	    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	    Date now = new Date();
 	    String strDate = sdfDate.format(now);
 	    return "[" + strDate + "] ";

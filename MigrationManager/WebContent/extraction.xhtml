@@ -9,56 +9,74 @@
       xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:body>
 		<ui:composition template="./template/commonLayout.xhtml">
-	   		<ui:define name="content">		
-				<h:form id="metadataextraction">
-				
-					<p:growl id="growl" for="growl" showDetail="true" sticky="true" />  
-					
+	   		<ui:define name="content">
+				<h:form id="extraction">			
+			   		<p:growl id="growl" for="growl" showDetail="true" sticky="true" />
 					<p:panelGrid id="optionPanel">
 						<p:row>
-							<p:column>Document</p:column>
 							<p:column>
-								<p:selectOneMenu id="document" value="#{extractionBean.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
+								<p:outputLabel value="Extraction Mode" />
+							</p:column>
+							<p:column>
+					        	<p:selectOneRadio id="mode" value="#{extractionBean.mode}">
+					           		<f:selectItem itemLabel="Individual" itemValue="individual" />
+					            	<f:selectItem itemLabel="Batch" itemValue="batch" />
+					            	<p:ajax update="extraction" />
+					        	</p:selectOneRadio>
+							</p:column>
+				        </p:row>
+						<p:row rendered="#{extractionBean.mode eq 'individual'}">
+							<p:column>
+				        		<p:outputLabel value="Document" />
+							</p:column>
+							<p:column>
+								<p:selectOneMenu id="document" value="#{extractionBean.selectedDocument}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
 									<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
 									<f:selectItems value="#{extractionBean.documents}" />
-									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{extractionBean.documentSelected}" />
-								</p:selectOneMenu>
+									<p:ajax update="optionPanel" listener="#{extractionBean.documentSelected}" />
+								</p:selectOneMenu>	
 							</p:column>
-						</p:row>
-						<p:row>
-							<p:column>Source Location</p:column>
+				        </p:row>	
+						<p:row rendered="#{extractionBean.mode eq 'individual' and extractionBean.documentSelected}">
+							<p:column>
+				        		<p:outputLabel value="Source Location" />
+							</p:column>
 							<p:column>
 								<p:selectOneMenu id="sourceLocation" value="#{extractionBean.commencePath}" converter="omnifaces.SelectItemsConverter">
 									<f:selectItem itemLabel="Select Source Location" noSelectionOption="true" />
-									<f:selectItems value="#{extractionBean.document.commencePaths}" />
-									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{extractionBean.commencePathSelected}" />
+									<f:selectItems value="#{extractionBean.selectedDocument.commencePaths}" />
+									<p:ajax update="extraction" listener="#{extractionBean.commencePathSelected}" />
 								</p:selectOneMenu>
 							</p:column>
-						</p:row>
-						<p:row>
-							<p:column>Metadata Property</p:column>
+				        </p:row>	
+						<p:row rendered="#{extractionBean.mode eq 'individual' and extractionBean.documentSelected}">
+							<p:column>
+								<p:outputLabel value="Metadata Property" />
+							</p:column>
 							<p:column>
 								<p:selectOneMenu id="metadataProperty" value="#{extractionBean.metadataProperty}" converter="omnifaces.SelectItemsConverter">
 									<f:selectItem itemLabel="Select Metadata Property" noSelectionOption="true" />
-									<f:selectItems value="#{extractionBean.document.metadataProperties}" />
-									<p:ajax update="optionPanel,metadataExtractionRulesPanel" listener="#{extractionBean.metadataPropertySeletced}" />
+									<f:selectItems value="#{extractionBean.selectedDocument.metadataProperties}" />
+									<p:ajax update="extraction" listener="#{extractionBean.metadataPropertySeletced}" />
 								</p:selectOneMenu>
 							</p:column>
-						</p:row>
-						<p:row rendered="#{extractionBean.metadataExtractionRules.hasDefault}">
-							<p:column>Use Default Rule</p:column>
+				        </p:row>						
+						<p:row rendered="#{extractionBean.mode eq 'individual' and extractionBean.metadataExtractionRules.hasDefault}">
+							<p:column>					
+								<p:outputLabel value="Use Default Rule" />
+							</p:column>
 							<p:column>
 								<p:selectBooleanCheckbox id="useDefaultRule" value="#{extractionBean.useDefaultRule}">
-								    <p:ajax event="change" update="@this,metadataExtractionRulesPanel" listener="#{extractionBean.toggleRules}" />
-								</p:selectBooleanCheckbox>
-								
+									<p:ajax event="change" update="extraction" listener="#{extractionBean.toggleRules}" />
+								</p:selectBooleanCheckbox>		
 							</p:column>
-						</p:row>
+				        </p:row>
+						
 					</p:panelGrid>
 					
 					<br />	
 					
-					<p:panel id="metadataExtractionRulesPanel" header="Metadata Extraction Rules" toggleable="true">
+					<p:panel id="metadataExtractionRulesPanel" header="Metadata Extraction Rules" toggleable="true" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}">
 					
 						<p:dataTable id="metadataExtractionRules" var="metadataExtractionRule" value="#{extractionBean.metadataExtractionRules.rules}" editable="#{extractionBean.ruleEditable}" editMode="cell" rowIndexVar="rowIndex">
 							<p:column headerText="Priority" style="width: 5%">
@@ -112,23 +130,18 @@
 						<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{extractionBean.metadataExtractionRules.rules.addNew}" update="metadataExtractionRules" ajax="true"  rendered="#{extractionBean.ruleEditable}" />
 						
 					</p:panel>
-				
-					<br />
-					
+									
 					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
 						<h:outputText value="#{extractionBean.status}" />
 					</p:dialog>
 					
-					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-					<p:commandButton value="Save" action="#{extractionBean.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-					<p:commandButton value="Run" action="#{extractionBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />	
-				
-					<br />
-					<br />
-					
+					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}"/>	
+					<p:commandButton value="Save" action="#{extractionBean.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
+					<p:commandButton value="Run" action="#{extractionBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
+									
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
 					
-					<p:panel header="Preview Result" toggleable="true">						
+					<p:panel header="Preview Result" toggleable="true" rendered="#{extractionBean.mode eq 'individual' and extractionBean.preview}">						
 						<p:dataTable id="preview" var="identifiedDocInstance" value="#{extractionBean.latestSnapshotInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
 						        <h:outputText value="#{identifiedDocInstance.path}" />
@@ -144,6 +157,29 @@
 						    </p:column>
 						</p:dataTable>					
 					</p:panel>
+
+			        <p:dataTable id="documents" var="document" value="#{extractionBean.documents}"
+			                     selection="#{extractionBean.selectedDocuments}" rowKey="#{document.id}"
+			                     filteredValue="#{extractionBean.filteredDocuments}" filterStyle="width: 100%"
+			                     rendered="#{extractionBean.mode eq 'batch'}" rows="10" paginator="true"
+			                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink}
+			                                        {LastPageLink} {RowsPerPageDropdown}"
+			                     rowsPerPageTemplate="10,100,1000" sortMode="multiple">
+			                     
+				        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}"
+				                  filterMatchMode="contains">
+				            <h:outputText value="#{document.team}" />
+				        </p:column>
+				        <p:column headerText="Document" sortBy="#{document.id}" filterBy="#{document}"
+				                  filterMatchMode="contains">
+				            <h:outputText value="#{document}" />
+				        </p:column>
+				    </p:dataTable>
+				    
+					<p:commandButton value="Run" action="#{extractionBean.runBatch}" update="preview,messages,growl" ajax="true"
+					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+					                 rendered="#{extractionBean.mode eq 'batch'}" />	
 				
 				</h:form>
     		</ui:define>
