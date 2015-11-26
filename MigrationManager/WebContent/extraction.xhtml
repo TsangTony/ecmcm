@@ -11,7 +11,12 @@
 		<ui:composition template="./template/commonLayout.xhtml">
 	   		<ui:define name="content">
 				<h:form id="extraction">			
-			   		<p:growl id="growl" for="growl" showDetail="true" sticky="true" />
+			   		<p:growl id="growl" for="growl" showDetail="true" sticky="true" />			   		
+
+					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
+						<h:outputText value="Pending..." />
+					</p:dialog>
+
 					<p:panelGrid id="optionPanel">
 						<p:row>
 							<p:column>
@@ -71,13 +76,13 @@
 								</p:selectBooleanCheckbox>		
 							</p:column>
 				        </p:row>
-						
+
 					</p:panelGrid>
-					
+
 					<br />	
-					
+
 					<p:panel id="metadataExtractionRulesPanel" header="Metadata Extraction Rules" toggleable="true" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}">
-					
+
 						<p:dataTable id="metadataExtractionRules" var="metadataExtractionRule" value="#{extractionBean.metadataExtractionRules.rules}" editable="#{extractionBean.ruleEditable}" editMode="cell" rowIndexVar="rowIndex">
 							<p:column headerText="Priority" style="width: 5%">
 						    	<h:outputText value="#{metadataExtractionRule.priority}" />
@@ -125,23 +130,28 @@
 							</p:column>
 							<p:ajax event="cellEdit" update="@this" />
 						</p:dataTable>
-						
+
 						<br />
 						<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{extractionBean.metadataExtractionRules.rules.addNew}" update="metadataExtractionRules" ajax="true"  rendered="#{extractionBean.ruleEditable}" />
-						
+
+						<p:selectBooleanCheckbox id="onlyNewCb" value="#{identificationBean.onlyNew}">
+						    <p:ajax event="change" update="@this" />
+						</p:selectBooleanCheckbox>		
+						<p:spacer width="5" height="10" /> 
+						<h:outputText id="onlyNewTxt" value="Office Document Only" />					
+						<p:spacer width="10" height="10" /> 
+						<p:tooltip for="onlyNewCb,onlyNewTxt" value="Only identify office documents, and media files (for training teams only)" />						
+
 					</p:panel>
-									
-					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
-						<h:outputText value="#{extractionBean.status}" />
-					</p:dialog>
-					
+
 					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}"/>	
 					<p:commandButton value="Save" action="#{extractionBean.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
 					<p:commandButton value="Run" action="#{extractionBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
-									
+
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
-					
-					<p:panel header="Preview Result" toggleable="true" rendered="#{extractionBean.mode eq 'individual' and extractionBean.preview}">						
+
+					<p:panel header="Preview Result" toggleable="true"
+					         rendered="#{extractionBean.mode eq 'individual' and extractionBean.preview}">						
 						<p:dataTable id="preview" var="identifiedDocInstance" value="#{extractionBean.latestSnapshotInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.path}">
 						        <h:outputText value="#{identifiedDocInstance.path}" />

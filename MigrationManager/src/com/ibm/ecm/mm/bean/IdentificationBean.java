@@ -24,17 +24,17 @@ import com.ibm.ecm.mm.util.ConnectionManager;
 public class IdentificationBean {
 	
 	private ArrayList<Document> documents;
+	private ArrayList<Document> selectedDocuments;
+	private ArrayList<Document> filteredDocuments;
 	private Document document;
 	private IdentifiedDocInstances identifiedDocInstances;
-	private String status;
+	private String mode;
+	private boolean preview;
 
 	public IdentificationBean() {
-		setDocuments(new ArrayList<Document>());
-		Document allDocuments = new Document();
-		allDocuments.setId(0);
-		getDocuments().add(allDocuments);
-		getDocuments().addAll(DataManager.getDocuments());		
+		setDocuments(DataManager.getDocuments());
 		setIdentifiedDocInstances(new IdentifiedDocInstances());
+		setPreview(false);
 	}
 	
 	public ArrayList<Document> getDocuments() {
@@ -43,6 +43,22 @@ public class IdentificationBean {
 	public void setDocuments(ArrayList<Document> documents) {
 		this.documents = documents;
 	}
+	public ArrayList<Document> getSelectedDocuments() {
+		return selectedDocuments;
+	}
+
+	public void setSelectedDocuments(ArrayList<Document> selectedDocuments) {
+		this.selectedDocuments = selectedDocuments;
+	}
+
+	public ArrayList<Document> getFilteredDocuments() {
+		return filteredDocuments;
+	}
+
+	public void setFilteredDocuments(ArrayList<Document> filteredDocuments) {
+		this.filteredDocuments = filteredDocuments;
+	}
+
 	public Document getDocument() {
 		return document;
 	}
@@ -55,19 +71,25 @@ public class IdentificationBean {
 	public void setIdentifiedDocInstances(IdentifiedDocInstances identifiedDocInstances) {
 		this.identifiedDocInstances = identifiedDocInstances;
 	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
 	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public boolean isPreview() {
+		return preview;
+	}
+
+	public void setPreview(boolean preview) {
+		this.preview = preview;
+	}
+
 	public boolean isDocumentSelected() {
 		return getDocument() != null && getDocument().getId() != 0;
-	}
-	
-	public boolean isAllDocumentsSelected() {
-		return getDocument() != null && getDocument().getId() == 0;
 	}
 
 	public ArrayList<IdentifiedDocInstance> getLatestSnapshotInstances() {
@@ -86,6 +108,7 @@ public class IdentificationBean {
 		try {
 			getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
 			getDocument().setIdentificationRules(DataManager.getIdentificationRules(getDocument().getId()));	
+			setPreview(false);
 		}
 		catch (Exception e) {
 			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error",  e.getMessage()));
@@ -120,6 +143,7 @@ public class IdentificationBean {
 	public void preview() {
 		try {
 			setIdentifiedDocInstances(IdentificationManager.identify(getDocument()));
+			setPreview(true);
 		}
 		catch (Exception e) {
 			String message = e.getClass().getName();
@@ -270,7 +294,7 @@ public class IdentificationBean {
 			summary = "Successful";
 			message = getDocument().toString() + " is identified.";
 			System.out.println(Util.getTimeStamp() + "DOC-" + getDocument().getId() + ": Run Identification Completed. ");
-			
+			setPreview(true);			
 		}
 		catch (Exception e) {
 			severity = FacesMessage.SEVERITY_ERROR;
@@ -285,7 +309,7 @@ public class IdentificationBean {
 		}
 	}
 	
-	public void runAndExtract() {
+	/*public void runAndExtract() {
 		Severity severity = null;
 		String summary = null;
 		String message = "";
@@ -307,15 +331,15 @@ public class IdentificationBean {
 		finally {
 			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
 		}
-	}
+	}*/
 	
-	public void runAll() {
+	public void runBatch() {
 		String successDoc = "";
 		Severity severity = null;
 		String summary = null;
 		String message = "";
 		try {
-			for (Document document : getDocuments()) {
+			for (Document document : getSelectedDocuments()) {
 				if (document.getId() != 0) {
 					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
 					document.setIdentificationRules(DataManager.getIdentificationRules(document.getId()));	
@@ -323,7 +347,7 @@ public class IdentificationBean {
 					successDoc += document.getId() + ",";
 				}
 			}
-			successDoc = successDoc.substring(0,successDoc.length()-2);
+			successDoc = successDoc.substring(0,successDoc.length()-1);
 			severity = FacesMessage.SEVERITY_INFO;
 			summary = "Successful";
 			message = "The following documents are identified: " + successDoc;
@@ -346,7 +370,7 @@ public class IdentificationBean {
 	}
 	
 
-	public void runExtractAll() {
+	/*public void runExtractAll() {
 		String successDoc = "";
 		Severity severity = null;
 		String summary = null;
@@ -380,5 +404,5 @@ public class IdentificationBean {
 		finally {
 			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
 		}
-	}
+	}*/
 }

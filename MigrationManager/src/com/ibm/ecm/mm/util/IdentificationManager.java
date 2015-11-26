@@ -85,8 +85,12 @@ public class IdentificationManager {
 			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 1 of 6 Querying the database");
 			identifiedDocInstances = DataManager.getDocInstances(document, false, true);
 			int count = 1;
+			int progress = 0;
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 2 of 6 Looking into content " + Math.round(count * 100.0f / identifiedDocInstances.size()) + "%");
+				if (Math.round(count * 100.0f / identifiedDocInstances.size()) > progress) {
+					progress = Math.round(count * 100.0f / identifiedDocInstances.size());
+					System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 2 of 6 Looking into content " + progress + "%");
+				}
 				String content = identifiedDocInstance.getContent();
 				if (!content.equals("")) {
 					for (IdentificationRule contentRule : contentRules) {

@@ -9,18 +9,29 @@
       xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:body>
 		<ui:composition template="./template/commonLayout.xhtml">
-   			<ui:define name="content">	
-				<h:form id="identification">			
-			
+   			<ui:define name="content">
+				<h:form id="identification">
 					<p:growl id="growl" for="growl" showDetail="true" sticky="true" escape="false" />  
 					
 					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
-						<h:outputText value="#{identificationBean.status}" />
+						<h:outputText value="Pending..." />
 					</p:dialog>
 					
 					<p:panelGrid id="optionPanel">
 						<p:row>
-							<p:column>Document</p:column>
+							<p:column>
+								<p:outputLabel value="Identification Mode" />
+							</p:column>
+							<p:column>
+					        	<p:selectOneRadio id="mode" value="#{identificationBean.mode}">
+					           		<f:selectItem itemLabel="Individual" itemValue="individual" />
+					            	<f:selectItem itemLabel="Batch" itemValue="batch" />
+					            	<p:ajax update="identification" />
+					        	</p:selectOneRadio>
+							</p:column>
+				        </p:row>
+						<p:row rendered="#{identificationBean.mode eq 'individual'}">
+							<p:column><p:outputLabel value="Document" /></p:column>
 							<p:column>
 								<p:selectOneMenu id="document" value="#{identificationBean.document}" converter="omnifaces.SelectItemsConverter" filter="true" filterMatchMode="contains">
 									<f:selectItem itemLabel="Select Document" noSelectionOption="true" />
@@ -33,11 +44,34 @@
 					
 					<br />
 					
-					<p:commandButton value="Run All Documents" action="#{identificationBean.runAll}" update="growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.allDocumentsSelected}" />	
-					<p:spacer width="5" height="10" /> 
-					<p:commandButton value="Run All and Extract Metadata" action="#{identificationBean.runExtractAll}" update="growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.allDocumentsSelected}" />	
-										
-					<p:panel id="commencePathPanel" header="Source Locations" toggleable="true" rendered="#{identificationBean.documentSelected}">
+					<p:dataTable id="documents" var="document" value="#{identificationBean.documents}"
+			                     selection="#{identificationBean.selectedDocuments}" rowKey="#{document.id}"
+			                     filteredValue="#{identificationBean.filteredDocuments}" filterStyle="width: 100%"
+			                     rendered="#{identificationBean.mode eq 'batch'}" rows="10" paginator="true"
+			                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink}
+			                                        {LastPageLink} {RowsPerPageDropdown}"
+			                     rowsPerPageTemplate="10,100,1000" sortMode="multiple">
+			                     
+				        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}"
+				                  filterMatchMode="contains">
+				            <h:outputText value="#{document.team}" />
+				        </p:column>
+				        <p:column headerText="Document" sortBy="#{document.id}" filterBy="#{document}"
+				                  filterMatchMode="contains">
+				            <h:outputText value="#{document}" />
+				        </p:column>
+				    </p:dataTable>
+				    
+					<br />
+					
+					<p:commandButton value="Run" action="#{identificationBean.runBatch}" update="preview,messages,growl" ajax="true"
+					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+					                 rendered="#{identificationBean.mode eq 'batch'}" />
+					                 
+					                 
+					<p:panel id="commencePathPanel" header="Source Locations" toggleable="true"
+					         rendered="#{identificationBean.mode eq 'individual' and identificationBean.documentSelected}">
 					
 						<p:dataTable id="commencePaths" var="commencePath" value="#{identificationBean.document.commencePaths}" editable="true" editMode="cell" rowIndexVar="rowIndex">
 						    <p:column headerText="Business Source Location" style="width: 44%">
@@ -67,7 +101,8 @@
 					
 					<br />
 					
-					<p:panel id="identificationRulesPanel" header="Identification Rules" toggleable="true" rendered="#{identificationBean.documentSelected}">
+					<p:panel id="identificationRulesPanel" header="Identification Rules" toggleable="true"
+					         rendered="#{identificationBean.mode eq 'individual' and identificationBean.documentSelected}">
 					
 						<p:fieldset legend="Business Rule" toggleable="true" toggleSpeed="500">	
 							<p:inputTextarea id="blIdentificationRule" value="#{identificationBean.document.blIdentificationRule}" rows="3" style="width:100%" >
@@ -167,6 +202,7 @@
 						</p:selectBooleanCheckbox>
 						<p:spacer width="5" height="10" /> 
 						<h:outputText id="noPdfTxt" value="Ignore PDF" />
+						<p:spacer width="10" height="10" /> 
 						<p:tooltip for="noPdfCb,noPdfTxt" value="Ignore the PDF version if two files with identical names exist in the same folder" />						
 						
 						<p:selectBooleanCheckbox id="includeLinkedFileCb" value="#{identificationBean.document.includeLinkedFile}">
@@ -181,20 +217,27 @@
 					<br />
 					
 					
-					<p:commandButton value="Preview" action="#{identificationBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
+					<p:commandButton value="Preview" action="#{identificationBean.preview}" update="identification" ajax="true"
+					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+					                 rendered="#{identificationBean.mode eq 'individual' and identificationBean.documentSelected}" />	
 					<p:spacer width="5" height="10" /> 
-					<p:commandButton value="Save" action="#{identificationBean.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
+					<p:commandButton value="Save" action="#{identificationBean.save}" update="identification" ajax="true"
+					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+					                 rendered="#{identificationBean.mode eq 'individual' and identificationBean.documentSelected}" />
 					<p:spacer width="5" height="10" /> 
-					<p:commandButton value="Run" action="#{identificationBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
-					<p:spacer width="5" height="10" /> 
-					<p:commandButton value="Run And Extract Metadata" action="#{identificationBean.runAndExtract}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{identificationBean.documentSelected}" />	
+					<p:commandButton value="Run" action="#{identificationBean.run}" update="identification" ajax="true"
+					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+					                 rendered="#{identificationBean.mode eq 'individual' and identificationBean.documentSelected}" />
 					
 					<br />
 					<br />
 					
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" escape="false" rendered="#{identificationBean.documentSelected}" />
 					
-					<p:panel header="Preview Result" toggleable="true" rendered="#{identificationBean.documentSelected}">	
+					<p:panel header="Preview Result" toggleable="true"
+					         rendered="#{identificationBean.documentSelected and
+					                     identificationBean.mode eq 'individual' and
+					                     identificationBean.preview}">
 						<p:dataTable id="preview" var="identifiedDocInstance" value="#{identificationBean.latestSnapshotInstances}" rows="20" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="20,50,100" sortMode="multiple">
 						    <p:column headerText="File Path" sortBy="#{identifiedDocInstance.fullPath}">
 						        <h:outputText value="#{identifiedDocInstance.volumePath}" />
