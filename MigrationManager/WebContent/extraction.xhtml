@@ -134,19 +134,19 @@
 						<br />
 						<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{extractionBean.metadataExtractionRules.rules.addNew}" update="metadataExtractionRules" ajax="true"  rendered="#{extractionBean.ruleEditable}" />
 
-						<p:selectBooleanCheckbox id="onlyNewCb" value="#{identificationBean.onlyNew}">
+						<p:selectBooleanCheckbox id="onlyNewCb" value="#{extractionBean.onlyNew}">
 						    <p:ajax event="change" update="@this" />
 						</p:selectBooleanCheckbox>		
 						<p:spacer width="5" height="10" /> 
-						<h:outputText id="onlyNewTxt" value="Office Document Only" />					
+						<h:outputText id="onlyNewTxt" value="New File Only" />					
 						<p:spacer width="10" height="10" /> 
-						<p:tooltip for="onlyNewCb,onlyNewTxt" value="Only identify office documents, and media files (for training teams only)" />						
+						<p:tooltip for="onlyNewCb,onlyNewTxt" value="Extract metadata for file newly identified in Snapshot 2 only)" />						
 
 					</p:panel>
 
-					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="preview,messages" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}"/>	
-					<p:commandButton value="Save" action="#{extractionBean.save}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
-					<p:commandButton value="Run" action="#{extractionBean.run}" update="preview,messages,growl" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
+					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="extraction" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}"/>	
+					<p:commandButton value="Save" action="#{extractionBean.save}" update="extraction" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
+					<p:commandButton value="Run" action="#{extractionBean.run}" update="extraction" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
 
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
 

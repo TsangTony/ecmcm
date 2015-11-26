@@ -34,6 +34,7 @@ public class ExtractionBean {
 	private IdentifiedDocInstances identifiedDocInstances;
 	private String status;
 	private boolean isPreview;
+	private boolean onlyNew;
 	
 	public ExtractionBean() {
 		setDocuments(DataManager.getDocuments());
@@ -129,6 +130,14 @@ public class ExtractionBean {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public boolean isOnlyNew() {
+		return onlyNew;
+	}
+
+	public void setOnlyNew(boolean onlyNew) {
+		this.onlyNew = onlyNew;
 	}
 
 	public ArrayList<MetadataExtractionRules> getMultipliedMetadataExtractionRules() {
@@ -278,7 +287,7 @@ public class ExtractionBean {
 				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getSelectedDocument(), getCommencePath()), getMultipliedMetadataExtractionRules()));
 			}
 			else {*/
-				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getSelectedDocument(), getCommencePath()), getMetadataExtractionRules()));
+				setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(getSelectedDocument(), getCommencePath(), isOnlyNew()), getMetadataExtractionRules()));
 			//}
 			setPreview(true);
 			return true;
@@ -336,7 +345,7 @@ public class ExtractionBean {
 	public void runExtraction(Document document, CommencePath commencePath, MetadataExtractionRules metadataExtractionRules) {
 		
 		
-		setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(document, commencePath), metadataExtractionRules));
+		setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(document, commencePath, isOnlyNew()), metadataExtractionRules));
 		
 		//if (preview()) {		
 			/*
