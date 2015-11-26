@@ -79,7 +79,32 @@
 
 					</p:panelGrid>
 
+					<br />						
+					
+			        <p:dataTable id="documents" var="document" value="#{extractionBean.documents}"
+			                     selection="#{extractionBean.selectedDocuments}" rowKey="#{document.id}"
+			                     filteredValue="#{extractionBean.filteredDocuments}" filterStyle="width: 100%"
+			                     rendered="#{extractionBean.mode eq 'batch'}" rows="10" paginator="true"
+			                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink}
+			                                        {LastPageLink} {RowsPerPageDropdown}"
+			                     rowsPerPageTemplate="10,100,1000" sortMode="multiple">
+			                     
+				        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}"
+				                  filterMatchMode="contains">
+				            <h:outputText value="#{document.team}" />
+				        </p:column>
+				        <p:column headerText="Document" sortBy="#{document.id}" filterBy="#{document}"
+				                  filterMatchMode="contains">
+				            <h:outputText value="#{document}" />
+				        </p:column>
+				    </p:dataTable>				    
+
 					<br />	
+
+					<p:commandButton value="Run" action="#{extractionBean.runBatch}" update="preview,messages,growl" ajax="true"
+					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+					                 rendered="#{extractionBean.mode eq 'batch'}" />	
 
 					<p:panel id="metadataExtractionRulesPanel" header="Metadata Extraction Rules" toggleable="true" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}">
 
@@ -133,7 +158,8 @@
 
 						<br />
 						<p:commandButton value="New Rule" icon="ui-icon-plusthick" action="#{extractionBean.metadataExtractionRules.rules.addNew}" update="metadataExtractionRules" ajax="true"  rendered="#{extractionBean.ruleEditable}" />
-
+						<p:spacer width="10" height="10" />
+						
 						<p:selectBooleanCheckbox id="onlyNewCb" value="#{extractionBean.onlyNew}">
 						    <p:ajax event="change" update="@this" />
 						</p:selectBooleanCheckbox>		
@@ -143,10 +169,15 @@
 						<p:tooltip for="onlyNewCb,onlyNewTxt" value="Extract metadata for file newly identified in Snapshot 2 only)" />						
 
 					</p:panel>
+					
+					<br />
 
 					<p:commandButton value="Preview" action="#{extractionBean.preview}" update="extraction" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}"/>	
 					<p:commandButton value="Save" action="#{extractionBean.save}" update="extraction" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
 					<p:commandButton value="Run" action="#{extractionBean.run}" update="extraction" ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" rendered="#{extractionBean.mode eq 'individual' and extractionBean.optionSet}" />	
+
+					<br />
+					<br />
 
 					<p:messages id="messages" for="messages" showDetail="true" autoUpdate="true" closable="true" />
 
@@ -168,28 +199,6 @@
 						</p:dataTable>					
 					</p:panel>
 
-			        <p:dataTable id="documents" var="document" value="#{extractionBean.documents}"
-			                     selection="#{extractionBean.selectedDocuments}" rowKey="#{document.id}"
-			                     filteredValue="#{extractionBean.filteredDocuments}" filterStyle="width: 100%"
-			                     rendered="#{extractionBean.mode eq 'batch'}" rows="10" paginator="true"
-			                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink}
-			                                        {LastPageLink} {RowsPerPageDropdown}"
-			                     rowsPerPageTemplate="10,100,1000" sortMode="multiple">
-			                     
-				        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
-				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}"
-				                  filterMatchMode="contains">
-				            <h:outputText value="#{document.team}" />
-				        </p:column>
-				        <p:column headerText="Document" sortBy="#{document.id}" filterBy="#{document}"
-				                  filterMatchMode="contains">
-				            <h:outputText value="#{document}" />
-				        </p:column>
-				    </p:dataTable>
-				    
-					<p:commandButton value="Run" action="#{extractionBean.runBatch}" update="preview,messages,growl" ajax="true"
-					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
-					                 rendered="#{extractionBean.mode eq 'batch'}" />	
 				
 				</h:form>
     		</ui:define>

@@ -1,10 +1,10 @@
 package com.ibm.ecm.mm.bean;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.regex.PatternSyntaxException;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.FacesContext;
 
 import com.ibm.ecm.mm.model.CommencePath;
@@ -364,7 +364,7 @@ public class ExtractionBean {
 	
 	public void run() {
 
-		System.out.format("%tT DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Started.", Calendar.getInstance());
+		System.out.println(Util.getTimeStamp() + "DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Started.");
 	
 		runExtraction(getSelectedDocument(), getCommencePath(), getMetadataExtractionRules());
 
@@ -379,16 +379,19 @@ public class ExtractionBean {
 	}
 	
 	public void runBatch() {
+		String successDoc = "";
+		Severity severity = null;
+		String summary = null;
+		String message = "";
 		try {
-			
-			System.out.format("%tT Run Batch Metadata Extraction Started.", Calendar.getInstance());
+
+			System.out.println(Util.getTimeStamp() + " Run Batch Metadata Extraction Started.");
 		
 			int docCount = 0;
 			
 			for (Document document : getSelectedDocuments()) {
 				docCount++;
-				
-				System.out.format("%tT " + docCount + "/" + getSelectedDocuments().size() + " DOC-" + document.getId() + ": Running Metadata Extraction", Calendar.getInstance());
+				System.out.println(Util.getTimeStamp() + " " + docCount + "/" + getSelectedDocuments().size() + " DOC-" + document.getId() + ": Running Metadata Extraction");
 			
 				document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
 				for (CommencePath commencePath : document.getCommencePaths()) {
@@ -414,12 +417,28 @@ public class ExtractionBean {
 						runExtraction(document,commencePath,metadataExtractionRules);
 	
 					}
-				}		
+				}
+				successDoc += document.getId() + ",";
 			}
-			System.out.format("%tT Run Batch Metadata Extraction Ended.", Calendar.getInstance());
+			System.out.println(Util.getTimeStamp() + " Run Batch Metadata Extraction Completed.");
+			successDoc = successDoc.substring(0,successDoc.length()-1);
+			severity = FacesMessage.SEVERITY_INFO;
+			summary = "Successful";
+			message = "The following documents are extracted with metadata: " + successDoc;
 		}
 		catch (Exception e) {
+			severity = FacesMessage.SEVERITY_ERROR;
+			summary = e.getClass().getName();
+			if (e.getMessage() != null)
+				message += e.getMessage() + ".";
+			if (successDoc.equals(""))
+				message += "No metadata is extracted.";
+			else	
+				message += "Only the following documents are extracted with metadata: " + successDoc;
 			e.printStackTrace();
+		}
+		finally {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
 		}
 	}
 	
