@@ -24,6 +24,27 @@ import com.ibm.ecm.mm.model.MetadataValue;
 
 public class DataManager {	
 	
+	private static int LATEST_SNAPSHOT;
+	
+	static {
+		try {
+			Connection conn = ConnectionManager.getConnection("");
+			String query = "select top 1 snapshot from all_document_instance order by snapshot desc";
+			PreparedStatement stmt = conn.prepareStatement(query);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				LATEST_SNAPSHOT = rs.getInt(1);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("");
+		}
+	}
+	
+
 	public static ArrayList<Document> getDocuments() {		
 		ArrayList<Document> documents = new ArrayList<Document>();		
 		try {	
@@ -37,7 +58,8 @@ public class DataManager {
 					+ "       ig_security_class.NAME, "
 					+ "       document.is_no_pdf, "
 					+ "       document.is_office_doc, "
-					+ "       document.include_linked_file "
+					+ "       document.include_linked_file, "
+					+ "       document.release "
 					+ "FROM   document "
 					+ "left join team "
 					+ "on document.team_id = team.id "
@@ -63,6 +85,7 @@ public class DataManager {
 				document.setNoPdf(selectDocumentRS.getBoolean(7));
 				document.setOfficeDoc(selectDocumentRS.getBoolean(8));
 				document.setIncludeLinkedFile(selectDocumentRS.getBoolean(9));
+				document.setRelease(selectDocumentRS.getInt(10));
 				documents.add(document);
 			}			
 		}
@@ -135,15 +158,21 @@ public class DataManager {
 			String query = ""
 					+ "SELECT metadata_property.id, "
 					+ "       metadata_property.NAME "
-					+ "FROM   metadata_property "
-					+ "       LEFT JOIN [D_MP] "
-					+ "              ON [D_MP].metadata_property_id = metadata_property.id "
-					+ "       LEFT JOIN Document "
-					+ "              ON Document.id = [D_MP].document_id "
-					+ "WHERE  document.id = ? "
-					+ "ORDER  BY metadata_property.id";
+					+ "FROM   metadata_property ";
+			
+			if (documentId != 0) {
+				query +=  "       LEFT JOIN [D_MP] "
+						+ "              ON [D_MP].metadata_property_id = metadata_property.id "
+						+ "       LEFT JOIN Document "
+						+ "              ON Document.id = [D_MP].document_id "
+						+ "WHERE  document.id = ? ";
+			}
+			
+			query += "ORDER  BY metadata_property.id";
+			
 			PreparedStatement selectMetadataPropertyStmt = conn.prepareStatement(query);
-			selectMetadataPropertyStmt.setInt(1, documentId);
+			if (documentId != 0)
+				selectMetadataPropertyStmt.setInt(1, documentId);
 			ResultSet selectMetadataPropertyRS = selectMetadataPropertyStmt.executeQuery();
 			while (selectMetadataPropertyRS.next()) {					
 				MetadataProperty metadataProperty = new MetadataProperty();
@@ -248,10 +277,23 @@ public class DataManager {
 		removeMetadataValues(documentId, metadataPropertyIds);
 	}
 	
-	public static void removeMetadataValues(int documentId, int commencePathId, int metadataPropertyId) {
-		ArrayList<Integer> metadataPropertyIds = new ArrayList<Integer>();
-		metadataPropertyIds.add(Integer.valueOf(metadataPropertyId));
-		removeMetadataValues(documentId, commencePathId, metadataPropertyIds);
+	public static void removeMetadataValues(IdentifiedDocInstances identifiedDocumentInstances, int documentId) {
+		try {
+			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
+			PreparedStatement stmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
+			stmt.setInt(1, documentId);
+			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocumentInstances) {
+				stmt.setLong(2, identifiedDocInstance.getId());
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+		}
+		catch (SQLException e) {				
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("removeMetadataValues");
+		}
 	}
 	
 	public static void removeMetadataValues(int documentId, ArrayList<Integer> metadataPropertyIds) {
@@ -400,7 +442,7 @@ public class DataManager {
 			if (commencePath != null)
 				query += " AND volume + '/' + ISNULL(path,'') LIKE ?";
 			if (onlyNew)
-				query += " AND snapshot=2";
+				query += " AND snapshot=" + LATEST_SNAPSHOT;
 				
 			
 			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement(query);
@@ -859,7 +901,7 @@ public class DataManager {
 			
 			if (document.isOfficeDoc()) {
 			
-				//extension		
+				//extension
 				query += "AND extension in ('doc','docx','dot','docm','dotx','dotm','docb',"
 					  +  "'xls','xlt','xlm','xlsx','xlsm','xltx','xltm','xlsb','xla','xll',"
 					  +  "'xlw','ppt','pot','pps','pptx','pptm','potx','potm','ppam','ppsx',"

@@ -353,7 +353,7 @@ public class ExtractionBean {
 			 */	
 			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Step 3 of 3 Saving metadata");
 			
-			DataManager.removeMetadataValues(document.getId(),commencePath.getId(),metadataExtractionRules.getMetadataProperty().getId());
+			DataManager.removeMetadataValues(getIdentifiedDocInstances(),document.getId());
 			
 			DataManager.addMetadataValues(getIdentifiedDocInstances(),document.getId());			
 			
@@ -385,13 +385,13 @@ public class ExtractionBean {
 		String message = "";
 		try {
 
-			System.out.println(Util.getTimeStamp() + " Run Batch Metadata Extraction Started.");
+			System.out.println(Util.getTimeStamp() + "Run Batch Metadata Extraction Started.");
 		
 			int docCount = 0;
 			
 			for (Document document : getSelectedDocuments()) {
 				docCount++;
-				System.out.println(Util.getTimeStamp() + " " + docCount + "/" + getSelectedDocuments().size() + " DOC-" + document.getId() + ": Running Metadata Extraction");
+				System.out.println(Util.getTimeStamp() + docCount + "/" + getSelectedDocuments().size() + " DOC-" + document.getId() + ": Running Metadata Extraction");
 			
 				document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
 				for (CommencePath commencePath : document.getCommencePaths()) {
@@ -420,7 +420,7 @@ public class ExtractionBean {
 				}
 				successDoc += document.getId() + ",";
 			}
-			System.out.println(Util.getTimeStamp() + " Run Batch Metadata Extraction Completed.");
+			System.out.println(Util.getTimeStamp() + "Run Batch Metadata Extraction Completed.");
 			successDoc = successDoc.substring(0,successDoc.length()-1);
 			severity = FacesMessage.SEVERITY_INFO;
 			summary = "Successful";

@@ -9,6 +9,7 @@ public class Document extends DataTableElement {
 	private String igDocClass;
 	private String igSecClass;
 	private String team;
+	private int release;
 	private boolean isNoPdf;
 	private boolean isOfficeDoc;
 	private boolean includeLinkedFile;
@@ -85,6 +86,14 @@ public class Document extends DataTableElement {
 		this.team = team;
 	}
 	
+
+	public int getRelease() {
+		return release;
+	}
+
+	public void setRelease(int release) {
+		this.release = release;
+	}
 
 	public boolean isNoPdf() {
 		return isNoPdf;

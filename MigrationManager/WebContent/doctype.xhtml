@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"   
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:of="http://omnifaces.org/functions"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:body>
+		<ui:composition template="./template/commonLayout.xhtml">
+	   		<ui:define name="content">
+				<h:form id="doctype">			
+			   		<p:growl id="growl" for="growl" showDetail="true" sticky="true" />			   		
+
+					<p:dialog header="Pending" widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false">
+						<h:outputText value="Pending..." />
+					</p:dialog>
+
+					<p:panelGrid id="optionPanel">
+						<p:row>
+							<p:column>
+				        		<p:outputLabel value="Document Type" />
+							</p:column>
+							<p:column>
+								<p:selectOneMenu id="documentType" value="#{doctypeBean.selectedDocumentType}"
+								                 converter="omnifaces.SelectItemsConverter" filter="true"
+								                 filterMatchMode="contains">
+									<f:selectItem itemLabel="Select Document Type" noSelectionOption="true" />
+									<f:selectItems value="#{doctypeBean.documentTypes}" />
+									<p:ajax update="doctype" listener="#{doctypeBean.onDocumentTypeSelected}" />
+								</p:selectOneMenu>	
+							</p:column>
+				        </p:row>	
+					</p:panelGrid>
+					
+					<br />
+					
+					<p:panelGrid id="editPanel" rendered="#{doctypeBean.documentTypeSelected}">
+						<p:row>
+							<p:column>
+				        		<p:outputLabel value="ID" />
+							</p:column>
+							<p:column>
+				        		<p:outputLabel value="#{doctypeBean.selectedDocumentType.id}" />
+							</p:column>
+				        </p:row>
+						<p:row>
+							<p:column>
+				        		<p:outputLabel value="Name" />
+							</p:column>
+							<p:column>
+								<p:inputText id="name" value="#{doctypeBean.selectedDocumentType.name}" style="width: 100%;">
+									<p:ajax event="change" update="@this" />
+								</p:inputText>	
+							</p:column>
+				        </p:row>
+						<p:row>
+							<p:column>
+				        		<p:outputLabel value="Team" />
+							</p:column>
+							<p:column>
+								<p:selectOneMenu id="team" value="#{doctypeBean.selectedDocumentType.team}"
+								                 converter="omnifaces.SelectItemsConverter" filter="true"
+								                 filterMatchMode="contains">
+									<f:selectItems value="#{doctypeBean.documentTypes}" />
+									<p:ajax update="@this" listener="#{doctypeBean.onDocumentTypeSelected}" />
+								</p:selectOneMenu>	
+							</p:column>
+				        </p:row>
+						<p:row>
+							<p:column>
+				        		<p:outputLabel value="Metadata Properties" />
+							</p:column>
+							<p:column>
+			                    <p:pickList id="metadataPickList" value="#{doctypeBean.metadataProperties}"
+			                                var="metadataProperty" itemValue="#{metadataProperty}" itemLabel="#{metadataProperty.name}">
+			                    	<o:converter converterId="omnifaces.ListConverter" list="#{doctypeBean.metadataProperties.source}" />
+			                    </p:pickList>
+							</p:column>
+				        </p:row>
+					</p:panelGrid>
+				
+				</h:form>
+    		</ui:define>
+    	</ui:composition>
+	</h:body>
+</html>

@@ -90,13 +90,18 @@
 			                     rowsPerPageTemplate="10,100,1000" sortMode="multiple">
 			                     
 				        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
-				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}"
+				        <p:column headerText="Release" sortBy="#{document.release}"
+				                  filterBy="#{document.release}" style="width: 20%"
 				                  filterMatchMode="contains">
+				            <h:outputText value="#{document.release}" />
+				        </p:column>
+				        <p:column headerText="Team" sortBy="#{document.team}" filterBy="#{document.team}"
+				                  filterMatchMode="contains" style="width: 40%">
 				            <h:outputText value="#{document.team}" />
 				        </p:column>
 				        <p:column headerText="Document" sortBy="#{document.id}" filterBy="#{document}"
 				                  filterMatchMode="contains">
-				            <h:outputText value="#{document}" />
+				            <h:outputText value="#{document}" style="width: 40%" />
 				        </p:column>
 				    </p:dataTable>				    
 

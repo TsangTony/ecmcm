@@ -99,11 +99,11 @@ public class IdentificationBean {
 	public int getCommencePathsLastIndex() {
 		return getDocument().getCommencePaths().size()-1;
 	}
-	
+
 	public int getIdentificationRulesLastIndex() {
 		return getDocument().getIdentificationRules().size()-1;
 	}	
-	
+
 	public void documentSelected() {
 		try {
 			getDocument().setCommencePaths(DataManager.getCommencePaths(getDocument().getId()));
@@ -334,12 +334,11 @@ public class IdentificationBean {
 	}*/
 	
 	public void runBatch() {
-		String successDoc = "";
-		Severity severity = null;
-		String summary = null;
-		String message = "";
-		try {
-			for (Document document : getSelectedDocuments()) {
+		String successDoc = "";		
+		String errorDoc = "";
+		
+		for (Document document : getSelectedDocuments()) {
+			try {
 				if (document.getId() != 0) {
 					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
 					document.setIdentificationRules(DataManager.getIdentificationRules(document.getId()));	
@@ -347,26 +346,27 @@ public class IdentificationBean {
 					successDoc += document.getId() + ",";
 				}
 			}
+			catch (Exception e) {
+				errorDoc += document.getId() + ",";
+				e.printStackTrace();
+			}
+		}
+		
+		if (successDoc.length() > 0) {
 			successDoc = successDoc.substring(0,successDoc.length()-1);
-			severity = FacesMessage.SEVERITY_INFO;
-			summary = "Successful";
-			message = "The following documents are identified: " + successDoc;
-			
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Successful", "The following documents are identified: " + successDoc));
 		}
-		catch (Exception e) {
-			severity = FacesMessage.SEVERITY_ERROR;
-			summary = e.getClass().getName();
-			if (e.getMessage() != null)
-				message += e.getMessage() + ".";
-			if (successDoc.equals(""))
-				message += "No document is identified.";
-			else	
-				message += "Only the following documents are identified: " + successDoc;
-			e.printStackTrace();
+		else {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error", "No document is identified"));
 		}
-		finally {
-			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
+		
+		if (errorDoc.length() > 0) {
+			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error", "The following documents are not identified due to error: " + errorDoc));			
 		}
+		
 	}
 	
 
