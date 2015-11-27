@@ -50,8 +50,9 @@
 				        		<p:outputLabel value="Name" />
 							</p:column>
 							<p:column>
-								<p:inputText id="name" value="#{doctypeBean.selectedDocumentType.name}" style="width: 100%;">
-									<p:ajax event="change" update="@this" />
+								<p:inputText id="name" value="#{doctypeBean.selectedDocumentType.name}"
+									style="width: 95%;" valueChangeListener="#{doctypeBean.onValueChanged}">
+									<p:ajax event="change" update="@this" process="@this" />
 								</p:inputText>	
 							</p:column>
 				        </p:row>
@@ -61,10 +62,12 @@
 							</p:column>
 							<p:column>
 								<p:selectOneMenu id="team" value="#{doctypeBean.selectedDocumentType.team}"
-								                 converter="omnifaces.SelectItemsConverter" filter="true"
-								                 filterMatchMode="contains">
-									<f:selectItems value="#{doctypeBean.documentTypes}" />
-									<p:ajax update="@this" listener="#{doctypeBean.onDocumentTypeSelected}" />
+									converter="omnifaces.SelectItemsConverter" filter="true"
+									filterMatchMode="contains"
+									valueChangeListener="#{doctypeBean.onValueChanged}">
+									<f:selectItem itemLabel="Select Team" noSelectionOption="true" />
+									<f:selectItems value="#{doctypeBean.teams}" />
+									<p:ajax update="@this" process="@this" />
 								</p:selectOneMenu>	
 							</p:column>
 				        </p:row>
@@ -74,13 +77,23 @@
 							</p:column>
 							<p:column>
 			                    <p:pickList id="metadataPickList" value="#{doctypeBean.metadataProperties}"
-			                                var="metadataProperty" itemValue="#{metadataProperty}" itemLabel="#{metadataProperty.name}">
-			                    	<o:converter converterId="omnifaces.ListConverter" list="#{doctypeBean.metadataProperties.source}" />
+			                    	var="metadataProperty" itemValue="#{metadataProperty}"
+			                    	itemLabel="#{metadataProperty.name}"
+									valueChangeListener="#{doctypeBean.onValueChanged}">
+			                    	<o:converter converterId="omnifaces.ListConverter" />
+									<p:ajax event="transfer"
+										listener="#{doctypeBean.onPickMetadataProperty}" />
 			                    </p:pickList>
 							</p:column>
 				        </p:row>
 					</p:panelGrid>
 				
+					<br />
+				
+					<p:commandButton value="Save" action="#{doctypeBean.save}" update="doctype" ajax="true"
+						onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+						rendered="#{doctypeBean.documentTypeSelected}" />
+		
 				</h:form>
     		</ui:define>
     	</ui:composition>

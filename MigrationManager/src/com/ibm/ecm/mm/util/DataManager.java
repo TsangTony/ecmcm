@@ -21,6 +21,7 @@ import com.ibm.ecm.mm.model.Lookup;
 import com.ibm.ecm.mm.model.MetadataExtractionRule;
 import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.model.MetadataValue;
+import com.ibm.ecm.mm.model.Team;
 
 public class DataManager {	
 	
@@ -53,6 +54,7 @@ public class DataManager {
 					+ "SELECT document.id, "
 					+ "       document.NAME, "
 					+ "       document.bl_identification_rule, "
+					+ "       team.id, "
 					+ "       team.NAME, "
 					+ "       ig_document_class.NAME, "
 					+ "       ig_security_class.NAME, "
@@ -79,13 +81,16 @@ public class DataManager {
 				document.setId(selectDocumentRS.getInt(1));
 				document.setName(selectDocumentRS.getString(2));	
 				document.setBlIdentificationRule(selectDocumentRS.getString(3));
-				document.setTeam(selectDocumentRS.getString(4));
-				document.setIgDocClass(selectDocumentRS.getString(5));
-				document.setIgSecClass(selectDocumentRS.getString(6));
-				document.setNoPdf(selectDocumentRS.getBoolean(7));
-				document.setOfficeDoc(selectDocumentRS.getBoolean(8));
-				document.setIncludeLinkedFile(selectDocumentRS.getBoolean(9));
-				document.setRelease(selectDocumentRS.getInt(10));
+				Team team = new Team();
+				team.setId(selectDocumentRS.getInt(4));
+				team.setName(selectDocumentRS.getString(5));
+				document.setTeam(team);
+				document.setIgDocClass(selectDocumentRS.getString(6));
+				document.setIgSecClass(selectDocumentRS.getString(7));
+				document.setNoPdf(selectDocumentRS.getBoolean(8));
+				document.setOfficeDoc(selectDocumentRS.getBoolean(9));
+				document.setIncludeLinkedFile(selectDocumentRS.getBoolean(10));
+				document.setRelease(selectDocumentRS.getInt(11));
 				documents.add(document);
 			}			
 		}
@@ -675,6 +680,7 @@ public class DataManager {
 			String query = ""
 						+ "SELECT document.id, "
 						+ "       document.NAME, "
+						+ "       team.id, "
 						+ "       team.NAME, "
 						+ "       Isnull(S1.count, 0)    AS S1, "
 						+ "       Isnull(S1Del.count, 0) AS S1Del, "
@@ -776,10 +782,13 @@ public class DataManager {
 					doc = new Document();
 					doc.setId(rs.getInt(1));
 					doc.setName(rs.getString(2));
-					doc.setTeam(rs.getString(3));
-					doc.setS1(rs.getInt(4));
-					doc.setS1Deleted(rs.getInt(5));
-					doc.setS2New(rs.getInt(6));
+					Team team = new Team();
+					team.setId(rs.getInt(3));
+					team.setName(rs.getString(4));
+					doc.setTeam(team);
+					doc.setS1(rs.getInt(5));
+					doc.setS1Deleted(rs.getInt(6));
+					doc.setS2New(rs.getInt(7));
 					documents.add(doc);
 					preDoc=doc;
 				}
@@ -787,10 +796,10 @@ public class DataManager {
 					doc = preDoc;
 				 
 				MetadataProperty metadataProperty = new MetadataProperty();
-				metadataProperty.setId(rs.getInt(7));
-				metadataProperty.setName(rs.getString(8));
-				metadataProperty.getExtracted().add(rs.getInt(9));
-				metadataProperty.getExtracted().add(rs.getInt(11));
+				metadataProperty.setId(rs.getInt(8));
+				metadataProperty.setName(rs.getString(9));
+				metadataProperty.getExtracted().add(rs.getInt(10));
+				metadataProperty.getExtracted().add(rs.getInt(12));
 				doc.getMetadataProperties().add(metadataProperty);				
 			}			
 		}
@@ -908,7 +917,7 @@ public class DataManager {
 					  +  "'ppsm','sldx','sldm','VSD','VST','VSW','VDX','VSX','VTX','VSDX',"
 					  +  "'VSDM','VSSX','VSSM','VSTX','VSTM','VSL','pdf','csv'";
 				
-				if (document.getTeam().contains("Training")) {
+				if (document.getTeam().getName().contains("Training")) {
 					query += ",'afc','wav','mp3','aif','rm','mid','aob','3gp','aiff','aac',"
 						  +  "'ape','au','flac','m4a','m4p','ra','raw','wma','mkv','flv','vob',"
 						  +  "'avi','mov','qt','wmv','rmvb','asf','mpg','mpeg','mp4',',mpe',"
@@ -1111,7 +1120,8 @@ public class DataManager {
 		try {	
 			Connection conn = ConnectionManager.getConnection("getIntraTeamDuplicates");	
 			String query = ""
-						+ "SELECT Team.name, "
+					    + "SELECT Team.id, "
+						+ "       Team.name, "
 						+ "       Document.id, "
 						+ "       Document.name, "
 						+ "       Duplicates.digest, "
@@ -1144,15 +1154,18 @@ public class DataManager {
 			while (rs.next()) {					
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				Document document = new Document();
-				document.setTeam(rs.getString(1));
-				document.setId(rs.getInt(2));
-				document.setName(rs.getString(3));
+				Team team = new Team();
+				team.setId(rs.getInt(1));
+				team.setName(rs.getString(2));
+				document.setTeam(team);
+				document.setId(rs.getInt(3));
+				document.setName(rs.getString(4));
 				identifiedDocInstance.setDocument(document);
-				identifiedDocInstance.setDigest(rs.getString(4));
-				identifiedDocInstance.setId(rs.getLong(5));
-				identifiedDocInstance.setName(rs.getString(6));
-				identifiedDocInstance.setPath(rs.getString(7));
-				identifiedDocInstance.setVolume(rs.getString(8));
+				identifiedDocInstance.setDigest(rs.getString(5));
+				identifiedDocInstance.setId(rs.getLong(6));
+				identifiedDocInstance.setName(rs.getString(7));
+				identifiedDocInstance.setPath(rs.getString(8));
+				identifiedDocInstance.setVolume(rs.getString(9));
 				duplicates.add(identifiedDocInstance);
 			}			
 		}
@@ -1172,6 +1185,7 @@ public class DataManager {
 			Connection conn = ConnectionManager.getConnection("getInterTeamDuplicates");	
 			String query = ""
 						+ "SELECT IDI1.digest, "
+						+ "       IDI1.team_id, "
 						+ "       IDI1.team_name, "
 						+ "       IDI1.document_id, "
 						+ "       IDI1.document_name, "
@@ -1179,6 +1193,7 @@ public class DataManager {
 						+ "       IDI1.NAME, "
 						+ "       IDI1.path, "
 						+ "       IDI1.volume, "
+						+ "       IDI2.team_id, "
 						+ "       IDI2.team_name, "
 						+ "       IDI2.document_id, "
 						+ "       IDI2.document_name, "
@@ -1236,24 +1251,30 @@ public class DataManager {
 				documentInstancePair.getDocumentInstance2().setDigest(rs.getString(1));				
 				
 				Document document1 = new Document();
-				document1.setTeam(rs.getString(2));
-				document1.setId(rs.getInt(3));
-				document1.setName(rs.getString(4));				
+				Team team1 = new Team();
+				team1.setId(rs.getInt(2));
+				team1.setName(rs.getString(3));
+				document1.setTeam(team1);
+				document1.setId(rs.getInt(4));
+				document1.setName(rs.getString(5));				
 				documentInstancePair.getDocumentInstance1().setDocument(document1);				
-				documentInstancePair.getDocumentInstance1().setId(rs.getLong(5));
-				documentInstancePair.getDocumentInstance1().setName(rs.getString(6));
-				documentInstancePair.getDocumentInstance1().setPath(rs.getString(7));
-				documentInstancePair.getDocumentInstance1().setVolume(rs.getString(8));
+				documentInstancePair.getDocumentInstance1().setId(rs.getLong(6));
+				documentInstancePair.getDocumentInstance1().setName(rs.getString(7));
+				documentInstancePair.getDocumentInstance1().setPath(rs.getString(8));
+				documentInstancePair.getDocumentInstance1().setVolume(rs.getString(9));
 				
 				Document document2 = new Document();
-				document2.setTeam(rs.getString(9));
-				document2.setId(rs.getInt(10));
-				document2.setName(rs.getString(11));				
+				Team team2 = new Team();
+				team2.setId(rs.getInt(10));
+				team2.setName(rs.getString(11));
+				document1.setTeam(team2);
+				document2.setId(rs.getInt(12));
+				document2.setName(rs.getString(13));				
 				documentInstancePair.getDocumentInstance2().setDocument(document2);				
-				documentInstancePair.getDocumentInstance2().setId(rs.getLong(12));
-				documentInstancePair.getDocumentInstance2().setName(rs.getString(13));
-				documentInstancePair.getDocumentInstance2().setPath(rs.getString(14));
-				documentInstancePair.getDocumentInstance2().setVolume(rs.getString(15));
+				documentInstancePair.getDocumentInstance2().setId(rs.getLong(14));
+				documentInstancePair.getDocumentInstance2().setName(rs.getString(15));
+				documentInstancePair.getDocumentInstance2().setPath(rs.getString(16));
+				documentInstancePair.getDocumentInstance2().setVolume(rs.getString(17));
 				
 				duplicates.add(documentInstancePair);
 			}			
@@ -1308,6 +1329,36 @@ public class DataManager {
 		}
 		
 		return identifiedDocInstance;
+	}
+
+	public static ArrayList<Team> getTeams() {
+		ArrayList<Team> teams = new ArrayList<Team>();		
+		try {	
+			Connection conn = ConnectionManager.getConnection("getTeams");	
+			String query = ""
+					+ "SELECT team.id, "
+					+ "       team.NAME, "
+					+ "       team.department "
+					+ "FROM   team "
+					+ "ORDER  BY team.department, team.name";
+
+			PreparedStatement stmt = conn.prepareStatement(query);
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {	
+				Team team = new Team();
+				team.setId(rs.getInt(1));
+				team.setName(rs.getString(2));
+				team.setDepartment(rs.getString(3));
+				teams.add(team);
+			}			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			ConnectionManager.close("getTeams");
+		}		
+		return teams;
 	}
 	
 	

@@ -8,7 +8,7 @@ public class Document extends DataTableElement {
 	private String blIdentificationRule;
 	private String igDocClass;
 	private String igSecClass;
-	private String team;
+	private Team team;
 	private int release;
 	private boolean isNoPdf;
 	private boolean isOfficeDoc;
@@ -78,11 +78,11 @@ public class Document extends DataTableElement {
 		this.igSecClass = igSecClass;
 	}
 
-	public String getTeam() {
+	public Team getTeam() {
 		return team;
 	}
 
-	public void setTeam(String team) {
+	public void setTeam(Team team) {
 		this.team = team;
 	}
 	

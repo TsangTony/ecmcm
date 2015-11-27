@@ -136,11 +136,11 @@ public class IdentificationManager {
 		int displayCount = identifiedDocInstances.getLatestSnapshotInstances().size();
 		
 		if (displayCount == 0)
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No document instance is identified."));
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "DOC-" + document.getId() + ": No document instance is identified."));
 		else if (displayCount == 1)
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "1 document instance is identified."));
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "DOC-" + document.getId() + ": 1 document instance is identified."));
 		else
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", displayCount + " document instances are identified."));
+			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "DOC-" + document.getId() + ": " + displayCount + " document instances are identified."));
 
 		return identifiedDocInstances;			
 	}
