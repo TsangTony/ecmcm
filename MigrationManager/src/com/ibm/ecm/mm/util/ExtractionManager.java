@@ -105,7 +105,9 @@ public class ExtractionManager {
 				}
 			}
 		}
-		DataManager.addMetadataValues(identifiedDocInstances, document.getId());
+		
+		//TODO make it.
+		//DataManager.addMetadataValues(identifiedDocInstances, document.getId());
 		
 	}
 	

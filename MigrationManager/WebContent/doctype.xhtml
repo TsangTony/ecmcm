@@ -49,11 +49,10 @@
 							<p:column>
 				        		<p:outputLabel value="Name" />
 							</p:column>
-							<p:column>
-								<p:inputText id="name" value="#{doctypeBean.selectedDocumentType.name}"
-									style="width: 95%;" valueChangeListener="#{doctypeBean.onValueChanged}">
-									<p:ajax event="change" update="@this" process="@this" />
-								</p:inputText>	
+							<p:column>							
+								<p:inputText id="selectedDocumentTypeName" value="#{doctypeBean.selectedDocumentType.name}" style="width: 95%;" >
+									<p:ajax event="change" update="selectedDocumentTypeName" />
+								</p:inputText>							
 							</p:column>
 				        </p:row>
 						<p:row>
@@ -63,11 +62,10 @@
 							<p:column>
 								<p:selectOneMenu id="team" value="#{doctypeBean.selectedDocumentType.team}"
 									converter="omnifaces.SelectItemsConverter" filter="true"
-									filterMatchMode="contains"
-									valueChangeListener="#{doctypeBean.onValueChanged}">
+									filterMatchMode="contains">
 									<f:selectItem itemLabel="Select Team" noSelectionOption="true" />
 									<f:selectItems value="#{doctypeBean.teams}" />
-									<p:ajax update="@this" process="@this" />
+									<p:ajax update="team" />
 								</p:selectOneMenu>	
 							</p:column>
 				        </p:row>
@@ -76,13 +74,10 @@
 				        		<p:outputLabel value="Metadata Properties" />
 							</p:column>
 							<p:column>
-			                    <p:pickList id="metadataPickList" value="#{doctypeBean.metadataProperties}"
+			                    <p:pickList id="metadataProperty" value="#{doctypeBean.metadataProperties}"
 			                    	var="metadataProperty" itemValue="#{metadataProperty}"
-			                    	itemLabel="#{metadataProperty.name}"
-									valueChangeListener="#{doctypeBean.onValueChanged}">
-			                    	<o:converter converterId="omnifaces.ListConverter" />
-									<p:ajax event="transfer"
-										listener="#{doctypeBean.onPickMetadataProperty}" />
+			                    	itemLabel="#{metadataProperty.name}" converter="pickListConverter">
+			                    	 <p:ajax event="transfer" update="@this" />
 			                    </p:pickList>
 							</p:column>
 				        </p:row>
@@ -90,10 +85,10 @@
 				
 					<br />
 				
-					<p:commandButton value="Save" action="#{doctypeBean.save}" update="doctype" ajax="true"
-						onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
-						rendered="#{doctypeBean.documentTypeSelected}" />
-		
+					<p:commandButton value="Save" action="#{doctypeBean.save}" update="doctype"
+						ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+						rendered="#{doctypeBean.documentTypeSelected}" />	
+						
 				</h:form>
     		</ui:define>
     	</ui:composition>

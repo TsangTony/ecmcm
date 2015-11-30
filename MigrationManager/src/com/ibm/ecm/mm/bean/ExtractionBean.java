@@ -353,9 +353,9 @@ public class ExtractionBean {
 			 */	
 			System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Step 3 of 3 Saving metadata");
 			
-			DataManager.removeMetadataValues(getIdentifiedDocInstances(),document.getId());
+			//DataManager.removeMetadataValues(getIdentifiedDocInstances(),document.getId());
 			
-			DataManager.addMetadataValues(getIdentifiedDocInstances(),document.getId());			
+			DataManager.addMetadataValues(getIdentifiedDocInstances(),document.getId(),metadataExtractionRules.getMetadataProperty().getId());			
 			
 		//};
 		

@@ -5,6 +5,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
     version="2.0">
+	<converter>
+		<converter-id>pickListConverter</converter-id>
+		<converter-class>com.ibm.ecm.mm.util.PickListConverter</converter-class>
+	</converter>
 	<managed-bean>
 		<managed-bean-name>fileUpload</managed-bean-name>
 		<managed-bean-class>com.ibm.ecm.mm.util.FileUpload</managed-bean-class>

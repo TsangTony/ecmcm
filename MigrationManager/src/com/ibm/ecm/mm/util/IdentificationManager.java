@@ -322,8 +322,8 @@ public class IdentificationManager {
 		 *  Metadata Extraction
 		 */
 		
-		if (extractMetadata)
-			ExtractionManager.extractMetadata(identifiedDocInstances, document);
+		//if (extractMetadata)
+			//ExtractionManager.extractMetadata(identifiedDocInstances, document);
 		
 	}
 	

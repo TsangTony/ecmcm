@@ -362,10 +362,17 @@ public class DataManager {
 		}
 	}
 	
-	public static void addMetadataValues(ArrayList<IdentifiedDocInstance> identifiedDocInstances, int documentId) {
+	public static void addMetadataValues(ArrayList<IdentifiedDocInstance> identifiedDocInstances, int documentId, int metadataPropertyId) {
 		try {
 			Connection conn = ConnectionManager.getConnection("addMetadataValues");
+			
+			PreparedStatement stmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND metadata_extraction_rule_id IN (SELECT id FROM Metadata_extraction_rule WHERE metadata_property_id = ?)");
+			stmt.setInt(1, documentId);
+			stmt.setInt(2, metadataPropertyId);
+			stmt.execute();
+			
 			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
+			
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				
 				for (MetadataValue metadataValue : identifiedDocInstance.getMetadataValues()) {
@@ -1183,6 +1190,7 @@ public class DataManager {
 		ArrayList<DocumentInstancePair> duplicates = new ArrayList<DocumentInstancePair>();		
 		try {	
 			Connection conn = ConnectionManager.getConnection("getInterTeamDuplicates");	
+			System.out.println(Util.getTimeStamp() + " getting inter-team duplicate report");
 			String query = ""
 						+ "SELECT IDI1.digest, "
 						+ "       IDI1.team_id, "
