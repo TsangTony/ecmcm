@@ -44,5 +44,10 @@
 		<managed-bean-class>com.ibm.ecm.mm.bean.DoctypeBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>aclextractionBean</managed-bean-name>
+		<managed-bean-class>com.ibm.ecm.mm.bean.AclExtractionBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
 
 </faces-config>
