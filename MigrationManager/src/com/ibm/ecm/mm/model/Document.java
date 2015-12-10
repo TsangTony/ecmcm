@@ -15,6 +15,7 @@ public class Document extends DataTableElement {
 	private boolean includeLinkedFile;
 	private DataTableArrayList<CommencePath> commencePaths;
 	private DataTableArrayList<IdentificationRule> identificationRules;
+	private boolean identifyDeltaOnly;
 	
 	private ArrayList<MetadataProperty> metadataProperties;
 	private int s1;
@@ -202,5 +203,13 @@ public class Document extends DataTableElement {
 		if (getId() == 0)
 			return "All Documents";
 		return "DOC-00" + String.valueOf(getId()) + " " + getName();		
+	}
+
+	public boolean isIdentifyDeltaOnly() {
+		return identifyDeltaOnly;
+	}
+
+	public void setIdentifyDeltaOnly(boolean identifyDeltaOnly) {
+		this.identifyDeltaOnly = identifyDeltaOnly;
 	}
 }

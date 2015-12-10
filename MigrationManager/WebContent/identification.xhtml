@@ -217,6 +217,13 @@
 						<h:outputText id="includeLinkedFileTxt" value="Include linked files" />
 						<p:tooltip for="includeLinkedFileCb,includeLinkedFileTxt" value="Include all files that the identified PowerPoint files link to, recurrsively" />						
 						
+						<p:selectBooleanCheckbox id="identifyDeltaOnlyCb" value="#{identificationBean.document.identifyDeltaOnly}">
+						    <p:ajax event="change" update="@this" />
+						</p:selectBooleanCheckbox>
+						<p:spacer width="5" height="10" /> 
+						<h:outputText id="identifyDeltaOnlyTxt" value="Identify Only Snapshot Delta" />
+						<p:tooltip for="identifyDeltaOnlyCb,identifyDeltaOnlyTxt" value="Identify only the delta between snapshots" />						
+						
 					</p:panel>
 						
 					<br />

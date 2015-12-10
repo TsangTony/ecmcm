@@ -368,41 +368,4 @@ public class IdentificationBean {
 		}
 		
 	}
-	
-
-	/*public void runExtractAll() {
-		String successDoc = "";
-		Severity severity = null;
-		String summary = null;
-		String message = "";
-		try {
-			for (Document document : getDocuments()) {
-				if (document.getId() != 0) {
-					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));
-					document.setIdentificationRules(DataManager.getIdentificationRules(document.getId()));	
-					IdentificationManager.saveIdentifiedDocInstances(document, IdentificationManager.identify(document), true);
-					successDoc += document.getId() + ",";
-				}
-			}
-			successDoc = successDoc.substring(0,successDoc.length()-2);
-			severity = FacesMessage.SEVERITY_INFO;
-			summary = "Successful";
-			message = "The following documents are identified and metadata are extracted: " + successDoc;
-			
-		}
-		catch (Exception e) {
-			severity = FacesMessage.SEVERITY_ERROR;
-			summary = e.getClass().getName();
-			if (e.getMessage() != null)
-				message += e.getMessage() + ".";
-			if (successDoc.equals(""))
-				message += "No document is identified.";
-			else	
-				message += "Only the following documents are identified and metadata are extracted: " + successDoc;
-			e.printStackTrace();
-		}
-		finally {
-			FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage(severity, summary, message));
-		}
-	}*/
 }

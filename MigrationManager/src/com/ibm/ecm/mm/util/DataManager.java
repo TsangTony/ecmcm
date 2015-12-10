@@ -366,7 +366,7 @@ public class DataManager {
 		try {
 			Connection conn = ConnectionManager.getConnection("addMetadataValues");
 			
-			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
+			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ? AND metadata_extraction_rule_id in (select id from metadata_extraction_rule where metadata_property_id = ?)");
 			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
 			
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
@@ -375,6 +375,7 @@ public class DataManager {
 					if (metadataValue.getMetadataExtractionRule() != null) {
 						deleteMetadataValuestmt.setInt(1, documentId);
 						deleteMetadataValuestmt.setLong(2, identifiedDocInstance.getId());
+						deleteMetadataValuestmt.setInt(3, metadataPropertyId);
 						
 						insertMetadataValueStmt.setLong(1, identifiedDocInstance.getId());
 						insertMetadataValueStmt.setString(2, metadataValue.getValue());
@@ -845,21 +846,25 @@ public class DataManager {
 	public static void addIdentifiedDocInstances(Document document, IdentifiedDocInstances identifiedDocInstances) {
 		try {
 			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");
-			
 			/*
 			 * Delete existing metadata value
 			 */
-			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ?");
-			deleteMetadataValueStmt.setInt(1, document.getId());
-			deleteMetadataValueStmt.execute();	
+
+			if (!document.isIdentifyDeltaOnly()) {
+				PreparedStatement deleteMetadataValueStmt = conn
+						.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ?");
+				deleteMetadataValueStmt.setInt(1, document.getId());
+				deleteMetadataValueStmt.execute();
+
+				/*
+				 * Delete existing identified doc instance
+				 */
+				PreparedStatement deleteIdentifiedDocInstanceStmt = conn
+						.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ?");
+				deleteIdentifiedDocInstanceStmt.setInt(1, document.getId());
+				deleteIdentifiedDocInstanceStmt.execute();
+			}
 			
-			/*
-			 * Delete existing identified doc instance
-			 */
-			
-			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ?");
-			deleteIdentifiedDocInstanceStmt.setInt(1, document.getId());			
-			deleteIdentifiedDocInstanceStmt.execute();
 			
 			/*
 			 * Insert identified doc instance and metadata value
@@ -937,6 +942,11 @@ public class DataManager {
 
 			//tilde
 			query += " AND name not like '~$%' ";
+			
+			if (document.isIdentifyDeltaOnly()){
+				query += " AND snapshot = " + LATEST_SNAPSHOT + " ";
+			}
+			
 			
 			//retention
 			if (document.getIgDocClass().equals("General Document"))
