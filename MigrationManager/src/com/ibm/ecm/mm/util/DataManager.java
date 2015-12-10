@@ -366,7 +366,7 @@ public class DataManager {
 		try {
 			Connection conn = ConnectionManager.getConnection("addMetadataValues");
 			
-			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?)");
+			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
 			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
 			
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
@@ -385,7 +385,7 @@ public class DataManager {
 							insertMetadataValueStmt.execute();
 						}
 						catch (SQLException e) {
-							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues (" + identifiedDocInstance.getId() + "," + metadataValue.getValue() + "," + metadataValue.getMetadataExtractionRule().getId() + "," + documentId);
+							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues (" + identifiedDocInstance.getId() + "," + metadataValue.getValue() + "," + metadataValue.getMetadataExtractionRule().getId() + "," + documentId + ")");
 						}
 						//insertMetadataValueStmt.addBatch();
 					}
