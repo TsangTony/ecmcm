@@ -366,26 +366,26 @@ public class DataManager {
 		try {
 			Connection conn = ConnectionManager.getConnection("addMetadataValues");
 			
-			PreparedStatement stmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND metadata_extraction_rule_id IN (SELECT id FROM Metadata_extraction_rule WHERE metadata_property_id = ?)");
-			stmt.setInt(1, documentId);
-			stmt.setInt(2, metadataPropertyId);
-			stmt.execute();
-			
+			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
 			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
 			
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				
 				for (MetadataValue metadataValue : identifiedDocInstance.getMetadataValues()) {
 					if (metadataValue.getMetadataExtractionRule() != null) {
+						deleteMetadataValuestmt.setInt(1, documentId);
+						deleteMetadataValuestmt.setLong(2, identifiedDocInstance.getId());
+						
 						insertMetadataValueStmt.setLong(1, identifiedDocInstance.getId());
 						insertMetadataValueStmt.setString(2, metadataValue.getValue());
 						insertMetadataValueStmt.setInt(3, metadataValue.getMetadataExtractionRule().getId());
 						insertMetadataValueStmt.setInt(4, documentId);	
 						try {
+							deleteMetadataValuestmt.execute();
 							insertMetadataValueStmt.execute();
 						}
 						catch (SQLException e) {
-							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues (" + identifiedDocInstance.getId() + "," + metadataValue.getValue() + "," + metadataValue.getMetadataExtractionRule().getId() + "," + documentId);
+							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues (" + identifiedDocInstance.getId() + "," + metadataValue.getValue() + "," + metadataValue.getMetadataExtractionRule().getId() + "," + documentId + ")");
 						}
 						//insertMetadataValueStmt.addBatch();
 					}
