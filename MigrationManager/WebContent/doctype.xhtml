@@ -49,7 +49,7 @@
 							<p:column>
 				        		<p:outputLabel value="Name" />
 							</p:column>
-							<p:column>							
+							<p:column>				
 								<p:inputText id="selectedDocumentTypeName" value="#{doctypeBean.selectedDocumentType.name}" style="width: 95%;" >
 									<p:ajax event="change" update="selectedDocumentTypeName" />
 								</p:inputText>							
@@ -86,8 +86,8 @@
 					<br />
 				
 					<p:commandButton value="Save" action="#{doctypeBean.save}" update="doctype"
-						ajax="true" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
-						rendered="#{doctypeBean.documentTypeSelected}" />	
+						ajax="false" onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+						rendered="#{doctypeBean.documentTypeSelected}" />
 						
 				</h:form>
     		</ui:define>

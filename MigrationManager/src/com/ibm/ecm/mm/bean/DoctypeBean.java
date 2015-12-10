@@ -128,7 +128,7 @@ public class DoctypeBean {
         	}
         }
 	}	
-	
+		
 	public void save() {
 		try {
 		ArrayList<String> logs = new ArrayList<String>();
