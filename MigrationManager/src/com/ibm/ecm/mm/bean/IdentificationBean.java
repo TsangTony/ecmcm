@@ -30,6 +30,7 @@ public class IdentificationBean {
 	private IdentifiedDocInstances identifiedDocInstances;
 	private String mode;
 	private boolean preview;
+	private boolean identifyDeltaOnly;
 
 	public IdentificationBean() {
 		setDocuments(DataManager.getDocuments());
@@ -86,6 +87,14 @@ public class IdentificationBean {
 
 	public void setPreview(boolean preview) {
 		this.preview = preview;
+	}
+
+	public boolean isIdentifyDeltaOnly() {
+		return identifyDeltaOnly;
+	}
+
+	public void setIdentifyDeltaOnly(boolean identifyDeltaOnly) {
+		this.identifyDeltaOnly = identifyDeltaOnly;
 	}
 
 	public boolean isDocumentSelected() {
@@ -338,6 +347,7 @@ public class IdentificationBean {
 		String errorDoc = "";
 		
 		for (Document document : getSelectedDocuments()) {
+			document.setIdentifyDeltaOnly(isIdentifyDeltaOnly());
 			try {
 				if (document.getId() != 0) {
 					document.setCommencePaths(DataManager.getCommencePaths(document.getId()));

@@ -316,6 +316,15 @@ public class IdentificationManager {
 		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Run Identification 2/2 saving... ");
 		DataManager.addIdentifiedDocInstances(document, identifiedDocInstances);
 		
+		
+		/*
+		 * Update Document_snapshot_count
+		 */
+		
+		
+		DataManager.saveSnapshotCount(document.getId());
+		
+		
 			
 		/*
 		 *  Metadata Extraction

@@ -846,25 +846,31 @@ public class DataManager {
 	public static void addIdentifiedDocInstances(Document document, IdentifiedDocInstances identifiedDocInstances) {
 		try {
 			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");
-			/*
-			 * Delete existing metadata value
-			 */
-
+			String deleteMetadataValueQuery = "";
+			String deleteIdentifiedDocInstanceQuery = "";
 			if (!document.isIdentifyDeltaOnly()) {
-				PreparedStatement deleteMetadataValueStmt = conn
-						.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ?");
-				deleteMetadataValueStmt.setInt(1, document.getId());
-				deleteMetadataValueStmt.execute();
-
-				/*
-				 * Delete existing identified doc instance
-				 */
-				PreparedStatement deleteIdentifiedDocInstanceStmt = conn
-						.prepareStatement("DELETE FROM Identified_Document_Instance WHERE document_id = ?");
-				deleteIdentifiedDocInstanceStmt.setInt(1, document.getId());
-				deleteIdentifiedDocInstanceStmt.execute();
+				deleteMetadataValueQuery = "DELETE FROM Metadata_Value WHERE document_id = ?";
+				deleteIdentifiedDocInstanceQuery = "DELETE FROM Identified_Document_Instance WHERE document_id = ?";
+			}
+			else {
+				deleteMetadataValueQuery = "DELETE Metadata_Value FROM Metadata_Value INNER JOIN Identified_Document_Instance"
+								+ " ON Metadata_Value.identified_document_instance_id = Identified_Document_Instance.id "
+								+ " AND Metadata_Value.document_id = Identified_Document_Instance.document_id"
+								+ " WHERE Identified_Document_Instance.document_id = ? and snapshot = ?";
+				deleteIdentifiedDocInstanceQuery = "DELETE FROM Identified_Document_Instance WHERE document_id = ? and snapshot = ?";
 			}
 			
+			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement(deleteMetadataValueQuery);
+			deleteMetadataValueStmt.setInt(1, document.getId());
+			if (document.isIdentifyDeltaOnly())
+				deleteMetadataValueStmt.setInt(2, LATEST_SNAPSHOT);
+			deleteMetadataValueStmt.execute();
+			
+			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement(deleteIdentifiedDocInstanceQuery);
+			deleteIdentifiedDocInstanceStmt.setInt(1, document.getId());
+			if (document.isIdentifyDeltaOnly())
+				deleteIdentifiedDocInstanceStmt.setInt(2, LATEST_SNAPSHOT);
+			deleteIdentifiedDocInstanceStmt.execute();				
 			
 			/*
 			 * Insert identified doc instance and metadata value
@@ -947,6 +953,7 @@ public class DataManager {
 				query += " AND snapshot = " + LATEST_SNAPSHOT + " ";
 			}
 			
+			query += " AND snapshot_deleted IS NULL ";
 			
 			//retention
 			if (document.getIgDocClass().equals("General Document"))
@@ -1377,6 +1384,55 @@ public class DataManager {
 			ConnectionManager.close("getTeams");
 		}		
 		return teams;
+	}
+
+	public static void saveSnapshotCount(int documentId) {
+		try {
+			Connection conn = ConnectionManager.getConnection("getTeams");
+			int fileCount = 0;
+			String selectFileCountQuery = "SELECT count(*) FROM Identified_Document_Instance WHERE document_id = ?";
+			PreparedStatement selectFileCountStatment = conn.prepareStatement(selectFileCountQuery);
+			selectFileCountStatment.setInt(1, documentId);
+			ResultSet fileCountRs = selectFileCountStatment.executeQuery();
+			if (fileCountRs.next()) {
+				fileCount = fileCountRs.getInt(1);
+			}
+			selectFileCountStatment.close();
+			fileCountRs.close();
+			
+			String selectQuery = "SELECT * FROM Document_snapshot_count WHERE document_id = ? and snapshot = ?";
+			PreparedStatement selectStatment = conn.prepareStatement(selectQuery);
+			selectStatment.setInt(1, documentId);
+			selectStatment.setInt(2, LATEST_SNAPSHOT);
+			ResultSet rs = selectStatment.executeQuery();
+			boolean hasRecord = rs.next();
+			selectStatment.close();
+			rs.close();
+			if(hasRecord){
+				String updateQuery = "UPDATE Document_snapshot_count SET file_count = ? WHERE document_id = ? and snapshot = ?";
+				PreparedStatement updateStatement = conn.prepareStatement(updateQuery);
+				updateStatement.setInt(1, fileCount);
+				updateStatement.setInt(2, documentId);
+				updateStatement.setInt(3, LATEST_SNAPSHOT);
+				updateStatement.execute();
+				System.out.println("Update Document_snapshot_count " + fileCount + " " + documentId + " " + LATEST_SNAPSHOT);
+				updateStatement.close();
+			} else {
+				String insertQuery = "INSERT INTO Document_snapshot_count (document_id, snapshot, file_count) VALUES (?,?,?)";
+				PreparedStatement insertStatement = conn.prepareStatement(insertQuery);
+				insertStatement.setInt(1, documentId);
+				insertStatement.setInt(2, LATEST_SNAPSHOT);
+				insertStatement.setInt(3, fileCount);
+				insertStatement.execute();
+				System.out.println("Insert Document_snapshot_count " + fileCount + " " + documentId + " " + LATEST_SNAPSHOT);
+				insertStatement.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			ConnectionManager.close("getTeams");
+		}
+
 	}
 	
 	

@@ -69,12 +69,25 @@
 				    </p:dataTable>
 				    
 					<br />
+										
+					
 					
 					<p:commandButton value="Run" action="#{identificationBean.runBatch}" update="preview,messages,growl" ajax="true"
 					                 onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
-					                 rendered="#{identificationBean.mode eq 'batch'}" />
+					                 rendered="#{identificationBean.mode eq 'batch'}" />	
+					<p:spacer width="5" height="10" /> 				                 
 					                 
-					                 
+					<p:selectBooleanCheckbox id="identifyDeltaOnlyCbForBatch" value="#{identificationBean.identifyDeltaOnly}"
+					                 rendered="#{identificationBean.mode eq 'batch'}">
+					    <p:ajax event="change" update="@this" />
+					</p:selectBooleanCheckbox>
+					<p:spacer width="5" height="10"
+					                 rendered="#{identificationBean.mode eq 'batch'}"  /> 
+					<h:outputText id="identifyDeltaOnlyTxtForBatch" value="Identify Only Snapshot Delta"
+					                 rendered="#{identificationBean.mode eq 'batch'}"  />
+					<p:tooltip for="identifyDeltaOnlyCbForBatch,identifyDeltaOnlyTxtForBatch" value="Identify only the delta between snapshots" 
+					                 rendered="#{identificationBean.mode eq 'batch'}"  />	
+					
 					<p:panel id="commencePathPanel" header="Source Locations" toggleable="true"
 					         rendered="#{identificationBean.mode eq 'individual' and identificationBean.documentSelected}">
 					
@@ -215,6 +228,7 @@
 						</p:selectBooleanCheckbox>
 						<p:spacer width="5" height="10" /> 
 						<h:outputText id="includeLinkedFileTxt" value="Include linked files" />
+						<p:spacer width="10" height="10" /> 
 						<p:tooltip for="includeLinkedFileCb,includeLinkedFileTxt" value="Include all files that the identified PowerPoint files link to, recurrsively" />						
 						
 						<p:selectBooleanCheckbox id="identifyDeltaOnlyCb" value="#{identificationBean.document.identifyDeltaOnly}">
