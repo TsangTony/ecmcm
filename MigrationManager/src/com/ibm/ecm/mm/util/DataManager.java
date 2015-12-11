@@ -25,7 +25,7 @@ import com.ibm.ecm.mm.model.Team;
 
 public class DataManager {	
 	
-	private static int LATEST_SNAPSHOT;
+	public static int LATEST_SNAPSHOT;
 	
 	static {
 		try {
@@ -685,130 +685,42 @@ public class DataManager {
 		try {	
 			Connection conn = ConnectionManager.getConnection("getDocumentStatusReport");	
 			
-			String query = ""
-						+ "SELECT document.id, "
-						+ "       document.NAME, "
-						+ "       team.id, "
-						+ "       team.NAME, "
-						+ "       Isnull(S1.count, 0)    AS S1, "
-						+ "       Isnull(S1Del.count, 0) AS S1Del, "
-						+ "       Isnull(S2.count, 0) AS S2, "
-						+ "       metadata_property.id   AS MPID, "
-						+ "       metadata_property.NAME AS MP, "
-						+ "       Isnull(S1XMP.count, 0) AS S1XMP, "
-						+ "       Isnull(S1DelXMP.count, 0) AS S1DelXMP, "
-						+ "       Isnull(S2XMP.count, 0) AS S2XMP "
-						+ "FROM   document "
-						+ "       LEFT JOIN team "
-						+ "              ON document.team_id = team.id "
-						+ "       LEFT JOIN (SELECT document_id, "
-						+ "                         Count(*) AS count "
-						+ "                  FROM   identified_document_instance "
-						+ "                  WHERE  snapshot = 1 "
-						+ "                  GROUP  BY document_id) S1 "
-						+ "              ON document.id = S1.document_id "
-						+ "       LEFT JOIN (SELECT document_id, "
-						+ "                         Count(*) AS count "
-						+ "                  FROM   identified_document_instance "
-						+ "                  WHERE  snapshot = 1 "
-						+ "                         AND snapshot_deleted = 2 "
-						+ "                  GROUP  BY document_id) S1Del "
-						+ "              ON document.id = S1Del.document_id "
-						+ "       LEFT JOIN (SELECT document_id, "
-						+ "                         Count(*) AS count "
-						+ "                  FROM   identified_document_instance "
-						+ "                  WHERE  snapshot = 2 "
-						+ "                  GROUP  BY document_id) S2 "
-						+ "              ON document.id = S2.document_id "						
-						+ "       LEFT JOIN [D_MP] "
-						+ "              ON [D_MP].document_id = Document.id "
-						+ "       LEFT JOIN metadata_property "
-						+ "              ON [D_MP].metadata_property_id = metadata_property.id "
-						+ "       LEFT JOIN (SELECT metadata_value.document_id, "
-						+ "						 metadata_extraction_rule.metadata_property_id, "
-						+ "                         Count(*) AS count "
-						+ "                  FROM   metadata_value, "
-						+ "                         metadata_extraction_rule, "
-						+ "                         identified_document_instance "
-						+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
-						+ "                         metadata_extraction_rule.id "
-						+ "                         AND metadata_value.identified_document_instance_id = "
-						+ "                             identified_document_instance.id "
-						+ "                         AND identified_document_instance.snapshot = 1 "
-						+ "						 AND metadata_value.document_id = identified_document_instance.document_id "
-						+ "						 AND rtrim(ltrim(isnull(Metadata_Value.value,'')))!='' "
-						+ "                  GROUP  BY metadata_value.document_id, "
-						+ "                            metadata_extraction_rule.metadata_property_id) S1XMP "
-						+ "              ON document.id = S1XMP.document_id "
-						+ "                 AND metadata_property.id = S1XMP.metadata_property_id "
-						+ "	          LEFT JOIN (SELECT metadata_value.document_id, "
-						+ "						 metadata_extraction_rule.metadata_property_id, "
-						+ "                         Count(*) AS count "
-						+ "                  FROM   metadata_value, "
-						+ "                         metadata_extraction_rule, "
-						+ "                         identified_document_instance "
-						+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
-						+ "                         metadata_extraction_rule.id "
-						+ "                         AND metadata_value.identified_document_instance_id = "
-						+ "                             identified_document_instance.id "
-						+ "                         AND identified_document_instance.snapshot = 1 "
-						+ "						 AND Identified_Document_Instance.snapshot_deleted IS NOT NULL "
-						+ "						 AND metadata_value.document_id = identified_document_instance.document_id "
-						+ "						 AND rtrim(ltrim(isnull(Metadata_Value.value,'')))!='' "
-						+ "                  GROUP  BY metadata_value.document_id, "
-						+ "                            metadata_extraction_rule.metadata_property_id) S1DelXMP "
-						+ "              ON document.id = S1DelXMP.document_id "
-						+ "                 AND metadata_property.id = S1XMP.metadata_property_id "
-						+ "       LEFT JOIN (SELECT metadata_value.document_id, "
-						+ "						 metadata_extraction_rule.metadata_property_id, "
-						+ "                         Count(*) AS count "
-						+ "                  FROM   metadata_value, "
-						+ "                         metadata_extraction_rule, "
-						+ "                         identified_document_instance "
-						+ "                  WHERE  metadata_value.metadata_extraction_rule_id = "
-						+ "                         metadata_extraction_rule.id "
-						+ "                         AND metadata_value.identified_document_instance_id = "
-						+ "                             identified_document_instance.id "
-						+ "                         AND identified_document_instance.snapshot = 2 "
-						+ "						 AND metadata_value.document_id = identified_document_instance.document_id "
-						+ "						 AND rtrim(ltrim(isnull(Metadata_Value.value,'')))!='' "
-						+ "                  GROUP  BY metadata_value.document_id, "
-						+ "                            metadata_extraction_rule.metadata_property_id) S2XMP "
-						+ "              ON document.id = S2XMP.document_id "
-						+ "                 AND metadata_property.id = S2XMP.metadata_property_id "
-						+ "WHERE  Document.is_cm_qualified = 1 "
-						+ "ORDER  BY document.id";
-
-			
+			String query =    "SELECT Team.id, "
+							+ "       Team.department, "
+							+ "       Team.NAME, "
+							+ "       Document.id, "
+							+ "       Document.NAME, "
+							+ "       Document_snapshot_count.snapshot, "
+							+ "       Document_snapshot_count.file_count "
+							+ "FROM   Document_snapshot_count "
+							+ "       LEFT JOIN Document "
+							+ "              ON Document.id = Document_snapshot_count.document_id "
+							+ "       LEFT JOIN Team "
+							+ "              ON Document.team_id = Team.id "
+							+ "ORDER  BY Document.id, Document_snapshot_count.snapshot";
 
 			PreparedStatement stmt = conn.prepareStatement(query);
 			ResultSet rs = stmt.executeQuery();
 			Document preDoc = null;
 			while (rs.next()) {
 				Document doc = null;
-				if (preDoc == null || rs.getInt(1) != preDoc.getId()) {
-					doc = new Document();
-					doc.setId(rs.getInt(1));
-					doc.setName(rs.getString(2));
+				if (preDoc == null || rs.getInt(4) != preDoc.getId()) {
 					Team team = new Team();
-					team.setId(rs.getInt(3));
-					team.setName(rs.getString(4));
+					team.setId(rs.getInt(1));
+					team.setDepartment(rs.getString(2));
+					team.setName(rs.getString(3));
+					doc = new Document();
 					doc.setTeam(team);
-					doc.setS1(rs.getInt(5));
-					doc.setS1Deleted(rs.getInt(6));
-					doc.setS2New(rs.getInt(7));
+					doc.setId(rs.getInt(4));
+					doc.setName(rs.getString(5));
+					doc.getIdentifiedFilesCounts().put(rs.getInt(6), rs.getInt(7));
 					documents.add(doc);
 					preDoc=doc;
 				}
-				else 
-					doc = preDoc;
-				 
-				MetadataProperty metadataProperty = new MetadataProperty();
-				metadataProperty.setId(rs.getInt(8));
-				metadataProperty.setName(rs.getString(9));
-				metadataProperty.getExtracted().add(rs.getInt(10));
-				metadataProperty.getExtracted().add(rs.getInt(12));
-				doc.getMetadataProperties().add(metadataProperty);				
+				else {
+					preDoc.getIdentifiedFilesCounts().put(rs.getInt(6), rs.getInt(7));
+				}
+				 		
 			}			
 		}
 		catch (SQLException e) {
@@ -953,7 +865,7 @@ public class DataManager {
 				query += " AND snapshot = " + LATEST_SNAPSHOT + " ";
 			}
 			
-			query += " AND snapshot_deleted IS NULL ";
+			
 			
 			//retention
 			if (document.getIgDocClass().equals("General Document"))
@@ -1389,43 +1301,51 @@ public class DataManager {
 	public static void saveSnapshotCount(int documentId) {
 		try {
 			Connection conn = ConnectionManager.getConnection("getTeams");
-			int fileCount = 0;
-			String selectFileCountQuery = "SELECT count(*) FROM Identified_Document_Instance WHERE document_id = ?";
-			PreparedStatement selectFileCountStatment = conn.prepareStatement(selectFileCountQuery);
-			selectFileCountStatment.setInt(1, documentId);
-			ResultSet fileCountRs = selectFileCountStatment.executeQuery();
-			if (fileCountRs.next()) {
-				fileCount = fileCountRs.getInt(1);
-			}
-			selectFileCountStatment.close();
-			fileCountRs.close();
 			
-			String selectQuery = "SELECT * FROM Document_snapshot_count WHERE document_id = ? and snapshot = ?";
-			PreparedStatement selectStatment = conn.prepareStatement(selectQuery);
-			selectStatment.setInt(1, documentId);
-			selectStatment.setInt(2, LATEST_SNAPSHOT);
-			ResultSet rs = selectStatment.executeQuery();
-			boolean hasRecord = rs.next();
-			selectStatment.close();
-			rs.close();
-			if(hasRecord){
-				String updateQuery = "UPDATE Document_snapshot_count SET file_count = ? WHERE document_id = ? and snapshot = ?";
-				PreparedStatement updateStatement = conn.prepareStatement(updateQuery);
-				updateStatement.setInt(1, fileCount);
-				updateStatement.setInt(2, documentId);
-				updateStatement.setInt(3, LATEST_SNAPSHOT);
-				updateStatement.execute();
-				System.out.println("Update Document_snapshot_count " + fileCount + " " + documentId + " " + LATEST_SNAPSHOT);
-				updateStatement.close();
-			} else {
-				String insertQuery = "INSERT INTO Document_snapshot_count (document_id, snapshot, file_count) VALUES (?,?,?)";
-				PreparedStatement insertStatement = conn.prepareStatement(insertQuery);
-				insertStatement.setInt(1, documentId);
-				insertStatement.setInt(2, LATEST_SNAPSHOT);
-				insertStatement.setInt(3, fileCount);
-				insertStatement.execute();
-				System.out.println("Insert Document_snapshot_count " + fileCount + " " + documentId + " " + LATEST_SNAPSHOT);
-				insertStatement.close();
+			for (int i=1; i<=LATEST_SNAPSHOT; i++) {
+				int fileCount = 0;
+				
+				String selectFileCountQuery = "SELECT count(*) FROM Identified_Document_Instance WHERE document_id = ? AND (snapshot = ? or (snapshot < ? and (snapshot_deleted IS NULL or snapshot_deleted > ?)))";
+				PreparedStatement selectFileCountStatment = conn.prepareStatement(selectFileCountQuery);
+				selectFileCountStatment.setInt(1, documentId);
+				selectFileCountStatment.setInt(2, i);
+				selectFileCountStatment.setInt(3, i);
+				selectFileCountStatment.setInt(4, i);
+				ResultSet fileCountRs = selectFileCountStatment.executeQuery();
+				if (fileCountRs.next()) {
+					fileCount = fileCountRs.getInt(1);
+				}
+				selectFileCountStatment.close();
+				fileCountRs.close();
+				
+				String selectQuery = "SELECT * FROM Document_snapshot_count WHERE document_id = ? and snapshot = ?";
+				PreparedStatement selectStatment = conn.prepareStatement(selectQuery);
+				selectStatment.setInt(1, documentId);
+				selectStatment.setInt(2, i);
+				ResultSet rs = selectStatment.executeQuery();
+				boolean hasRecord = rs.next();
+				selectStatment.close();
+				rs.close();
+				if(hasRecord){
+					String updateQuery = "UPDATE Document_snapshot_count SET file_count = ? WHERE document_id = ? and snapshot = ?";
+					PreparedStatement updateStatement = conn.prepareStatement(updateQuery);
+					updateStatement.setInt(1, fileCount);
+					updateStatement.setInt(2, documentId);
+					updateStatement.setInt(3, i);
+					updateStatement.execute();
+					System.out.println("Update Document_snapshot_count " + fileCount + " " + documentId + " " + i);
+					updateStatement.close();
+				} else {
+					String insertQuery = "INSERT INTO Document_snapshot_count (document_id, snapshot, file_count) VALUES (?,?,?)";
+					PreparedStatement insertStatement = conn.prepareStatement(insertQuery);
+					insertStatement.setInt(1, documentId);
+					insertStatement.setInt(2, i);
+					insertStatement.setInt(3, fileCount);
+					insertStatement.execute();
+					System.out.println("Insert Document_snapshot_count " + fileCount + " " + documentId + " " + i);
+					insertStatement.close();
+				}
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.ibm.ecm.mm.bean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.ibm.ecm.mm.model.Document;
@@ -16,33 +17,47 @@ public class ReportBean {
 	private ArrayList<DocumentInstancePair> filteredInstancePair;
 	private ArrayList<String> reports;
 	private String report;
+	private ArrayList<ColumnModel> columns;
 
 	public ReportBean() {
 		setDocuments(DataManager.getDocumentStatusReport());
 		setReports(ReportManager.getReports());
 		setReport("");
+		
+		columns = new ArrayList<ColumnModel>();         
+		for (int i = 1; i <= DataManager.LATEST_SNAPSHOT; i++)        
+			columns.add(new ColumnModel("Snapshot " + i, i));
+        
 	}
 	
 	public ArrayList<Document> getDocuments() {
 		return documents;
 	}
 
+	public ArrayList<ColumnModel> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(ArrayList<ColumnModel> columns) {
+		this.columns = columns;
+	}
+
 	public ArrayList<Document> getMetadataDocuments() {
 		ArrayList<Document> documents = new ArrayList<Document>();
-		for (Document document : getDocuments()) {
-			for (int i = 0; i<document.getMetadataProperties().size(); i++) {
-				Document newDocument = new Document();
-				newDocument.setId(document.getId());
-				newDocument.setName(document.getName());
-				newDocument.setTeam(document.getTeam());
-				newDocument.setS1(document.getS1());
-				newDocument.setS1Deleted(document.getS1Deleted());
-				newDocument.setS2New(document.getS2New());
-				newDocument.setMetadataProperties(document.getMetadataProperties());
-				newDocument.setPriority(i);
-				documents.add(newDocument);
-			}
-		}
+//		for (Document document : getDocuments()) {
+//			for (int i = 0; i<document.getMetadataProperties().size(); i++) {
+//				Document newDocument = new Document();
+//				newDocument.setId(document.getId());
+//				newDocument.setName(document.getName());
+//				newDocument.setTeam(document.getTeam());
+//				newDocument.setS1(document.getS1());
+//				newDocument.setS1Deleted(document.getS1Deleted());
+//				newDocument.setS2New(document.getS2New());
+//				newDocument.setMetadataProperties(document.getMetadataProperties());
+//				newDocument.setPriority(i);
+//				documents.add(newDocument);
+//			}
+//		}
 		return documents;
 	}
 	
@@ -118,5 +133,24 @@ public class ReportBean {
 		
 		
 	}
+	
+	static public class ColumnModel implements Serializable {
+		 
+        private String header;
+        private int property;
+ 
+        public ColumnModel(String header, int property) {
+            this.header = header;
+            this.property = property;
+        }
+ 
+        public String getHeader() {
+            return header;
+        }
+ 
+        public int getProperty() {
+            return property;
+        }
+    }
 	
 }

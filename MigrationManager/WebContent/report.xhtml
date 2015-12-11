@@ -6,7 +6,8 @@
 	  xmlns:p="http://primefaces.org/ui"
 	  xmlns:o="http://omnifaces.org/ui"
 	  xmlns:of="http://omnifaces.org/functions"
-      xmlns:ui="http://java.sun.com/jsf/facelets">
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core">
 	<h:body>
 		<ui:composition template="./template/commonLayout.xhtml">
    			<ui:define name="content">
@@ -26,38 +27,33 @@
 					
 					<br />
 						
-					<p:panel id="reportPanel" header="Document Status Report" toggleable="true">	
-					
-						<p:dataTable var="document" value="#{reportBean.documents}" rows="20" paginator="true" 
-							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
-							rowsPerPageTemplate="20,50,100,200,500" sortMode="multiple" filteredValue="#{reportBean.filteredDocument}"  rendered="#{reportBean.documentStatusReport}">
-						    
-						    <p:column headerText="Team" sortBy="#{document.team}" style="width: 15%" filterBy="#{document.team}" filterMatchMode="contains">
-						        <h:outputText value="#{document.team}" />
-						    </p:column>
-						    
-						    <p:column headerText="Document" sortBy="#{document.id}" style="width: 20%" filterBy="#{document}" filterMatchMode="contains">
-						        <h:outputText value="#{document}" />
-						    </p:column>
-						 
-						    <p:column headerText="Snapshot 1" sortBy="#{document.s1}" style="width: 10%" filterBy="#{document.s1}" filterMatchMode="contains">
-						        <h:outputText value="#{document.s1}" />
-						    </p:column>			    
-						    
-						    <p:column headerText="Snapshot 2" sortBy="#{document.s2}" style="width: 10%" filterBy="#{document.s2}" filterMatchMode="contains">
-						        <h:outputText value="#{document.s2}" />
-						    </p:column>
-						    
-						    <p:column headerText="Snapshot 1 Metadata Extracted" sortBy="#{document.s1Extracted}" style="width: 20%" filterBy="#{document.s1Extracted}" filterMatchMode="contains">
-						        <h:outputText value="#{document.s1Extracted}" />
-						    </p:column>
-						    
-						    <p:column headerText="Snapshot 2 Metadata Extracted" sortBy="#{document.s2Extracted}" style="width: 20%"  filterBy="#{document.s2Extracted}" filterMatchMode="contains">
-						        <h:outputText value="#{document.s2Extracted}" />
-						    </p:column>
+					<p:panel id="reportPanel" header="Document Status Report" toggleable="true">
+	
+						<p:dataTable var="document" value="#{reportBean.documents}"
+							rows="20" paginator="true"
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							rowsPerPageTemplate="20,50,100,200,500,1000" sortMode="multiple"
+							filteredValue="#{reportBean.filteredDocument}"
+							rendered="#{reportBean.documentStatusReport}">
+	
+							<p:column headerText="Team" sortBy="#{document.team}"
+								style="width: 20%" filterBy="#{document.team}"
+								filterMatchMode="contains">
+								<h:outputText value="#{document.team}" />
+							</p:column>
+	
+							<p:column headerText="Document" sortBy="#{document.id}" style="width: 25%" filterBy="#{document}"
+								filterMatchMode="contains">
+								<h:outputText value="#{document}" />
+							</p:column>
+							
+							<p:columns value="#{reportBean.columns}" var="column" headerText="#{column.header}">
+								<h:outputText value="#{document.identifiedFilesCounts.get(column.property)}" />
+							</p:columns>
+	
 						</p:dataTable>
-						
-						
+	
+	
 						<p:dataTable var="document" value="#{reportBean.metadataDocuments}" rows="20" paginator="true" 
 							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" 
 							rowsPerPageTemplate="20,50,100,200,500" sortMode="multiple" filteredValue="#{reportBean.filteredDocument}"  rendered="#{reportBean.metadataStatusReport}">

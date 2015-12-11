@@ -1,6 +1,7 @@
 package com.ibm.ecm.mm.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Document extends DataTableElement {
 	private int id;
@@ -18,14 +19,13 @@ public class Document extends DataTableElement {
 	private boolean identifyDeltaOnly;
 	
 	private ArrayList<MetadataProperty> metadataProperties;
-	private int s1;
-	private int s2New;
-	private int s1Deleted;
+	private HashMap<Integer,Integer> identifiedFilesCounts;
 	
 	public Document() {
 		this.commencePaths = new DataTableArrayList<CommencePath>(CommencePath.class);
 		this.identificationRules = new DataTableArrayList<IdentificationRule>(IdentificationRule.class);
 		this.metadataProperties = new ArrayList<MetadataProperty>();
+		this.identifiedFilesCounts = new HashMap<Integer,Integer>();
 	}
 	
 	public int getId() {
@@ -132,31 +132,13 @@ public class Document extends DataTableElement {
 	 * For Document Status Report
 	 */
 	
-	public int getS1() {
-		return s1;
+	public HashMap<Integer,Integer> getIdentifiedFilesCounts() {
+		return identifiedFilesCounts;
 	}
 
-	public void setS1(int s1) {
-		this.s1 = s1;
+	public void setIdentifiedFilesCounts(HashMap<Integer,Integer> identifiedFilesCounts) {
+		this.identifiedFilesCounts = identifiedFilesCounts;
 	}
-
-
-	public int getS1Deleted() {
-		return s1Deleted;
-	}
-
-	public void setS1Deleted(int s1Deleted) {
-		this.s1Deleted = s1Deleted;
-	}
-
-	public int getS2New() {
-		return s2New;
-	}
-
-	public void setS2New(int s2New) {
-		this.s2New = s2New;
-	}
-	
 	
 	public String getS1Extracted() {		
 		int extracted = 0;
@@ -174,23 +156,6 @@ public class Document extends DataTableElement {
 				extracted++;
 		}
 		return extracted + " out of " + getMetadataProperties().size();
-	}
-	
-	public String getS2() {
-		int s2 = getS1() - getS1Deleted() + getS2New();
-		return s2 + " (- " + getS1Deleted() + ", + " + getS2New() + ") ";
-	}
-	
-	public String getS1SuccessRate(int metadataIndex) {
-		if (getS1()<=0)
-			return String.valueOf(0);
-		return String.valueOf(Math.round((float) getMetadataProperties().get(metadataIndex).getExtracted().get(0) / (float) getS1() * 100));
-	}
-	
-	public String getS2SuccessRate(int metadataIndex) {
-		if (getS1()-getS1Deleted()+getS2New()<=0)
-			return String.valueOf(0);
-		return String.valueOf(Math.round((float) getMetadataProperties().get(metadataIndex).getExtracted().get(1) / (float) (getS1()-getS1Deleted()+getS2New()) * 100));
 	}
 
 
