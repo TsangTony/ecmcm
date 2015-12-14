@@ -1,37 +1,6 @@
 package com.ibm.ecm.mm.model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
-import org.apache.poi.hslf.extractor.PowerPointExtractor;
-import org.apache.poi.hssf.extractor.ExcelExtractor;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xssf.eventusermodel.XSSFReader;
-import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-
-import com.ibm.ecm.mm.util.Util;
 
 public class IdentifiedDocInstance extends DataTableElement {
 	private long id;
@@ -46,7 +15,6 @@ public class IdentifiedDocInstance extends DataTableElement {
 	private String snippet;
 	private int snapshotDeleted;
 	private Document document;
-	private long originInstanceId;
 	
 	public IdentifiedDocInstance() {
 		setMetadataValues(new ArrayList<MetadataValue>());
@@ -160,12 +128,5 @@ public class IdentifiedDocInstance extends DataTableElement {
 		this.document = document;
 	}
 
-	public long getOriginInstanceId() {
-		return originInstanceId;
-	}
-
-	public void setOriginInstanceId(long originInstanceId) {
-		this.originInstanceId = originInstanceId;
-	}
 
 }

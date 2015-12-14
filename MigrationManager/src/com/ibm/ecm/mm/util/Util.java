@@ -64,7 +64,7 @@ public class Util {
 		return value;
 	}
 
-	private static String delimited(String lookupValue) {
+	public static String delimited(String lookupValue) {
 		String delimitor = "[\\W_]";
 		return  "^" + lookupValue + delimitor + "|" + delimitor + lookupValue + "$|" + delimitor + lookupValue + delimitor + "|^" + lookupValue + "$";
 	}		

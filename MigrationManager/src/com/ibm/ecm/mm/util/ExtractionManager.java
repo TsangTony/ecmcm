@@ -167,7 +167,7 @@ public class ExtractionManager {
 							outputSdf = new SimpleDateFormat("yyyy");
 						
 						SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
-						String dateFound = Util.findRegex(valueBase.toString(), lookup.getLookupValue(), searchSequence);
+						String dateFound = Util.findRegex(valueBase.toString(), Util.delimited(lookup.getLookupValue()), searchSequence);
 						try {
 							if (!dateFound.equals("")) {
 								Date dateParsed = inputSdf.parse(dateFound);
@@ -175,12 +175,12 @@ public class ExtractionManager {
 								Date upperLimit = null;
 								Date lowerLimit = null;
 								if ((metadataExtractionRules.getMetadataProperty().getName().equals("Year"))) {
-									upperLimit = outputSdf.parse("2020");
-									lowerLimit = outputSdf.parse("1940");							
+									upperLimit = outputSdf.parse("2018");
+									lowerLimit = outputSdf.parse("1995");							
 								}
 								else if ((metadataExtractionRules.getMetadataProperty().getName().equals("Date"))) {
-									upperLimit = outputSdf.parse("2020-12-31");
-									lowerLimit = outputSdf.parse("1940-01-01");
+									upperLimit = outputSdf.parse("2018-12-31");
+									lowerLimit = outputSdf.parse("1995-01-01");
 								}
 								
 								if (metadataExtractionRules.getMetadataProperty().getName().equals("Month") || dateParsed.before(upperLimit) && dateParsed.after(lowerLimit)) {

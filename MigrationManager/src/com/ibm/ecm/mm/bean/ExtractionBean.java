@@ -227,7 +227,7 @@ public class ExtractionBean {
 			if (isUseDefaultRule()) {
 				if (getCommencePath().getId() == 0)
 					getMetadataExtractionRules().setRules(ExtractionManager.createDefaultMetadataExtractionRules(getMetadataExtractionRules().getMetadataProperty(), getCommencePath().getId()).getRules());				
-				getMetadataExtractionRules().setCustomRules(new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class));
+				//getMetadataExtractionRules().setCustomRules(new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class));
 				getMetadataExtractionRules().setDefaultRules(getMetadataExtractionRules().getRules());
 			}
 			else {
@@ -258,7 +258,6 @@ public class ExtractionBean {
 			getMetadataExtractionRules().setRules(getMetadataExtractionRules().getCustomRules());
 			getMetadataExtractionRules().setDefault(false);
 		}
-		
 	}
 	
 	public boolean isPreview() {
@@ -344,7 +343,6 @@ public class ExtractionBean {
 	
 	public void runExtraction(Document document, CommencePath commencePath, MetadataExtractionRules metadataExtractionRules) {
 		
-		
 		setIdentifiedDocInstances(ExtractionManager.extractMetadata(DataManager.getIdentifiedDocInstances(document, commencePath, isOnlyNew()), metadataExtractionRules));
 		
 		//if (preview()) {		
@@ -363,19 +361,11 @@ public class ExtractionBean {
 	}
 	
 	public void run() {
-
 		System.out.println(Util.getTimeStamp() + "DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Started.");
-	
 		runExtraction(getSelectedDocument(), getCommencePath(), getMetadataExtractionRules());
-
 		setPreview(true);
-		
 		System.out.println(Util.getTimeStamp() + "DOC-" + getSelectedDocument().getId() + ": Run Metadata Extraction Completed.");
-
 		FacesContext.getCurrentInstance().addMessage("growl", new FacesMessage("Successful",  "Metadata Extraction Rules and Metadata Values are saved. ") );
-		
-
-	
 	}
 	
 	public void runBatch() {

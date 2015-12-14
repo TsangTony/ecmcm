@@ -457,7 +457,6 @@ public class DataManager {
 			if (onlyNew)
 				query += " AND snapshot=" + LATEST_SNAPSHOT;
 				
-			
 			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement(query);
 			selectIdentifiedDocumentInstanceStmt.setInt(1, document.getId());
 			if (commencePath != null)
@@ -755,46 +754,48 @@ public class DataManager {
 		}	
 	}
 
-	public static void addIdentifiedDocInstances(Document document, IdentifiedDocInstances identifiedDocInstances) {
+	
+	public static void removeIdentifiedDocInstances(int documentId, ArrayList<Long> removedIdentifiedFileIds) {
 		try {
-			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");
-			String deleteMetadataValueQuery = "";
+			Connection conn = ConnectionManager.getConnection("removeIdentifiedDocInstances");
+			String deleteMetadataValueQuery = "DELETE Metadata_Value FROM Metadata_Value INNER JOIN Identified_Document_Instance"
+					+ " ON Metadata_Value.identified_document_instance_id = Identified_Document_Instance.id "
+					+ " AND Metadata_Value.document_id = Identified_Document_Instance.document_id"
+					+ " WHERE Identified_Document_Instance.document_id = ? and Identified_Document_Instance.id = ?";
 			String deleteIdentifiedDocInstanceQuery = "";
-			if (!document.isIdentifyDeltaOnly()) {
-				deleteMetadataValueQuery = "DELETE FROM Metadata_Value WHERE document_id = ?";
-				deleteIdentifiedDocInstanceQuery = "DELETE FROM Identified_Document_Instance WHERE document_id = ?";
-			}
-			else {
-				deleteMetadataValueQuery = "DELETE Metadata_Value FROM Metadata_Value INNER JOIN Identified_Document_Instance"
-								+ " ON Metadata_Value.identified_document_instance_id = Identified_Document_Instance.id "
-								+ " AND Metadata_Value.document_id = Identified_Document_Instance.document_id"
-								+ " WHERE Identified_Document_Instance.document_id = ? and snapshot = ?";
-				deleteIdentifiedDocInstanceQuery = "DELETE FROM Identified_Document_Instance WHERE document_id = ? and snapshot = ?";
-			}
-			
+			deleteIdentifiedDocInstanceQuery = "DELETE FROM Identified_Document_Instance WHERE document_id = ? and id = ?";
 			PreparedStatement deleteMetadataValueStmt = conn.prepareStatement(deleteMetadataValueQuery);
-			deleteMetadataValueStmt.setInt(1, document.getId());
-			if (document.isIdentifyDeltaOnly())
-				deleteMetadataValueStmt.setInt(2, LATEST_SNAPSHOT);
-			deleteMetadataValueStmt.execute();
-			
 			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement(deleteIdentifiedDocInstanceQuery);
-			deleteIdentifiedDocInstanceStmt.setInt(1, document.getId());
-			if (document.isIdentifyDeltaOnly())
-				deleteIdentifiedDocInstanceStmt.setInt(2, LATEST_SNAPSHOT);
-			deleteIdentifiedDocInstanceStmt.execute();				
-			
-			/*
-			 * Insert identified doc instance and metadata value
-			 */		
-			
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id,origin_instance_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,?,? FROM All_Document_Instance WHERE id = ?");
+
+			for (Long removedIdentifiedFileId : removedIdentifiedFileIds) {
+				deleteMetadataValueStmt.setInt(1, documentId);
+				deleteMetadataValueStmt.setLong(2, removedIdentifiedFileId);
+				deleteMetadataValueStmt.addBatch();
+				deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
+				deleteIdentifiedDocInstanceStmt.setLong(2, removedIdentifiedFileId);
+				deleteIdentifiedDocInstanceStmt.addBatch();
+			}
+
+			deleteMetadataValueStmt.executeBatch();
+			deleteIdentifiedDocInstanceStmt.executeBatch();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			ConnectionManager.close("removeIdentifiedDocInstances");
+		}
+	}
+	
+	
+	public static void addIdentifiedDocInstances(Document document, ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+		try {
+			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");		
+						
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
 			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,document_id) VALUES (?,?,?)");
 							
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				insertIdentifiedDocInstancStmt.setInt(1, document.getId());
-				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getOriginInstanceId());
-				insertIdentifiedDocInstancStmt.setLong(3, identifiedDocInstance.getId());
+				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
 				insertIdentifiedDocInstancStmt.addBatch();
 				
 				if (document.isIncludeLinkedFile() && identifiedDocInstance.getMetadataValues().size() > 0) {
