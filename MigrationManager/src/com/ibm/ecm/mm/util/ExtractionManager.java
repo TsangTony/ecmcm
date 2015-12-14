@@ -130,7 +130,7 @@ public class ExtractionManager {
 			}
 			else if (metadataExtractionRule.getSource().equals("Content")) {
 				if (content == null) {
-					valueBase.append(identifiedDocInstance.getContent());
+					valueBase.append(FileExtractor.getContent(identifiedDocInstance));
 					content = valueBase;
 				}
 				else

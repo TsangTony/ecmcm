@@ -90,7 +90,9 @@ public class IdentificationManager {
 					progress = Math.round(count * 100.0f / identifiedDocInstances.size());
 					System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ":   Step 2 of 6 Looking into content " + progress + "%");
 				}
-				String content = identifiedDocInstance.getContent();
+				String content = "";
+				if (identifiedDocInstance.getSnapshotDeleted() != 0)
+					content = FileExtractor.getContent(identifiedDocInstance);
 				if (!content.equals("")) {
 					for (IdentificationRule contentRule : contentRules) {
 						if (content.equals(contentRule.getValue())) {
