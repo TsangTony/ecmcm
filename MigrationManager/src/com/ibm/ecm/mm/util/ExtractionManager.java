@@ -20,14 +20,15 @@ import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.model.MetadataValue;
 
 public class ExtractionManager {
-	
+
 	public static ArrayList<MetadataExtractionRules> getMetadataExtractionRules(Document document) {
 		ArrayList<MetadataProperty> metadataPropreties = DataManager.getMetadataPropreties(document.getId());
 		ArrayList<MetadataExtractionRules> metadataExtractionRulesList = new ArrayList<MetadataExtractionRules>();
-		
+
 		for (CommencePath commencePath : document.getCommencePaths()) {
-			for (MetadataProperty metadataProperty : metadataPropreties) {				
-				DataTableArrayList<MetadataExtractionRule> existingMetadataExtractionRuleList = DataManager.getMetadataExtractionRules(document.getId(),commencePath.getId(),metadataProperty.getId());
+			for (MetadataProperty metadataProperty : metadataPropreties) {
+				DataTableArrayList<MetadataExtractionRule> existingMetadataExtractionRuleList = DataManager
+						.getMetadataExtractionRules(document.getId(), commencePath.getId(), metadataProperty.getId());
 				if (existingMetadataExtractionRuleList.size() > 0) {
 					MetadataExtractionRules existingMetadataExtractionRules = new MetadataExtractionRules();
 					existingMetadataExtractionRules.setCommencePathId(commencePath.getId());
@@ -35,31 +36,31 @@ public class ExtractionManager {
 					existingMetadataExtractionRules.setRules(existingMetadataExtractionRuleList);
 					existingMetadataExtractionRules.setDefault(existingMetadataExtractionRuleList.get(0).isDefault());
 					if (existingMetadataExtractionRules.isDefault())
-						existingMetadataExtractionRules.setLookups(DataManager.getLookups(metadataProperty.getId()));	
-					
+						existingMetadataExtractionRules.setLookups(DataManager.getLookups(metadataProperty.getId()));
+
 					metadataExtractionRulesList.add(existingMetadataExtractionRules);
-				}
-				else {
-					MetadataExtractionRules metadataExtractionRules = createDefaultMetadataExtractionRules(metadataProperty, commencePath.getId());
+				} else {
+					MetadataExtractionRules metadataExtractionRules = createDefaultMetadataExtractionRules(
+							metadataProperty, commencePath.getId());
 					if (metadataExtractionRules != null) {
 						metadataExtractionRulesList.add(metadataExtractionRules);
 					}
 				}
 			}
 		}
-		
+
 		return metadataExtractionRulesList;
 	}
-	
-	public static MetadataExtractionRules createDefaultMetadataExtractionRules(MetadataProperty metadataProperty, int commencePathId) {
+
+	public static MetadataExtractionRules createDefaultMetadataExtractionRules(MetadataProperty metadataProperty,
+			int commencePathId) {
 		MetadataExtractionRules defaultMetadataExtractionRules = new MetadataExtractionRules();
-		defaultMetadataExtractionRules.setLookups(DataManager.getLookups(metadataProperty.getId()));			
+		defaultMetadataExtractionRules.setLookups(DataManager.getLookups(metadataProperty.getId()));
 		if (defaultMetadataExtractionRules.getLookups().size() > 0) {
 			defaultMetadataExtractionRules.setCommencePathId(commencePathId);
 			defaultMetadataExtractionRules.setMetadataProperty(metadataProperty);
 			defaultMetadataExtractionRules.setDefault(true);
-			
-			
+
 			MetadataExtractionRule metadataExtractionRuleFP = new MetadataExtractionRule();
 			metadataExtractionRuleFP.setBlRule("Retrieve the " + metadataProperty.getName() + " value");
 			metadataExtractionRuleFP.setSource("File Path");
@@ -72,203 +73,237 @@ public class ExtractionManager {
 			metadataExtractionRuleCT.setPriority(2);
 			metadataExtractionRuleCT.setNew(true);
 			defaultMetadataExtractionRules.getRules().add(metadataExtractionRuleCT);
-			
-			DataManager.addMetadataExtractionRule(defaultMetadataExtractionRules.getRules(), commencePathId, metadataProperty.getId(), true);
-			
+
+			DataManager.addMetadataExtractionRule(defaultMetadataExtractionRules.getRules(), commencePathId,
+					metadataProperty.getId(), true);
+
 			return defaultMetadataExtractionRules;
 		}
 		return null;
 	}
-	
-	public static ArrayList<MetadataProperty> extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances, Document document) {		
+
+	public static ArrayList<MetadataProperty> extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances,
+			Document document) {
 		ArrayList<MetadataExtractionRules> metadataExtractionRulesList = getMetadataExtractionRules(document);
 		extractMetadata(identifiedDocInstances, document, metadataExtractionRulesList);
-		
+
 		ArrayList<MetadataProperty> extractedMetadataProperties = new ArrayList<MetadataProperty>();
 		for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 			if (extractedMetadataProperties.contains(metadataExtractionRules.getMetadataProperty()))
 				continue;
 			extractedMetadataProperties.add(metadataExtractionRules.getMetadataProperty());
 		}
-		
+
 		return extractedMetadataProperties;
 	}
-	
-	public static void extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances, Document document, ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
+
+	public static void extractMetadata(ArrayList<IdentifiedDocInstance> identifiedDocInstances, Document document,
+			ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath() != null) {
-					if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
-						DataManager.removeMetadataValues(document.getId(), metadataExtractionRules.getMetadataProperty().getId());
-						identifiedDocInstance.getMetadataValues().add(extractMetadata(identifiedDocInstance, metadataExtractionRules));
+					if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules
+							.getCommencePathId()) {
+						DataManager.removeMetadataValues(document.getId(),
+								metadataExtractionRules.getMetadataProperty().getId());
+						identifiedDocInstance.getMetadataValues()
+								.add(extractMetadata(identifiedDocInstance, metadataExtractionRules));
 					}
 				}
 			}
 		}
-		
-		//TODO make it.
-		//DataManager.addMetadataValues(identifiedDocInstances, document.getId());
-		
-	}
-	
-	
-	public static MetadataValue extractMetadata(IdentifiedDocInstance identifiedDocInstance, MetadataExtractionRules metadataExtractionRules) {
 
-		//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":   Start extracting metadata for " + identifiedDocInstance.getName());
-		
+		// TODO make it.
+		// DataManager.addMetadataValues(identifiedDocInstances,
+		// document.getId());
+
+	}
+
+	public static MetadataValue extractMetadata(IdentifiedDocInstance identifiedDocInstance,
+			MetadataExtractionRules metadataExtractionRules) {
+
+		// System.out.println("DOC-" +
+		// identifiedDocInstance.getDocument().getId() + ": Start extracting
+		// metadata for " + identifiedDocInstance.getName());
+
 		MetadataValue metadataValue = new MetadataValue();
 		metadataValue.setValue("");
 		StringBuilder content = null;
-				
-		metadataExtractionRuleloop:
-		for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules.getRules()) {
+
+		metadataExtractionRuleloop: for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules
+				.getRules()) {
 			StringBuilder valueBase = new StringBuilder();
 			String searchSequence = "FIRST";
-			if (metadataExtractionRule.getSource().equals("File Path"))  {
-				valueBase.append(identifiedDocInstance.getVolumePath() + "/" + identifiedDocInstance.getNameWithoutExtension());
+			if (metadataExtractionRule.getSource().equals("File Path")) {
+				valueBase.append(
+						identifiedDocInstance.getVolumePath() + "/" + identifiedDocInstance.getNameWithoutExtension());
 				searchSequence = "LAST";
-			}
-			else if (metadataExtractionRule.getSource().equals("Content")) {
+			} else if (metadataExtractionRule.getSource().equals("Content")) {
 				if (content == null) {
 					valueBase.append(FileExtractor.getContent(identifiedDocInstance));
 					content = valueBase;
-				}
-				else
+				} else
 					valueBase = content;
-			}
-			else if (metadataExtractionRule.getSource().equals("Default")) {
+			} else if (metadataExtractionRule.getSource().equals("Default")) {
 				metadataValue.setValue(metadataExtractionRule.getDefaultValue());
 				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 				break;
 			}
-			
+
 			if (valueBase.toString().equals(""))
 				continue metadataExtractionRuleloop;
-			
-			
+
 			if (metadataExtractionRules.isDefault()) {
-				
-				//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":   Start looking up value from " + metadataExtractionRule.getSource() + " for " + identifiedDocInstance.getName());
-				
-				lookupLoop:
-				for (Lookup lookup : metadataExtractionRules.getLookups()) {
-					
-					//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":     Looking up " + lookup.getLookupValue() + " for " + identifiedDocInstance.getName());
-										
-					if (metadataExtractionRules.getMetadataProperty().getName().equals("Date") ||
-						metadataExtractionRules.getMetadataProperty().getName().equals("Month")||
-						metadataExtractionRules.getMetadataProperty().getName().equals("Year")) {
-						
+
+				// System.out.println("DOC-" +
+				// identifiedDocInstance.getDocument().getId() + ": Start
+				// looking up value from " + metadataExtractionRule.getSource()
+				// + " for " + identifiedDocInstance.getName());
+
+				lookupLoop: for (Lookup lookup : metadataExtractionRules.getLookups()) {
+
+					// System.out.println("DOC-" +
+					// identifiedDocInstance.getDocument().getId() + ": Looking
+					// up " + lookup.getLookupValue() + " for " +
+					// identifiedDocInstance.getName());
+
+					if (metadataExtractionRules.getMetadataProperty().getName().equals("Date")
+							|| metadataExtractionRules.getMetadataProperty().getName().equals("Month")
+							|| metadataExtractionRules.getMetadataProperty().getName().equals("Year")) {
+
 						SimpleDateFormat outputSdf = new SimpleDateFormat("yyyy-MM-dd");
-						
+
 						if (metadataExtractionRules.getMetadataProperty().getName().equals("Month"))
 							outputSdf = new SimpleDateFormat("MMMMM");
 						else if (metadataExtractionRules.getMetadataProperty().getName().equals("Year"))
 							outputSdf = new SimpleDateFormat("yyyy");
-						
+
 						SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
-						String dateFound = Util.findRegex(valueBase.toString(), Util.delimited(lookup.getLookupValue()), searchSequence);
+						String dateFound = Util.findRegex(valueBase.toString(), Util.delimited(lookup.getLookupValue()),
+								searchSequence);
 						try {
 							if (!dateFound.equals("")) {
 								Date dateParsed = inputSdf.parse(dateFound);
-								//TODO: from DB
+								// TODO: from DB
 								Date upperLimit = null;
 								Date lowerLimit = null;
 								if ((metadataExtractionRules.getMetadataProperty().getName().equals("Year"))) {
 									upperLimit = outputSdf.parse("2018");
-									lowerLimit = outputSdf.parse("1995");							
-								}
-								else if ((metadataExtractionRules.getMetadataProperty().getName().equals("Date"))) {
+									lowerLimit = outputSdf.parse("1995");
+								} else if ((metadataExtractionRules.getMetadataProperty().getName().equals("Date"))) {
 									upperLimit = outputSdf.parse("2018-12-31");
 									lowerLimit = outputSdf.parse("1995-01-01");
 								}
-								
-								if (metadataExtractionRules.getMetadataProperty().getName().equals("Month") || dateParsed.before(upperLimit) && dateParsed.after(lowerLimit)) {
-									metadataValue.setValue(outputSdf.format(dateParsed));									
+
+								if (metadataExtractionRules.getMetadataProperty().getName().equals("Month")
+										|| dateParsed.before(upperLimit) && dateParsed.after(lowerLimit)) {
+									metadataValue.setValue(outputSdf.format(dateParsed));
+								} else if (metadataExtractionRules.getMetadataProperty().getName().equals("Date")
+										&& !lookup.getReturnedValue().contains("y")) {
+									metadataValue.setValue("0000" + outputSdf.format(dateParsed).substring(5));
 								}
 							}
 						} catch (ParseException e) {
 							continue lookupLoop;
 						}
+					} else {
+						metadataValue.setValue(Util.findRegex(valueBase.toString(), lookup, searchSequence));
 					}
-					else {
-						metadataValue.setValue(Util.findRegex(valueBase.toString(), lookup, searchSequence));						
-					}
-					
+
 					if (!metadataValue.getValue().equals("")) {
-						//System.out.println("DOC-" + identifiedDocInstance.getDocument().getId() + ":   Value is set for " + identifiedDocInstance.getName() + " : " + metadataValue.getValue());
+						// System.out.println("DOC-" +
+						// identifiedDocInstance.getDocument().getId() + ":
+						// Value is set for " + identifiedDocInstance.getName()
+						// + " : " + metadataValue.getValue());
 						metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 						break metadataExtractionRuleloop;
-					}	
+					}
 				}
+			} else {
+				metadataValue.setValue(Util.findRegex(valueBase.toString(), metadataExtractionRule.getRegex(),
+						metadataExtractionRule.getCapGroup(), searchSequence));
 			}
-			else {
-				metadataValue.setValue(Util.findRegex(valueBase.toString(), metadataExtractionRule.getRegex(), metadataExtractionRule.getCapGroup(), searchSequence));
-			}
-			
+
 			if (!metadataValue.getValue().equals("")) {
 				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 				break metadataExtractionRuleloop;
-			}	
+			}
 		}
 		return metadataValue;
 	}
-	
-	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances, MetadataExtractionRules metadataExtractionRules) {
+
+	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances,
+			MetadataExtractionRules metadataExtractionRules) {
 		ArrayList<MetadataExtractionRules> metadataExtractionRulesList = new ArrayList<MetadataExtractionRules>();
 		metadataExtractionRulesList.add(metadataExtractionRules);
 		return extractMetadata(identifiedDocInstances, metadataExtractionRulesList);
 	}
 
-	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances, ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
+	public static IdentifiedDocInstances extractMetadata(IdentifiedDocInstances identifiedDocInstances,
+			ArrayList<MetadataExtractionRules> metadataExtractionRulesList) {
 		int totalCount = 0;
 		int filePathCount = 0;
 		int contentCount = 0;
 		int defaultCount = 0;
-		
+
 		int count = 1;
 		boolean commencePathMatch = false;
 		for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				
+
 			identifiedDocInstance.getMetadataValues().clear();
 			for (MetadataExtractionRules metadataExtractionRules : metadataExtractionRulesList) {
 				if (identifiedDocInstance.getCommencePath().getId() == metadataExtractionRules.getCommencePathId()) {
-					
-					System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId() + ": Step 2 of 3 Extracting metadata (" + metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/" + identifiedDocInstances.size());
-											
-					MetadataValue metadataValue = extractMetadata(identifiedDocInstance,metadataExtractionRules);
-					//System.gc();
-					
-					identifiedDocInstance.getMetadataValues().add(metadataValue);					
+
+					System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId()
+							+ ": Step 2 of 3 Extracting metadata ("
+							+ metadataExtractionRules.getMetadataProperty().getName() + ") " + count + "/"
+							+ identifiedDocInstances.size());
+
+					MetadataValue metadataValue = extractMetadata(identifiedDocInstance, metadataExtractionRules);
+					// System.gc();
+
+					identifiedDocInstance.getMetadataValues().add(metadataValue);
 					if (identifiedDocInstance.getSnapshotDeleted() == 0) {
-						totalCount++;	
-						if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("File Path"))
+						totalCount++;
+						if (!metadataValue.getValue().equals("")
+								&& metadataValue.getMetadataExtractionRule().getSource().equals("File Path"))
 							filePathCount++;
-						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Content"))
+						else if (!metadataValue.getValue().equals("")
+								&& metadataValue.getMetadataExtractionRule().getSource().equals("Content"))
 							contentCount++;
-						else if (!metadataValue.getValue().equals("") && metadataValue.getMetadataExtractionRule().getSource().equals("Default"))
+						else if (!metadataValue.getValue().equals("")
+								&& metadataValue.getMetadataExtractionRule().getSource().equals("Default"))
 							defaultCount++;
-					}	
+					}
 					commencePathMatch = true;
 					break;
 				}
-			}		
+			}
 			if (!commencePathMatch) {
-				System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId() + ": No commence path matching metadata extraction rule for " + identifiedDocInstance.getFullyQualifiedPath());
-				
+				System.out.println(Util.getTimeStamp() + "DOC-" + identifiedDocInstance.getDocument().getId()
+						+ ": No commence path matching metadata extraction rule for "
+						+ identifiedDocInstance.getFullyQualifiedPath());
+
 			}
 			count++;
-			//System.gc();
+			// System.gc();
 		}
-		
+
 		if (filePathCount + contentCount < totalCount * 0.8f)
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / totalCount) + "%, Content:" + Math.round(contentCount * 100.0f / totalCount) + "%, Default: " + Math.round(defaultCount * 100.0f / totalCount) + "%"));
+			FacesContext.getCurrentInstance().addMessage("messages",
+					new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning",
+							"Success Rate for File Path: " + Math.round(filePathCount * 100.0f / totalCount)
+									+ "%, Content:" + Math.round(contentCount * 100.0f / totalCount) + "%, Default: "
+									+ Math.round(defaultCount * 100.0f / totalCount) + "%"));
 		else
-			FacesContext.getCurrentInstance().addMessage("messages", new FacesMessage(FacesMessage.SEVERITY_INFO, "Info", "Success Rate for File Path: " + Math.round(filePathCount * 100.0f / totalCount) + "%, Content:" + Math.round(contentCount * 100.0f / totalCount) + "%, Default: " + Math.round(defaultCount * 100.0f / totalCount) + "%"));
-		
+			FacesContext.getCurrentInstance().addMessage("messages",
+					new FacesMessage(FacesMessage.SEVERITY_INFO, "Info",
+							"Success Rate for File Path: " + Math.round(filePathCount * 100.0f / totalCount)
+									+ "%, Content:" + Math.round(contentCount * 100.0f / totalCount) + "%, Default: "
+									+ Math.round(defaultCount * 100.0f / totalCount) + "%"));
+
 		return identifiedDocInstances;
-		
+
 	}
-		
 
 }
