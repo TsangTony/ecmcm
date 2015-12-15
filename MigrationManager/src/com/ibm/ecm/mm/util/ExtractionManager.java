@@ -181,6 +181,18 @@ public class ExtractionManager {
 						SimpleDateFormat inputSdf = new SimpleDateFormat(lookup.getReturnedValue());
 						String dateFound = Util.findRegex(valueBase.toString(), Util.delimited(lookup.getLookupValue()),
 								searchSequence);
+						
+						System.out.println(dateFound);
+						
+						if (dateFound.matches("[\\W_]" + lookup.getLookupValue() + "[\\W_]?"))
+							dateFound = dateFound.substring(1);
+
+						System.out.println(dateFound);
+						
+						if (dateFound.matches(lookup.getLookupValue() + "[\\W_]"))
+							dateFound = dateFound.substring(0, dateFound.length()-1);
+
+						System.out.println(dateFound);
 						try {
 							if (!dateFound.equals("")) {
 								Date dateParsed = inputSdf.parse(dateFound);
@@ -200,7 +212,7 @@ public class ExtractionManager {
 									metadataValue.setValue(outputSdf.format(dateParsed));
 								} else if (metadataExtractionRules.getMetadataProperty().getName().equals("Date")
 										&& !lookup.getReturnedValue().contains("y")) {
-									metadataValue.setValue("0000" + outputSdf.format(dateParsed).substring(5));
+									metadataValue.setValue("0000-" + outputSdf.format(dateParsed).substring(5));
 								}
 							}
 						} catch (ParseException e) {
