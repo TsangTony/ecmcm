@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
@@ -124,9 +124,9 @@ public class IdentificationManager {
 
 		if (document.isIncludeLinkedFile()) {
 			IdentifiedDocInstances linkedDocumentInstances = new IdentifiedDocInstances();
-			HashMap<String, IdentifiedDocInstance> digests = new HashMap<String, IdentifiedDocInstance>();
+			HashSet<String> fullPaths = new HashSet<String>();
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				digests.put(identifiedDocInstance.getDigest(), identifiedDocInstance);
+				fullPaths.add(identifiedDocInstance.getFullPath());
 			}
 
 			int count = 1;
@@ -135,7 +135,7 @@ public class IdentificationManager {
 						+ Math.round(count * 100.0f / identifiedDocInstances.size()) + "% - "
 						+ identifiedDocInstance.getFullyQualifiedPath());
 				IdentifiedDocInstances newLinkedDocumentInstances = getLinkedDocumentInstances(document,
-						identifiedDocInstance, digests);
+						identifiedDocInstance, fullPaths);
 				linkedDocumentInstances.addAll(newLinkedDocumentInstances);
 				linkedDocumentInstances.getLatestSnapshotInstances()
 						.addAll(newLinkedDocumentInstances.getLatestSnapshotInstances());
@@ -162,7 +162,7 @@ public class IdentificationManager {
 	}
 
 	private static IdentifiedDocInstances getLinkedDocumentInstances(Document document,
-			IdentifiedDocInstance identifiedDocInstance, HashMap<String, IdentifiedDocInstance> digests) {
+			IdentifiedDocInstance identifiedDocInstance, HashSet<String> fullPaths) {
 
 		// System.out.println("DOC-" + document.getId() + ": Identifying linked
 		// files from " + identifiedDocInstance.getFullyQualifiedPath());
@@ -284,13 +284,11 @@ public class IdentificationManager {
 					MetadataValue metadataValue = new MetadataValue();
 					metadataValue.setValue(String.valueOf(identifiedDocInstance.getId()));
 
-					if (digests.containsKey(newIdentifiedDocInstance.getDigest())
-							&& digests.get(newIdentifiedDocInstance.getDigest()).getSnapshotDeleted() > 0
-							|| !digests.containsKey(newIdentifiedDocInstance.getDigest())) {
+					if (!fullPaths.contains(newIdentifiedDocInstance.getFullPath())) {
 						System.out.println("DOC-" + document.getId() + ":  Qualified link: " + link);
 
 						newIdentifiedDocInstance.getMetadataValues().add(metadataValue);
-						digests.put(newIdentifiedDocInstance.getDigest(), newIdentifiedDocInstance);
+						fullPaths.add(newIdentifiedDocInstance.getFullPath());
 
 						// newIdentifiedDocInstance.setOriginInstanceId(identifiedDocInstance.getId());
 						newLinkedDocumentInstances.add(newIdentifiedDocInstance);
@@ -298,19 +296,19 @@ public class IdentificationManager {
 							newLinkedDocumentInstances.getLatestSnapshotInstances().add(newIdentifiedDocInstance);
 
 						IdentifiedDocInstances instancesLinkedToNewIdentifiedDocInstance = getLinkedDocumentInstances(
-								document, newIdentifiedDocInstance, digests);
+								document, newIdentifiedDocInstance, fullPaths);
 						newLinkedDocumentInstances.addAll(instancesLinkedToNewIdentifiedDocInstance);
 						newLinkedDocumentInstances.getLatestSnapshotInstances()
 								.addAll(instancesLinkedToNewIdentifiedDocInstance);
 					} else {
 						System.out.println("DOC-" + document.getId() + ":  Duplicated link: " + link);
-						ArrayList<MetadataValue> metadataValues = digests.get(newIdentifiedDocInstance.getDigest())
-								.getMetadataValues();
-						if (metadataValues.size() > 0)
-							metadataValues.get(0)
-									.setValue(metadataValues.get(0).getValue() + "," + metadataValue.getValue());
-						else
-							metadataValues.add(metadataValue);
+//						ArrayList<MetadataValue> metadataValues = digests.get(newIdentifiedDocInstance.getDigest())
+//								.getMetadataValues();
+//						if (metadataValues.size() > 0)
+//							metadataValues.get(0)
+//									.setValue(metadataValues.get(0).getValue() + "," + metadataValue.getValue());
+//						else
+//							metadataValues.add(metadataValue);
 					}
 
 				}

@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import com.ibm.ecm.mm.model.CommencePath;
@@ -23,10 +22,10 @@ import com.ibm.ecm.mm.model.MetadataProperty;
 import com.ibm.ecm.mm.model.MetadataValue;
 import com.ibm.ecm.mm.model.Team;
 
-public class DataManager {	
-	
+public class DataManager {
+
 	public static int LATEST_SNAPSHOT;
-	
+
 	static {
 		try {
 			Connection conn = ConnectionManager.getConnection("");
@@ -36,50 +35,34 @@ public class DataManager {
 			if (rs.next()) {
 				LATEST_SNAPSHOT = rs.getInt(1);
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("");
 		}
 	}
-	
 
-	public static ArrayList<Document> getDocuments() {		
-		ArrayList<Document> documents = new ArrayList<Document>();		
-		try {	
-			Connection conn = ConnectionManager.getConnection("getDocuments");	
-			String query = ""
-					+ "SELECT document.id, "
-					+ "       document.NAME, "
-					+ "       document.bl_identification_rule, "
-					+ "       team.id, "
-					+ "       team.NAME, "
-					+ "       ig_document_class.NAME, "
-					+ "       ig_security_class.NAME, "
-					+ "       document.is_no_pdf, "
-					+ "       document.is_office_doc, "
-					+ "       document.include_linked_file, "
-					+ "       document.release "
-					+ "FROM   document "
-					+ "left join team "
-					+ "on document.team_id = team.id "
-					+ "left join ig_document_class "
-					+ "on  document.ig_document_class_id = ig_document_class.id "
-					+ "left join ig_security_class "
-					+ "on  document.ig_security_class_id = ig_security_class.id "
-					+ "  where "
-					+ "       document.is_active = 1 "
-					+ "       AND document.is_cm_qualified = 1 "
+	public static ArrayList<Document> getDocuments() {
+		ArrayList<Document> documents = new ArrayList<Document>();
+		try {
+			Connection conn = ConnectionManager.getConnection("getDocuments");
+			String query = "" + "SELECT document.id, " + "       document.NAME, "
+					+ "       document.bl_identification_rule, " + "       team.id, " + "       team.NAME, "
+					+ "       ig_document_class.NAME, " + "       ig_security_class.NAME, "
+					+ "       document.is_no_pdf, " + "       document.is_office_doc, "
+					+ "       document.include_linked_file, " + "       document.release " + "FROM   document "
+					+ "left join team " + "on document.team_id = team.id " + "left join ig_document_class "
+					+ "on  document.ig_document_class_id = ig_document_class.id " + "left join ig_security_class "
+					+ "on  document.ig_security_class_id = ig_security_class.id " + "  where "
+					+ "       document.is_active = 1 " + "       AND document.is_cm_qualified = 1 "
 					+ "ORDER  BY document.id";
 
 			PreparedStatement selectDocumentStmt = conn.prepareStatement(query);
 			ResultSet selectDocumentRS = selectDocumentStmt.executeQuery();
-			while (selectDocumentRS.next()) {					
+			while (selectDocumentRS.next()) {
 				Document document = new Document();
 				document.setId(selectDocumentRS.getInt(1));
-				document.setName(selectDocumentRS.getString(2));	
+				document.setName(selectDocumentRS.getString(2));
 				document.setBlIdentificationRule(selectDocumentRS.getString(3));
 				Team team = new Team();
 				team.setId(selectDocumentRS.getInt(4));
@@ -92,49 +75,48 @@ public class DataManager {
 				document.setIncludeLinkedFile(selectDocumentRS.getBoolean(10));
 				document.setRelease(selectDocumentRS.getInt(11));
 				documents.add(document);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getDocuments");
-		}		
+		}
 		return documents;
 	}
-	
+
 	public static DataTableArrayList<CommencePath> getCommencePaths(int documentId) {
 		DataTableArrayList<CommencePath> commencePaths = new DataTableArrayList<CommencePath>(CommencePath.class);
-		try {	
-			Connection conn = ConnectionManager.getConnection("getCommencePaths");		
-			PreparedStatement selectCommencePathStmt = conn.prepareStatement("SELECT id,business_path,actual_path FROM Commence_Path WHERE document_id = ? ORDER BY id");
+		try {
+			Connection conn = ConnectionManager.getConnection("getCommencePaths");
+			PreparedStatement selectCommencePathStmt = conn.prepareStatement(
+					"SELECT id,business_path,actual_path FROM Commence_Path WHERE document_id = ? ORDER BY id");
 			selectCommencePathStmt.setInt(1, documentId);
 			ResultSet selectCommencePathRS = selectCommencePathStmt.executeQuery();
-			while (selectCommencePathRS.next()) {					
+			while (selectCommencePathRS.next()) {
 				CommencePath commencePath = new CommencePath();
 				commencePath.setId(selectCommencePathRS.getInt(1));
 				commencePath.setBusinessPath(selectCommencePathRS.getString(2));
 				commencePath.setActualPath(selectCommencePathRS.getString(3));
 				commencePaths.add(commencePath);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getCommencePaths");
-		}		
+		}
 		return commencePaths;
 	}
-	
+
 	public static DataTableArrayList<IdentificationRule> getIdentificationRules(int documentId) {
-		DataTableArrayList<IdentificationRule> identificationRules = new DataTableArrayList<IdentificationRule>(IdentificationRule.class);
-		try {	
-			Connection conn = ConnectionManager.getConnection("getIdentificationRules");		
-			PreparedStatement selectIdentificationRuleStmt = conn.prepareStatement("SELECT id, operator_1, attribute, operator_2, value, left_paren, right_paren, priority FROM Identification_Rule WHERE document_id = ? ORDER BY id");
+		DataTableArrayList<IdentificationRule> identificationRules = new DataTableArrayList<IdentificationRule>(
+				IdentificationRule.class);
+		try {
+			Connection conn = ConnectionManager.getConnection("getIdentificationRules");
+			PreparedStatement selectIdentificationRuleStmt = conn.prepareStatement(
+					"SELECT id, operator_1, attribute, operator_2, value, left_paren, right_paren, priority FROM Identification_Rule WHERE document_id = ? ORDER BY id");
 			selectIdentificationRuleStmt.setInt(1, documentId);
 			ResultSet selectIdentificationRuleRS = selectIdentificationRuleStmt.executeQuery();
-			while (selectIdentificationRuleRS.next()) {					
+			while (selectIdentificationRuleRS.next()) {
 				IdentificationRule identificationRule = new IdentificationRule();
 				identificationRule.setId(selectIdentificationRuleRS.getInt(1));
 				identificationRule.setLogicalOperator(selectIdentificationRuleRS.getString(2));
@@ -145,93 +127,80 @@ public class DataManager {
 				identificationRule.setRightParen(selectIdentificationRuleRS.getString(7));
 				identificationRule.setPriority(selectIdentificationRuleRS.getInt(8));
 				identificationRules.add(identificationRule);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getIdentificationRules");
-		}		
+		}
 		return identificationRules;
 	}
-	
+
 	public static ArrayList<MetadataProperty> getMetadataPropreties(int documentId) {
 		ArrayList<MetadataProperty> metadataPropreties = new ArrayList<MetadataProperty>();
-		try {	
-			Connection conn = ConnectionManager.getConnection("getMetadataPropreties");		
-			String query = ""
-					+ "SELECT metadata_property.id, "
-					+ "       metadata_property.NAME "
+		try {
+			Connection conn = ConnectionManager.getConnection("getMetadataPropreties");
+			String query = "" + "SELECT metadata_property.id, " + "       metadata_property.NAME "
 					+ "FROM   metadata_property ";
-			
+
 			if (documentId != 0) {
-				query +=  "       LEFT JOIN [D_MP] "
+				query += "       LEFT JOIN [D_MP] "
 						+ "              ON [D_MP].metadata_property_id = metadata_property.id "
-						+ "       LEFT JOIN Document "
-						+ "              ON Document.id = [D_MP].document_id "
+						+ "       LEFT JOIN Document " + "              ON Document.id = [D_MP].document_id "
 						+ "WHERE  document.id = ? ";
 			}
-			
+
 			query += "ORDER  BY metadata_property.id";
-			
+
 			PreparedStatement selectMetadataPropertyStmt = conn.prepareStatement(query);
 			if (documentId != 0)
 				selectMetadataPropertyStmt.setInt(1, documentId);
 			ResultSet selectMetadataPropertyRS = selectMetadataPropertyStmt.executeQuery();
-			while (selectMetadataPropertyRS.next()) {					
+			while (selectMetadataPropertyRS.next()) {
 				MetadataProperty metadataProperty = new MetadataProperty();
 				metadataProperty.setId(selectMetadataPropertyRS.getInt(1));
 				metadataProperty.setName(selectMetadataPropertyRS.getString(2));
 				metadataPropreties.add(metadataProperty);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getMetadataPropreties");
 		}
 		return metadataPropreties;
 	}
-	
-	public static DataTableArrayList<MetadataExtractionRule> getMetadataExtractionRules(int documentId, int commencePathId, int metadataPropertyId) {
-		DataTableArrayList<MetadataExtractionRule> metadataExtractionRules = new DataTableArrayList<MetadataExtractionRule>(MetadataExtractionRule.class);
-		try {	
-			Connection conn = ConnectionManager.getConnection("getMetadataExtractionRules");	
-			String query = ""
-					+ "SELECT id, "
-					+ "       priority, "
-					+ "       source, "
-					+ "       bl_rule, "
-					+ "       regex, "
-					+ "       capturing_group, "
-					+ "       default_value, "
-					+ "       is_default "
-					+ "FROM   metadata_extraction_rule "
-					+ "WHERE  ";
-			
+
+	public static DataTableArrayList<MetadataExtractionRule> getMetadataExtractionRules(int documentId,
+			int commencePathId, int metadataPropertyId) {
+		DataTableArrayList<MetadataExtractionRule> metadataExtractionRules = new DataTableArrayList<MetadataExtractionRule>(
+				MetadataExtractionRule.class);
+		try {
+			Connection conn = ConnectionManager.getConnection("getMetadataExtractionRules");
+			String query = "" + "SELECT id, " + "       priority, " + "       source, " + "       bl_rule, "
+					+ "       regex, " + "       capturing_group, " + "       default_value, " + "       is_default "
+					+ "FROM   metadata_extraction_rule " + "WHERE  ";
+
 			if (commencePathId == 0)
 				query += "    commence_path_id IN (SELECT id FROM Commence_Path WHERE document_id = ?) ";
 			else
 				query += "    commence_path_id = ?";
-			
+
 			if (metadataPropertyId != 0)
-				query  += " AND  metadata_property_id = ? ";
-			
-			query  += " ORDER  BY metadata_property_id, priority";
-			
+				query += " AND  metadata_property_id = ? ";
+
+			query += " ORDER  BY metadata_property_id, priority";
+
 			PreparedStatement selectMetadataExtractionRulesStmt = conn.prepareStatement(query);
 			if (commencePathId == 0)
 				selectMetadataExtractionRulesStmt.setInt(1, documentId);
 			else
 				selectMetadataExtractionRulesStmt.setInt(1, commencePathId);
-			
+
 			if (metadataPropertyId != 0)
 				selectMetadataExtractionRulesStmt.setInt(2, metadataPropertyId);
-			
+
 			ResultSet selectMetadataExtractionRulesRS = selectMetadataExtractionRulesStmt.executeQuery();
-			while (selectMetadataExtractionRulesRS.next()) {		
+			while (selectMetadataExtractionRulesRS.next()) {
 				MetadataExtractionRule metadataExtractionRule = new MetadataExtractionRule();
 				metadataExtractionRule.setId(selectMetadataExtractionRulesRS.getInt(1));
 				metadataExtractionRule.setPriority(selectMetadataExtractionRulesRS.getInt(2));
@@ -242,99 +211,93 @@ public class DataManager {
 				metadataExtractionRule.setDefaultValue(selectMetadataExtractionRulesRS.getString(7));
 				metadataExtractionRule.setDefault(selectMetadataExtractionRulesRS.getBoolean(8));
 				metadataExtractionRules.add(metadataExtractionRule);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getMetadataExtractionRules");
-		}		
+		}
 		return metadataExtractionRules;
 	}
-	
+
 	public static ArrayList<Lookup> getLookups(int metadataPropertyId) {
 		ArrayList<Lookup> lookups = new ArrayList<Lookup>();
 		try {
 			Connection conn = ConnectionManager.getConnection("getLookups");
-			PreparedStatement selectLookupStmt = conn.prepareStatement("SELECT lookup_value, returned_value FROM Lookup WHERE metadata_property_id = ? ORDER BY id");
-			selectLookupStmt.setInt(1, metadataPropertyId);				
-			ResultSet lookupRs = selectLookupStmt.executeQuery();						
+			PreparedStatement selectLookupStmt = conn.prepareStatement(
+					"SELECT lookup_value, returned_value FROM Lookup WHERE metadata_property_id = ? ORDER BY id");
+			selectLookupStmt.setInt(1, metadataPropertyId);
+			ResultSet lookupRs = selectLookupStmt.executeQuery();
 			while (lookupRs.next()) {
 				Lookup lookup = new Lookup();
 				lookup.setLookupValue(lookupRs.getString(1));
 				lookup.setReturnedValue(lookupRs.getString(2));
 				lookups.add(lookup);
-			}			
-		}
-		catch (SQLException e) {				
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getLookups");
 		}
 		return lookups;
 	}
-	
+
 	public static void removeMetadataValues(int documentId, int metadataPropertyId) {
 		ArrayList<Integer> metadataPropertyIds = new ArrayList<Integer>();
 		metadataPropertyIds.add(Integer.valueOf(metadataPropertyId));
 		removeMetadataValues(documentId, metadataPropertyIds);
 	}
-	
+
 	public static void removeMetadataValues(IdentifiedDocInstances identifiedDocumentInstances, int documentId) {
 		try {
 			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
-			PreparedStatement stmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
+			PreparedStatement stmt = conn.prepareStatement(
+					"DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ?");
 			stmt.setInt(1, documentId);
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocumentInstances) {
 				stmt.setLong(2, identifiedDocInstance.getId());
 				stmt.addBatch();
 			}
 			stmt.executeBatch();
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("removeMetadataValues");
 		}
 	}
-	
+
 	public static void removeMetadataValues(int documentId, ArrayList<Integer> metadataPropertyIds) {
 		try {
 			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
-			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE metadata_property_id IN (?)) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
-			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);	
-			
-			String metadataPropertyIdList = "" + metadataPropertyIds.get(0);			
-			for (int i=1; i < metadataPropertyIds.size(); i++)
+			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement(
+					"DELETE FROM Metadata_Value WHERE document_id = ? AND (metadata_extraction_rule_id IN (SELECT id FROM Metadata_Extraction_Rule WHERE metadata_property_id IN (?)) OR metadata_extraction_rule_id NOT IN (SELECT id FROM Metadata_Extraction_Rule))");
+			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
+
+			String metadataPropertyIdList = "" + metadataPropertyIds.get(0);
+			for (int i = 1; i < metadataPropertyIds.size(); i++)
 				metadataPropertyIdList += "," + metadataPropertyIds.get(i);
-			
+
 			deleteIdentifiedDocInstanceStmt.setString(2, metadataPropertyIdList);
 			deleteIdentifiedDocInstanceStmt.execute();
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("removeMetadataValues");
 		}
 	}
-	
-	public static void removeMetadataValues(int documentId, int commencePathId, ArrayList<Integer> metadataPropertyIds) {
+
+	public static void removeMetadataValues(int documentId, int commencePathId,
+			ArrayList<Integer> metadataPropertyIds) {
 		try {
 			Connection conn = ConnectionManager.getConnection("removeMetadataValues");
-			String query = ""
-					+ "DELETE FROM metadata_value "
-					+ "WHERE  document_id = ? "
+			String query = "" + "DELETE FROM metadata_value " + "WHERE  document_id = ? "
 					+ "       AND ( metadata_extraction_rule_id IN (SELECT id "
 					+ "                                             FROM   metadata_extraction_rule "
 					+ "                                            WHERE   metadata_property_id IN ( ? ) ";
-			
+
 			if (commencePathId != 0)
 				query += "                                           AND   commence_path_id = ?  ";
-			
+
 			query += "                                                        ) "
 					+ "              OR metadata_extraction_rule_id NOT IN (SELECT id "
 					+ "                                                     FROM "
@@ -342,76 +305,74 @@ public class DataManager {
 
 			PreparedStatement deleteIdentifiedDocInstanceStmt = conn.prepareStatement(query);
 			deleteIdentifiedDocInstanceStmt.setInt(1, documentId);
-			
-			String metadataPropertyIdList = "" + metadataPropertyIds.get(0);			
-			for (int i=1; i < metadataPropertyIds.size(); i++)
+
+			String metadataPropertyIdList = "" + metadataPropertyIds.get(0);
+			for (int i = 1; i < metadataPropertyIds.size(); i++)
 				metadataPropertyIdList += "," + metadataPropertyIds.get(i);
-			
+
 			deleteIdentifiedDocInstanceStmt.setString(2, metadataPropertyIdList);
-			
+
 			if (commencePathId != 0)
 				deleteIdentifiedDocInstanceStmt.setInt(3, commencePathId);
-			
+
 			deleteIdentifiedDocInstanceStmt.execute();
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("removeMetadataValues");
 		}
 	}
-	
-	public static void addMetadataValues(ArrayList<IdentifiedDocInstance> identifiedDocInstances, int documentId, int metadataPropertyId) {
+
+	public static void addMetadataValues(ArrayList<IdentifiedDocInstance> identifiedDocInstances, int documentId,
+			int metadataPropertyId) {
 		try {
 			Connection conn = ConnectionManager.getConnection("addMetadataValues");
-			
-			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement("DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ? AND metadata_extraction_rule_id in (select id from metadata_extraction_rule where metadata_property_id = ?)");
-			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
-			
+
+			PreparedStatement deleteMetadataValuestmt = conn.prepareStatement(
+					"DELETE FROM Metadata_Value WHERE document_id = ? AND identified_document_instance_id = ? AND metadata_extraction_rule_id in (select id from metadata_extraction_rule where metadata_property_id = ?)");
+			PreparedStatement insertMetadataValueStmt = conn.prepareStatement(
+					"INSERT INTO Metadata_Value (identified_document_instance_id,value,metadata_extraction_rule_id,document_id) VALUES (?,?,?,?)");
+
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-				
+
 				for (MetadataValue metadataValue : identifiedDocInstance.getMetadataValues()) {
 					if (metadataValue.getMetadataExtractionRule() != null) {
 						deleteMetadataValuestmt.setInt(1, documentId);
 						deleteMetadataValuestmt.setLong(2, identifiedDocInstance.getId());
 						deleteMetadataValuestmt.setInt(3, metadataPropertyId);
-						
+
 						insertMetadataValueStmt.setLong(1, identifiedDocInstance.getId());
 						insertMetadataValueStmt.setString(2, metadataValue.getValue());
 						insertMetadataValueStmt.setInt(3, metadataValue.getMetadataExtractionRule().getId());
-						insertMetadataValueStmt.setInt(4, documentId);	
+						insertMetadataValueStmt.setInt(4, documentId);
 						try {
 							deleteMetadataValuestmt.execute();
 							insertMetadataValueStmt.execute();
+						} catch (SQLException e) {
+							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues ("
+									+ identifiedDocInstance.getId() + "," + metadataValue.getValue() + ","
+									+ metadataValue.getMetadataExtractionRule().getId() + "," + documentId + ")");
 						}
-						catch (SQLException e) {
-							System.err.println(e.getClass().getName() + ":" + e.getMessage() + " in addMetadataValues (" + identifiedDocInstance.getId() + "," + metadataValue.getValue() + "," + metadataValue.getMetadataExtractionRule().getId() + "," + documentId + ")");
-						}
-						//insertMetadataValueStmt.addBatch();
+						// insertMetadataValueStmt.addBatch();
 					}
 				}
-				
-				
+
 			}
-			//insertMetadataValueStmt.executeBatch();
-		}
-		catch (SQLException e) {
+			// insertMetadataValueStmt.executeBatch();
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("addMetadataValues");
 		}
 	}
 
-	
 	public static ArrayList<String> getLogicalOperators() {
 		ArrayList<String> logicalOperators = new ArrayList<String>();
 		logicalOperators.add("And");
 		logicalOperators.add("Or");
 		return logicalOperators;
 	}
-	
+
 	public static ArrayList<String> getAttributes() {
 		ArrayList<String> attributes = new ArrayList<String>();
 		attributes.add("Filename");
@@ -437,40 +398,43 @@ public class DataManager {
 		sources.add("Default");
 		return sources;
 	}
-	
-	//public static IdentifiedDocInstances getIdentifiedDocInstances(Document document) {
-	//	return getIdentifiedDocInstances(document,null);
-	//}	
 
-	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath, boolean onlyNew) {
-		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": Step 1 of 3 Getting identified document instances");
-		if (commencePath!=null && commencePath.getId()==0)
+	// public static IdentifiedDocInstances getIdentifiedDocInstances(Document
+	// document) {
+	// return getIdentifiedDocInstances(document,null);
+	// }
+
+	public static IdentifiedDocInstances getIdentifiedDocInstances(Document document, CommencePath commencePath,
+			boolean onlyNew) {
+		System.out.println(Util.getTimeStamp() + "DOC-" + document.getId()
+				+ ": Step 1 of 3 Getting identified document instances");
+		if (commencePath != null && commencePath.getId() == 0)
 			commencePath = null;
-		
+
 		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();
 		try {
 			Connection conn = ConnectionManager.getConnection("getIdentifiedDocInstances");
-			
+
 			String query = "SELECT id, server, volume, path, name, extension, snapshot_deleted from Identified_Document_Instance where document_id = ? AND snapshot_deleted is null";
 			if (commencePath != null)
 				query += " AND volume + '/' + ISNULL(path,'') LIKE ?";
 			if (onlyNew)
 				query += " AND snapshot=" + LATEST_SNAPSHOT;
-				
+
 			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement(query);
 			selectIdentifiedDocumentInstanceStmt.setInt(1, document.getId());
 			if (commencePath != null)
 				selectIdentifiedDocumentInstanceStmt.setString(2, commencePath.getActualPath() + "%");
-			
-			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();				
-			
+
+			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();
+
 			while (rs.next()) {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				identifiedDocInstance.setId(rs.getLong(1));
 				identifiedDocInstance.setServer(rs.getString(2) == null ? null : rs.getString(2).trim());
 				identifiedDocInstance.setVolume(rs.getString(3) == null ? null : rs.getString(3).trim());
 				identifiedDocInstance.setPath(rs.getString(4) == null ? null : rs.getString(4).trim());
-				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());	
+				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());
 				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
 				identifiedDocInstance.setSnapshotDeleted(rs.getInt(7));
 				identifiedDocInstance.setNew(false);
@@ -479,48 +443,43 @@ public class DataManager {
 					identifiedDocInstance.setCommencePath(commencePath);
 				else {
 					for (CommencePath docCommencePath : document.getCommencePaths()) {
-						if (docCommencePath.getId()==0)
+						if (docCommencePath.getId() == 0)
 							continue;
-						if (identifiedDocInstance.getVolumePath().toUpperCase().startsWith(docCommencePath.getActualPath().toUpperCase())) {
+						if (identifiedDocInstance.getVolumePath().toUpperCase()
+								.startsWith(docCommencePath.getActualPath().toUpperCase())) {
 							identifiedDocInstance.setCommencePath(docCommencePath);
 							break;
 						}
-						System.out.println(Util.getTimeStamp() + "DOC-" + document.getId() + ": No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+						System.out.println(
+								Util.getTimeStamp() + "DOC-" + document.getId() + ": No matching commence path: "
+										+ document.getName() + " " + identifiedDocInstance.getName());
 					}
 				}
-				
+
 				identifiedDocInstances.add(identifiedDocInstance);
-				
-				if (identifiedDocInstance.getSnapshotDeleted()==0)
+
+				if (identifiedDocInstance.getSnapshotDeleted() == 0)
 					identifiedDocInstances.getLatestSnapshotInstances().add(identifiedDocInstance);
 			}
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getIdentifiedDocInstances");
 		}
-		
+
 		return identifiedDocInstances;
 	}
-	
+
 	public static IdentifiedDocInstances getIdentifiedDocInstancesWithMetadataValues(int documentId) {
 		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();
 		try {
 			Connection conn = ConnectionManager.getConnection("getIdentifiedDocInstances");
-			
-			String query = ""
-					+ "SELECT identified_document_instance.id, "
-					+ "       identified_document_instance.NAME, "
-					+ "       path, "
-					+ "       volume, "
-					+ "       metadata_property.id, "
-					+ "       metadata_property.NAME, "
-					+ "       metadata_extraction_rule.id, "
-					+ "       metadata_extraction_rule.source, "
-					+ "       metadata_value.value "
-					+ "FROM   identified_document_instance "
+
+			String query = "" + "SELECT identified_document_instance.id, "
+					+ "       identified_document_instance.NAME, " + "       path, " + "       volume, "
+					+ "       metadata_property.id, " + "       metadata_property.NAME, "
+					+ "       metadata_extraction_rule.id, " + "       metadata_extraction_rule.source, "
+					+ "       metadata_value.value " + "FROM   identified_document_instance "
 					+ "       LEFT JOIN metadata_value "
 					+ "              ON metadata_value.identified_document_instance_id = "
 					+ "                 identified_document_instance.id "
@@ -528,36 +487,33 @@ public class DataManager {
 					+ "                     identified_document_instance.document_id "
 					+ "       LEFT JOIN metadata_extraction_rule "
 					+ "              ON metadata_value.metadata_extraction_rule_id = "
-					+ "                 metadata_extraction_rule.id "
-					+ "       LEFT JOIN metadata_property "
+					+ "                 metadata_extraction_rule.id " + "       LEFT JOIN metadata_property "
 					+ "              ON metadata_extraction_rule.metadata_property_id = "
-					+ "                 metadata_property.id "
-					+ "WHERE  identified_document_instance.document_id = ? "
+					+ "                 metadata_property.id " + "WHERE  identified_document_instance.document_id = ? "
 					+ "  AND  identified_document_instance.snapshot_deleted IS NULL "
-					+ "ORDER  BY identified_document_instance_id, "
-					+ "          metadata_property_id";
-			
+					+ "ORDER  BY identified_document_instance_id, " + "          metadata_property_id";
+
 			PreparedStatement selectIdentifiedDocumentInstanceStmt = conn.prepareStatement(query);
 			selectIdentifiedDocumentInstanceStmt.setInt(1, documentId);
-			
-			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();				
-			
+
+			ResultSet rs = selectIdentifiedDocumentInstanceStmt.executeQuery();
+
 			Long preInstanceId = Long.valueOf(0);
 			IdentifiedDocInstance identifiedDocInstance = null;
 			while (rs.next()) {
-				
+
 				Long instanceId = rs.getLong(1);
-				if (!preInstanceId.equals(instanceId)) {				
+				if (!preInstanceId.equals(instanceId)) {
 					identifiedDocInstance = new IdentifiedDocInstance();
 					identifiedDocInstance.setId(rs.getLong(1));
-					identifiedDocInstance.setName(rs.getString(2) == null ? null : rs.getString(2).trim());	
+					identifiedDocInstance.setName(rs.getString(2) == null ? null : rs.getString(2).trim());
 					identifiedDocInstance.setPath(rs.getString(3) == null ? null : rs.getString(3).trim());
 					identifiedDocInstance.setVolume(rs.getString(4) == null ? null : rs.getString(4).trim());
 					identifiedDocInstance.setNew(false);
 					identifiedDocInstances.add(identifiedDocInstance);
 					preInstanceId = instanceId;
 				}
-				
+
 				MetadataValue metadataValue = new MetadataValue();
 				MetadataProperty metadataProperty = new MetadataProperty();
 				MetadataExtractionRule metadataExtractionRule = new MetadataExtractionRule();
@@ -568,16 +524,14 @@ public class DataManager {
 				metadataValue.setMetadataExtractionRule(metadataExtractionRule);
 				metadataValue.setSource(rs.getString(8));
 				metadataValue.setValue(rs.getString(9));
-				identifiedDocInstance.getMetadataValues().add(metadataValue);				
+				identifiedDocInstance.getMetadataValues().add(metadataValue);
 			}
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getIdentifiedDocInstances");
 		}
-		
+
 		return identifiedDocInstances;
 	}
 
@@ -603,29 +557,29 @@ public class DataManager {
 			metadataExtractionRuleIds.add(metadataExtractionRule.getId());
 		removeMetadataExtractionRule(metadataExtractionRuleIds);
 	}
-	
+
 	public static void removeMetadataExtractionRule(HashSet<Integer> metadataExtractionRuleIds) {
-		try {					
+		try {
 			Connection conn = ConnectionManager.getConnection("removeMetadataExtractionRule");
-			PreparedStatement deleteMetadataExtractionRuleStmt = conn.prepareStatement("DELETE FROM Metadata_Extraction_Rule WHERE id = ?");
+			PreparedStatement deleteMetadataExtractionRuleStmt = conn
+					.prepareStatement("DELETE FROM Metadata_Extraction_Rule WHERE id = ?");
 			for (Integer metadataExtractionRuleId : metadataExtractionRuleIds) {
 				deleteMetadataExtractionRuleStmt.setInt(1, metadataExtractionRuleId);
 				deleteMetadataExtractionRuleStmt.addBatch();
 			}
 			deleteMetadataExtractionRuleStmt.executeBatch();
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("removeMetadataExtractionRule");
 		}
 	}
-	
+
 	public static void updateMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules) {
-		try {					
+		try {
 			Connection conn = ConnectionManager.getConnection("updateMetadataExtractionRule");
-			PreparedStatement updateMetadataExtractionRuleStmt = conn.prepareStatement("UPDATE Metadata_Extraction_Rule SET source=?, bl_rule=?, regex=?, capturing_group=?, default_value=?, priority=? WHERE ID = ?");
+			PreparedStatement updateMetadataExtractionRuleStmt = conn.prepareStatement(
+					"UPDATE Metadata_Extraction_Rule SET source=?, bl_rule=?, regex=?, capturing_group=?, default_value=?, priority=? WHERE ID = ?");
 			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
 				updateMetadataExtractionRuleStmt.setString(1, metadataExtractionRule.getSource());
 				updateMetadataExtractionRuleStmt.setString(2, metadataExtractionRule.getBlRule());
@@ -637,21 +591,20 @@ public class DataManager {
 				updateMetadataExtractionRuleStmt.addBatch();
 			}
 			updateMetadataExtractionRuleStmt.executeBatch();
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("updateMetadataExtractionRule");
 		}
 	}
-	
 
-	
-	public static void addMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules, int commencePathId, int metadataPropertyId, boolean isDefault) {
-		try {					
+	public static void addMetadataExtractionRule(ArrayList<MetadataExtractionRule> metadataExtractionRules,
+			int commencePathId, int metadataPropertyId, boolean isDefault) {
+		try {
 			Connection conn = ConnectionManager.getConnection("addMetadataExtractionRule");
-			PreparedStatement insertMetadataExtractionRuleStmt = conn.prepareStatement("INSERT INTO Metadata_Extraction_Rule (commence_path_id,metadata_property_id,source,bl_rule,regex,capturing_group,default_value,priority,is_default) VALUES (?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement insertMetadataExtractionRuleStmt = conn.prepareStatement(
+					"INSERT INTO Metadata_Extraction_Rule (commence_path_id,metadata_property_id,source,bl_rule,regex,capturing_group,default_value,priority,is_default) VALUES (?,?,?,?,?,?,?,?,?)",
+					Statement.RETURN_GENERATED_KEYS);
 			for (MetadataExtractionRule metadataExtractionRule : metadataExtractionRules) {
 				insertMetadataExtractionRuleStmt.setInt(1, commencePathId);
 				insertMetadataExtractionRuleStmt.setInt(2, metadataPropertyId);
@@ -663,40 +616,32 @@ public class DataManager {
 				insertMetadataExtractionRuleStmt.setInt(8, metadataExtractionRule.getPriority());
 				insertMetadataExtractionRuleStmt.setBoolean(9, isDefault);
 				insertMetadataExtractionRuleStmt.execute();
-				
+
 				ResultSet metadataExtractionRuleIdRs = insertMetadataExtractionRuleStmt.getGeneratedKeys();
 				if (metadataExtractionRuleIdRs != null && metadataExtractionRuleIdRs.next()) {
 					metadataExtractionRule.setId(metadataExtractionRuleIdRs.getInt(1));
 				}
 			}
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("addMetadataExtractionRule");
 		}
-		
+
 	}
 
 	public static ArrayList<Document> getDocumentStatusReport() {
 		ArrayList<Document> documents = new ArrayList<Document>();
-		try {	
-			Connection conn = ConnectionManager.getConnection("getDocumentStatusReport");	
-			
-			String query =    "SELECT Team.id, "
-							+ "       Team.department, "
-							+ "       Team.NAME, "
-							+ "       Document.id, "
-							+ "       Document.NAME, "
-							+ "       Document_snapshot_count.snapshot, "
-							+ "       Document_snapshot_count.file_count "
-							+ "FROM   Document_snapshot_count "
-							+ "       LEFT JOIN Document "
-							+ "              ON Document.id = Document_snapshot_count.document_id "
-							+ "       LEFT JOIN Team "
-							+ "              ON Document.team_id = Team.id "
-							+ "ORDER  BY Document.id, Document_snapshot_count.snapshot";
+		try {
+			Connection conn = ConnectionManager.getConnection("getDocumentStatusReport");
+
+			String query = "SELECT Team.id, " + "       Team.department, " + "       Team.NAME, "
+					+ "       Document.id, " + "       Document.NAME, " + "       Document_snapshot_count.snapshot, "
+					+ "       Document_snapshot_count.file_count " + "FROM   Document_snapshot_count "
+					+ "       LEFT JOIN Document "
+					+ "              ON Document.id = Document_snapshot_count.document_id " + "       LEFT JOIN Team "
+					+ "              ON Document.team_id = Team.id "
+					+ "ORDER  BY Document.id, Document_snapshot_count.snapshot";
 
 			PreparedStatement stmt = conn.prepareStatement(query);
 			ResultSet rs = stmt.executeQuery();
@@ -714,47 +659,42 @@ public class DataManager {
 					doc.setName(rs.getString(5));
 					doc.getIdentifiedFilesCounts().put(rs.getInt(6), rs.getInt(7));
 					documents.add(doc);
-					preDoc=doc;
-				}
-				else {
+					preDoc = doc;
+				} else {
 					preDoc.getIdentifiedFilesCounts().put(rs.getInt(6), rs.getInt(7));
 				}
-				 		
-			}			
-		}
-		catch (SQLException e) {
+
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getDocumentStatusReport");
-		}		
+		}
 		return documents;
 	}
-	
+
 	public static void addSnippet(int documentId, IdentifiedDocInstances identifiedDocInstances) {
 		try {
 			Connection conn = ConnectionManager.getConnection("addSnippet");
-			
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet,snapshot_deleted,snapshot) SELECT id,name,path,volume,extension,server,?,?,snapshot_deleted,snapshot FROM All_Document_Instance WHERE id = ?");
-									
+
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement(
+					"INSERT INTO Identified_Document_Instance_Snippet (id,name,path,volume,extension,server,document_id,snippet,snapshot_deleted,snapshot) SELECT id,name,path,volume,extension,server,?,?,snapshot_deleted,snapshot FROM All_Document_Instance WHERE id = ?");
+
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				insertIdentifiedDocInstancStmt.setInt(1, documentId);
 				insertIdentifiedDocInstancStmt.setString(2, identifiedDocInstance.getSnippet());
 				insertIdentifiedDocInstancStmt.setLong(3, identifiedDocInstance.getId());
 				insertIdentifiedDocInstancStmt.addBatch();
 			}
-			
-			insertIdentifiedDocInstancStmt.executeBatch();		
-		}
-		catch (SQLException e) {				
+
+			insertIdentifiedDocInstancStmt.executeBatch();
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("addSnippet");
-		}	
+		}
 	}
 
-	
 	public static void removeIdentifiedDocInstances(int documentId, ArrayList<Long> removedIdentifiedFileIds) {
 		try {
 			Connection conn = ConnectionManager.getConnection("removeIdentifiedDocInstances");
@@ -784,104 +724,101 @@ public class DataManager {
 			ConnectionManager.close("removeIdentifiedDocInstances");
 		}
 	}
-	
-	
-	public static void addIdentifiedDocInstances(Document document, ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
+
+	public static void addIdentifiedDocInstances(Document document,
+			ArrayList<IdentifiedDocInstance> identifiedDocInstances) {
 		try {
-			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");		
-						
-			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement("INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
-			PreparedStatement insertMetadataValueStmt = conn.prepareStatement("INSERT INTO Metadata_Value (identified_document_instance_id,value,document_id) VALUES (?,?,?)");
-							
+			Connection conn = ConnectionManager.getConnection("addIdentifiedDocInstances");
+
+			PreparedStatement insertIdentifiedDocInstancStmt = conn.prepareStatement(
+					"INSERT INTO Identified_Document_Instance (id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,document_id) SELECT id,name,extension,path,server,volume,owner,size,ctime,mtime,atime,digest,snapshot,snapshot_deleted,? FROM All_Document_Instance WHERE id = ?");
+			PreparedStatement insertMetadataValueStmt = conn.prepareStatement(
+					"INSERT INTO Metadata_Value (identified_document_instance_id,value,document_id) VALUES (?,?,?)");
+
 			for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
 				insertIdentifiedDocInstancStmt.setInt(1, document.getId());
 				insertIdentifiedDocInstancStmt.setLong(2, identifiedDocInstance.getId());
 				insertIdentifiedDocInstancStmt.addBatch();
-				
+
 				if (document.isIncludeLinkedFile() && identifiedDocInstance.getMetadataValues().size() > 0) {
 					for (MetadataValue metadataValue : identifiedDocInstance.getMetadataValues()) {
 						insertMetadataValueStmt.setLong(1, identifiedDocInstance.getId());
 						insertMetadataValueStmt.setString(2, metadataValue.getValue());
-						insertMetadataValueStmt.setInt(3, document.getId());	
+						insertMetadataValueStmt.setInt(3, document.getId());
 						insertMetadataValueStmt.addBatch();
 					}
 				}
 			}
-			
+
 			insertIdentifiedDocInstancStmt.executeBatch();
 			insertMetadataValueStmt.executeBatch();
-			
-		}
-		catch (SQLException e) {				
+
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("addIdentifiedDocInstances");
 		}
 	}
-	
-	
-	
-	public static IdentifiedDocInstances getDocInstances(Document document, boolean fromSnippet, boolean skipIdentificationRules) throws SQLException {
-		
-		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();		
+
+	public static IdentifiedDocInstances getDocInstances(Document document, boolean fromSnippet,
+			boolean skipIdentificationRules) throws SQLException {
+
+		IdentifiedDocInstances identifiedDocInstances = new IdentifiedDocInstances();
 		String query = "SELECT ";
-		
+
 		if (fromSnippet)
-			query += "id, name, path, volume, digest, extension, server, snapshot_deleted FROM Identified_Document_Instance_Snippet WHERE document_id=" + document.getId() + " ";
-		else {		
+			query += "id, name, path, volume, digest, extension, server, snapshot_deleted FROM Identified_Document_Instance_Snippet WHERE document_id="
+					+ document.getId() + " ";
+		else {
 			query += "id, name, path, volume, digest, extension, server, snapshot_deleted FROM All_Document_Instance WHERE (";
 			for (CommencePath commencePath : document.getCommencePaths()) {
 				query += "volume + '/' + ISNULL(path,'') like '" + commencePath.getActualPath() + "/%' OR ";
 				query += "volume + '/' + ISNULL(path,'') = '" + commencePath.getActualPath() + "' OR ";
-			}		
+			}
 			query += "1=0) ";
-			
-			//TODO: IG rules from DB
-			
+
+			// TODO: IG rules from DB
+
 			if (document.isOfficeDoc()) {
-			
-				//extension
+
+				// extension
 				query += "AND extension in ('doc','docx','dot','docm','dotx','dotm','docb',"
-					  +  "'xls','xlt','xlm','xlsx','xlsm','xltx','xltm','xlsb','xla','xll',"
-					  +  "'xlw','ppt','pot','pps','pptx','pptm','potx','potm','ppam','ppsx',"
-					  +  "'ppsm','sldx','sldm','VSD','VST','VSW','VDX','VSX','VTX','VSDX',"
-					  +  "'VSDM','VSSX','VSSM','VSTX','VSTM','VSL','pdf','csv'";
-				
+						+ "'xls','xlt','xlm','xlsx','xlsm','xltx','xltm','xlsb','xla','xll',"
+						+ "'xlw','ppt','pot','pps','pptx','pptm','potx','potm','ppam','ppsx',"
+						+ "'ppsm','sldx','sldm','VSD','VST','VSW','VDX','VSX','VTX','VSDX',"
+						+ "'VSDM','VSSX','VSSM','VSTX','VSTM','VSL','pdf','csv'";
+
 				if (document.getTeam().getName().contains("Training")) {
 					query += ",'afc','wav','mp3','aif','rm','mid','aob','3gp','aiff','aac',"
-						  +  "'ape','au','flac','m4a','m4p','ra','raw','wma','mkv','flv','vob',"
-						  +  "'avi','mov','qt','wmv','rmvb','asf','mpg','mpeg','mp4',',mpe',"
-						  +  "'mpv','m2v','m4v','3g2','mxf','jpg','jpeg','tif','tiff','gif',"
-						  +  "'bmp','png','img','psd','cpt','ai','svg','ico'";
+							+ "'ape','au','flac','m4a','m4p','ra','raw','wma','mkv','flv','vob',"
+							+ "'avi','mov','qt','wmv','rmvb','asf','mpg','mpeg','mp4',',mpe',"
+							+ "'mpv','m2v','m4v','3g2','mxf','jpg','jpeg','tif','tiff','gif',"
+							+ "'bmp','png','img','psd','cpt','ai','svg','ico'";
 				}
 				query += ") ";
-			
+
 			}
 
-			//tilde
+			// tilde
 			query += " AND name not like '~$%' ";
-			
-			if (document.isIdentifyDeltaOnly()){
+
+			if (document.isIdentifyDeltaOnly()) {
 				query += " AND snapshot = " + LATEST_SNAPSHOT + " ";
 			}
-			
-			
-			
-			//retention
+
+			// retention
 			if (document.getIgDocClass().equals("General Document"))
 				query += "AND mtime > DATEADD(YEAR,-7,GETDATE())";
 		}
 
-		
 		if (!skipIdentificationRules && document.getIdentificationRules().size() != 0) {
 			query += " AND (";
 			for (IdentificationRule identificationRule : document.getIdentificationRules()) {
 				if (identificationRule.getPriority() != 1 && identificationRule.getLogicalOperator() != null)
 					query += identificationRule.getLogicalOperator() + " ";
-				
+
 				query += identificationRule.getLeftParen();
-				
+
 				if (identificationRule.getAttribute().equals("Filename"))
 					query += "REPLACE([name],'.'+extension,'') ";
 				else if (identificationRule.getAttribute().equals("File Path"))
@@ -890,37 +827,37 @@ public class DataManager {
 					query += "extension ";
 				else if (identificationRule.getAttribute().equals("Content"))
 					query += "snippet ";
-								
+
 				if (identificationRule.getRelationalOperator().equals("Equals"))
 					query += "= '" + identificationRule.getValue() + "'";
-				else if (identificationRule.getRelationalOperator().equals("Not equals"))				
+				else if (identificationRule.getRelationalOperator().equals("Not equals"))
 					query += "!= '" + identificationRule.getValue() + "'";
 				else if (identificationRule.getRelationalOperator().equals("Contains"))
 					query += "LIKE '%" + identificationRule.getValue() + "%'";
 				else if (identificationRule.getRelationalOperator().equals("Not contains"))
-					query += "NOT LIKE '%" + identificationRule.getValue() + "%'";	
-				
+					query += "NOT LIKE '%" + identificationRule.getValue() + "%'";
+
 				query += identificationRule.getRightParen() + " ";
 			}
 
 			query += ")";
-		}		
-		
+		}
+
 		query += " ORDER BY snapshot, snapshot_deleted";
-				
+
 		try {
-			Connection conn = ConnectionManager.getConnection("getDocInstances");	
+			Connection conn = ConnectionManager.getConnection("getDocInstances");
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);	
-			
-			HashMap<String,Integer> digests = new HashMap<String,Integer>();
-			
+			ResultSet rs = stmt.executeQuery(query);
+
+			// HashMap<String,Integer> digests = new HashMap<String,Integer>();
+
 			ArrayList<IdentifiedDocInstance> pdfInstances = new ArrayList<IdentifiedDocInstance>();
-			
+
 			while (rs.next()) {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
-				identifiedDocInstance.setId(rs.getLong(1));	
-				identifiedDocInstance.setName(rs.getNString(2) == null ? null : rs.getNString(2).trim());	
+				identifiedDocInstance.setId(rs.getLong(1));
+				identifiedDocInstance.setName(rs.getNString(2) == null ? null : rs.getNString(2).trim());
 				identifiedDocInstance.setPath(rs.getNString(3) == null ? null : rs.getNString(3).trim());
 				identifiedDocInstance.setVolume(rs.getString(4) == null ? null : rs.getString(4).trim());
 				identifiedDocInstance.setDigest(rs.getString(5) == null ? null : rs.getString(5).trim());
@@ -928,167 +865,148 @@ public class DataManager {
 				identifiedDocInstance.setServer(rs.getString(7) == null ? null : rs.getString(7).trim());
 				identifiedDocInstance.setSnapshotDeleted(rs.getInt(8));
 				identifiedDocInstance.setDocument(document);
-				
-				
-				if (fromSnippet ||
-					!digests.containsKey(identifiedDocInstance.getDigest()) || 
-					 digests.get(identifiedDocInstance.getDigest()) > 0) {
-					
-					
-					//Ignore PDF
-					if (!fromSnippet && document.isNoPdf()) {
-						if (identifiedDocInstance.getExtension().toUpperCase().equals("PDF"))	{	
-							pdfInstances.add(identifiedDocInstance);
-						}
-					}
 
-					boolean hasCommencePath = false;
-					
-					for (CommencePath commencePath : document.getCommencePaths()) {						
-						if (identifiedDocInstance.getVolumePath().toUpperCase().equals(commencePath.getActualPath().toUpperCase()) || identifiedDocInstance.getVolumePath().toUpperCase().startsWith(commencePath.getActualPath().toUpperCase() + "/")) {
-							identifiedDocInstance.setCommencePath(commencePath);
-							hasCommencePath = true;
-							break;
-						}
+				// if (fromSnippet ||
+				// !digests.containsKey(identifiedDocInstance.getDigest()) ||
+				// digests.get(identifiedDocInstance.getDigest()) > 0) {
+
+				// Ignore PDF
+				if (!fromSnippet && document.isNoPdf()) {
+					if (identifiedDocInstance.getExtension().toUpperCase().equals("PDF")) {
+						pdfInstances.add(identifiedDocInstance);
 					}
-					
-					if (!hasCommencePath) {
-						String log = identifiedDocInstance.getFullyQualifiedPath() + " has no matching commence path :";
-						for (CommencePath commencePath : document.getCommencePaths())
-							log += commencePath.getActualPath() + ";";
-						System.out.println(Util.getTimeStamp() + log);
-					}		
-					
-					if ((digests.containsKey(identifiedDocInstance.getDigest()) &&
-						identifiedDocInstance.getSnapshotDeleted() == 0) ||
-						!digests.containsKey(identifiedDocInstance.getDigest())) {
-						digests.put(identifiedDocInstance.getDigest(),Integer.valueOf(identifiedDocInstance.getSnapshotDeleted()));
-					}
-					
-					identifiedDocInstances.add(identifiedDocInstance);	
-					
-					if (identifiedDocInstance.getSnapshotDeleted() == 0)
-						identifiedDocInstances.getLatestSnapshotInstances().add(identifiedDocInstance);
-					
 				}
 
+				boolean hasCommencePath = false;
+
+				for (CommencePath commencePath : document.getCommencePaths()) {
+					if (identifiedDocInstance.getVolumePath().toUpperCase()
+							.equals(commencePath.getActualPath().toUpperCase())
+							|| identifiedDocInstance.getVolumePath().toUpperCase()
+									.startsWith(commencePath.getActualPath().toUpperCase() + "/")) {
+						identifiedDocInstance.setCommencePath(commencePath);
+						hasCommencePath = true;
+						break;
+					}
+				}
+
+				if (!hasCommencePath) {
+					String log = identifiedDocInstance.getFullyQualifiedPath() + " has no matching commence path :";
+					for (CommencePath commencePath : document.getCommencePaths())
+						log += commencePath.getActualPath() + ";";
+					System.out.println(Util.getTimeStamp() + log);
+				}
+
+//				if ((digests.containsKey(identifiedDocInstance.getDigest())
+//						&& identifiedDocInstance.getSnapshotDeleted() == 0)
+//						|| !digests.containsKey(identifiedDocInstance.getDigest())) {
+//					digests.put(identifiedDocInstance.getDigest(),
+//							Integer.valueOf(identifiedDocInstance.getSnapshotDeleted()));
+//				}
+
+				identifiedDocInstances.add(identifiedDocInstance);
+
+				if (identifiedDocInstance.getSnapshotDeleted() == 0)
+					identifiedDocInstances.getLatestSnapshotInstances().add(identifiedDocInstance);
+
 			}
-				
+
+			// }
+
 			ArrayList<IdentifiedDocInstance> tobeRemovedPdf = new ArrayList<IdentifiedDocInstance>();
-			
-			//noPdf
+
+			// noPdf
 			if (!fromSnippet && document.isNoPdf()) {
 				if (pdfInstances.size() > 0) {
 					for (IdentifiedDocInstance pdfInstance : pdfInstances) {
 						for (IdentifiedDocInstance identifiedDocInstance : identifiedDocInstances) {
-							if (pdfInstance.getServer().equals(identifiedDocInstance.getServer()) &&
-								pdfInstance.getVolume().equals(identifiedDocInstance.getVolume()) &&
-								pdfInstance.getPath().equals(identifiedDocInstance.getPath()) &&
-								pdfInstance.getNameWithoutExtension().equals(identifiedDocInstance.getNameWithoutExtension()) &&
-								!identifiedDocInstance.getExtension().toUpperCase().equals("PDF") &&
-								identifiedDocInstance.getSnapshotDeleted() == 0) {
-									tobeRemovedPdf.add(pdfInstance);
+							if (pdfInstance.getServer().equals(identifiedDocInstance.getServer())
+									&& pdfInstance.getVolume().equals(identifiedDocInstance.getVolume())
+									&& pdfInstance.getPath().equals(identifiedDocInstance.getPath())
+									&& pdfInstance.getNameWithoutExtension()
+											.equals(identifiedDocInstance.getNameWithoutExtension())
+									&& !identifiedDocInstance.getExtension().toUpperCase().equals("PDF")
+									&& identifiedDocInstance.getSnapshotDeleted() == 0) {
+								tobeRemovedPdf.add(pdfInstance);
 							}
 						}
 					}
 				}
 			}
-			
+
 			identifiedDocInstances.removeAll(tobeRemovedPdf);
 			identifiedDocInstances.getLatestSnapshotInstances().removeAll(tobeRemovedPdf);
-			identifiedDocInstances.setDigests(digests);
-		}
-		catch (SQLException e) {
+			//identifiedDocInstances.setDigests(digests);
+		} catch (SQLException e) {
 			System.err.println(Util.getTimeStamp() + e.getMessage() + " - " + query);
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getDocInstances");
 		}
-		
+
 		return identifiedDocInstances;
 	}
 
 	public static void removeSnippet(int documentId) {
 		try {
 			Connection conn = ConnectionManager.getConnection("removeSnippet");
-			PreparedStatement deleteSnippetStmt = conn.prepareStatement("DELETE FROM Identified_Document_Instance_Snippet WHERE document_id = ?");
-			deleteSnippetStmt.setInt(1, documentId);	
+			PreparedStatement deleteSnippetStmt = conn
+					.prepareStatement("DELETE FROM Identified_Document_Instance_Snippet WHERE document_id = ?");
+			deleteSnippetStmt.setInt(1, documentId);
 			deleteSnippetStmt.execute();
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("removeSnippet");
 		}
 	}
 
-	public static ArrayList<DocumentClass> getDocumentClasses() {		
-		ArrayList<DocumentClass> documentClasses = new ArrayList<DocumentClass>();		
-		try {	
-			Connection conn = ConnectionManager.getConnection("getDocumentClasses");	
-			String query = ""
-					+ "SELECT id, "
-					+ "       name "
-					+ "FROM   document_class "
-					+ "WHERE  parent_id != 124 AND parent_id != 0"
-					+ "ORDER  BY id";
+	public static ArrayList<DocumentClass> getDocumentClasses() {
+		ArrayList<DocumentClass> documentClasses = new ArrayList<DocumentClass>();
+		try {
+			Connection conn = ConnectionManager.getConnection("getDocumentClasses");
+			String query = "" + "SELECT id, " + "       name " + "FROM   document_class "
+					+ "WHERE  parent_id != 124 AND parent_id != 0" + "ORDER  BY id";
 
 			PreparedStatement selectDocumentClassStmt = conn.prepareStatement(query);
 			ResultSet selectDocumentClassRS = selectDocumentClassStmt.executeQuery();
-			while (selectDocumentClassRS.next()) {					
+			while (selectDocumentClassRS.next()) {
 				DocumentClass documentClass = new DocumentClass();
 				documentClass.setId(selectDocumentClassRS.getInt(1));
-				documentClass.setName(selectDocumentClassRS.getString(2));	
+				documentClass.setName(selectDocumentClassRS.getString(2));
 				documentClasses.add(documentClass);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getDocumentClasses");
-		}		
+		}
 		return documentClasses;
 	}
 
 	public static ArrayList<IdentifiedDocInstance> getIntraTeamDuplicates() {
-		ArrayList<IdentifiedDocInstance> duplicates = new ArrayList<IdentifiedDocInstance>();		
-		try {	
-			Connection conn = ConnectionManager.getConnection("getIntraTeamDuplicates");	
-			String query = ""
-					    + "SELECT Team.id, "
-						+ "       Team.name, "
-						+ "       Document.id, "
-						+ "       Document.name, "
-						+ "       Duplicates.digest, "
-						+ "       Identified_document_instance.id, "
-						+ "       Identified_document_instance.NAME, "
-						+ "       path, "
-						+ "       volume "
-						+ "FROM   Identified_document_instance "
-						+ "       LEFT JOIN Document "
-						+ "              ON Identified_document_instance.document_id = Document.id "
-						+ "	      LEFT JOIN Team "
-						+ "	             ON Document.team_id = Team.id "
-						+ "       INNER JOIN (SELECT team_id, "
-						+ "                          digest "
-						+ "                   FROM   Identified_document_instance "
-						+ "                          LEFT JOIN Document "
-						+ "                                 ON Identified_document_instance.document_id = "
-						+ "                                    Document.id "
-						+ "                   GROUP  BY team_id, "
-						+ "                             digest "
-						+ "                   HAVING Count(*) > 1) Duplicates "
-						+ "               ON Document.team_id = Duplicates.team_id "
-						+ "                  AND Identified_document_instance.digest = Duplicates.digest "
-						+ "ORDER  BY Duplicates.team_id, "
-						+ "          Duplicates.digest";
-
+		ArrayList<IdentifiedDocInstance> duplicates = new ArrayList<IdentifiedDocInstance>();
+		try {
+			Connection conn = ConnectionManager.getConnection("getIntraTeamDuplicates");
+			String query = "" + "SELECT Team.id, " + "       Team.name, " + "       Document.id, "
+					+ "       Document.name, " + "       Duplicates.digest, "
+					+ "       Identified_document_instance.id, " + "       Identified_document_instance.NAME, "
+					+ "       path, " + "       volume " + "FROM   Identified_document_instance "
+					+ "       LEFT JOIN Document "
+					+ "              ON Identified_document_instance.document_id = Document.id "
+					+ "	      LEFT JOIN Team " + "	             ON Document.team_id = Team.id "
+					+ "       INNER JOIN (SELECT team_id, " + "                          digest "
+					+ "                   FROM   Identified_document_instance "
+					+ "                          LEFT JOIN Document "
+					+ "                                 ON Identified_document_instance.document_id = "
+					+ "                                    Document.id " + "                   GROUP  BY team_id, "
+					+ "                             digest " + "                   HAVING Count(*) > 1) Duplicates "
+					+ "               ON Document.team_id = Duplicates.team_id "
+					+ "                  AND Identified_document_instance.digest = Duplicates.digest "
+					+ "ORDER  BY Duplicates.team_id, " + "          Duplicates.digest";
 
 			PreparedStatement stmt = conn.prepareStatement(query);
 			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {					
+			while (rs.next()) {
 				IdentifiedDocInstance identifiedDocInstance = new IdentifiedDocInstance();
 				Document document = new Document();
 				Team team = new Team();
@@ -1104,125 +1022,94 @@ public class DataManager {
 				identifiedDocInstance.setPath(rs.getString(8));
 				identifiedDocInstance.setVolume(rs.getString(9));
 				duplicates.add(identifiedDocInstance);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getIntraTeamDuplicates");
-		}		
+		}
 		return duplicates;
 	}
-	
 
 	public static ArrayList<DocumentInstancePair> getInterTeamDuplicates() {
-		ArrayList<DocumentInstancePair> duplicates = new ArrayList<DocumentInstancePair>();		
-		try {	
-			Connection conn = ConnectionManager.getConnection("getInterTeamDuplicates");	
+		ArrayList<DocumentInstancePair> duplicates = new ArrayList<DocumentInstancePair>();
+		try {
+			Connection conn = ConnectionManager.getConnection("getInterTeamDuplicates");
 			System.out.println(Util.getTimeStamp() + " getting inter-team duplicate report");
-			String query = ""
-						+ "SELECT IDI1.digest, "
-						+ "       IDI1.team_id, "
-						+ "       IDI1.team_name, "
-						+ "       IDI1.document_id, "
-						+ "       IDI1.document_name, "
-						+ "       IDI1.id, "
-						+ "       IDI1.NAME, "
-						+ "       IDI1.path, "
-						+ "       IDI1.volume, "
-						+ "       IDI2.team_id, "
-						+ "       IDI2.team_name, "
-						+ "       IDI2.document_id, "
-						+ "       IDI2.document_name, "
-						+ "       IDI2.id, "
-						+ "       IDI2.NAME, "
-						+ "       IDI2.path, "
-						+ "       IDI2.volume "
-						+ "FROM   (SELECT Identified_document_instance.id, "
-						+ "               Identified_document_instance.document_id, "
-						+ "               Identified_document_instance.NAME, "
-						+ "               Identified_document_instance.path, "
-						+ "               Identified_document_instance.volume, "
-						+ "               Identified_document_instance.server, "
-						+ "               Identified_document_instance.digest, "
-						+ "               Document.team_id, "
-						+ "               Document.NAME AS document_name, "
-						+ "               Team.NAME     AS team_name "
-						+ "        FROM   Identified_document_instance "
-						+ "               LEFT JOIN Document "
-						+ "                      ON Identified_document_instance.document_id = Document.id "
-						+ "               LEFT JOIN Team "
-						+ "                      ON Document.team_id = Team.id "
-						+ "        WHERE  Identified_document_instance.snapshot_deleted IS NULL) AS IDI1, "
-						+ "       (SELECT Identified_document_instance.id, "
-						+ "               Identified_document_instance.document_id, "
-						+ "               Identified_document_instance.NAME, "
-						+ "               Identified_document_instance.path, "
-						+ "               Identified_document_instance.volume, "
-						+ "               Identified_document_instance.server, "
-						+ "               Identified_document_instance.digest, "
-						+ "               Document.team_id, "
-						+ "               Document.NAME AS document_name, "
-						+ "               Team.NAME     AS team_name "
-						+ "        FROM   Identified_document_instance "
-						+ "               LEFT JOIN Document "
-						+ "                      ON Identified_document_instance.document_id = Document.id "
-						+ "               LEFT JOIN Team "
-						+ "                      ON Document.team_id = Team.id "
-						+ "        WHERE  Identified_document_instance.snapshot_deleted IS NULL) AS IDI2 "
-						+ "WHERE  IDI1.digest = IDI2.digest "
-						+ "       AND IDI1.team_id != IDI2.team_id "
-						+ "ORDER  BY IDI1.digest, "
-						+ "          IDI1.team_id, "
-						+ "          IDI1.document_id, "
-						+ "          IDI1.id, "
-						+ "          IDI2.team_id, "
-						+ "          IDI2.document_id, "
-						+ "          IDI2.id";
+			String query = "" + "SELECT IDI1.digest, " + "       IDI1.team_id, " + "       IDI1.team_name, "
+					+ "       IDI1.document_id, " + "       IDI1.document_name, " + "       IDI1.id, "
+					+ "       IDI1.NAME, " + "       IDI1.path, " + "       IDI1.volume, " + "       IDI2.team_id, "
+					+ "       IDI2.team_name, " + "       IDI2.document_id, " + "       IDI2.document_name, "
+					+ "       IDI2.id, " + "       IDI2.NAME, " + "       IDI2.path, " + "       IDI2.volume "
+					+ "FROM   (SELECT Identified_document_instance.id, "
+					+ "               Identified_document_instance.document_id, "
+					+ "               Identified_document_instance.NAME, "
+					+ "               Identified_document_instance.path, "
+					+ "               Identified_document_instance.volume, "
+					+ "               Identified_document_instance.server, "
+					+ "               Identified_document_instance.digest, " + "               Document.team_id, "
+					+ "               Document.NAME AS document_name, " + "               Team.NAME     AS team_name "
+					+ "        FROM   Identified_document_instance " + "               LEFT JOIN Document "
+					+ "                      ON Identified_document_instance.document_id = Document.id "
+					+ "               LEFT JOIN Team " + "                      ON Document.team_id = Team.id "
+					+ "        WHERE  Identified_document_instance.snapshot_deleted IS NULL) AS IDI1, "
+					+ "       (SELECT Identified_document_instance.id, "
+					+ "               Identified_document_instance.document_id, "
+					+ "               Identified_document_instance.NAME, "
+					+ "               Identified_document_instance.path, "
+					+ "               Identified_document_instance.volume, "
+					+ "               Identified_document_instance.server, "
+					+ "               Identified_document_instance.digest, " + "               Document.team_id, "
+					+ "               Document.NAME AS document_name, " + "               Team.NAME     AS team_name "
+					+ "        FROM   Identified_document_instance " + "               LEFT JOIN Document "
+					+ "                      ON Identified_document_instance.document_id = Document.id "
+					+ "               LEFT JOIN Team " + "                      ON Document.team_id = Team.id "
+					+ "        WHERE  Identified_document_instance.snapshot_deleted IS NULL) AS IDI2 "
+					+ "WHERE  IDI1.digest = IDI2.digest " + "       AND IDI1.team_id != IDI2.team_id "
+					+ "ORDER  BY IDI1.digest, " + "          IDI1.team_id, " + "          IDI1.document_id, "
+					+ "          IDI1.id, " + "          IDI2.team_id, " + "          IDI2.document_id, "
+					+ "          IDI2.id";
 
 			PreparedStatement stmt = conn.prepareStatement(query);
 			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {					
+			while (rs.next()) {
 				DocumentInstancePair documentInstancePair = new DocumentInstancePair();
 				documentInstancePair.getDocumentInstance1().setDigest(rs.getString(1));
-				documentInstancePair.getDocumentInstance2().setDigest(rs.getString(1));				
-				
+				documentInstancePair.getDocumentInstance2().setDigest(rs.getString(1));
+
 				Document document1 = new Document();
 				Team team1 = new Team();
 				team1.setId(rs.getInt(2));
 				team1.setName(rs.getString(3));
 				document1.setTeam(team1);
 				document1.setId(rs.getInt(4));
-				document1.setName(rs.getString(5));				
-				documentInstancePair.getDocumentInstance1().setDocument(document1);				
+				document1.setName(rs.getString(5));
+				documentInstancePair.getDocumentInstance1().setDocument(document1);
 				documentInstancePair.getDocumentInstance1().setId(rs.getLong(6));
 				documentInstancePair.getDocumentInstance1().setName(rs.getString(7));
 				documentInstancePair.getDocumentInstance1().setPath(rs.getString(8));
 				documentInstancePair.getDocumentInstance1().setVolume(rs.getString(9));
-				
+
 				Document document2 = new Document();
 				Team team2 = new Team();
 				team2.setId(rs.getInt(10));
 				team2.setName(rs.getString(11));
 				document1.setTeam(team2);
 				document2.setId(rs.getInt(12));
-				document2.setName(rs.getString(13));				
-				documentInstancePair.getDocumentInstance2().setDocument(document2);				
+				document2.setName(rs.getString(13));
+				documentInstancePair.getDocumentInstance2().setDocument(document2);
 				documentInstancePair.getDocumentInstance2().setId(rs.getLong(14));
 				documentInstancePair.getDocumentInstance2().setName(rs.getString(15));
 				documentInstancePair.getDocumentInstance2().setPath(rs.getString(16));
 				documentInstancePair.getDocumentInstance2().setVolume(rs.getString(17));
-				
+
 				duplicates.add(documentInstancePair);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getInterTeamDuplicates");
-		}		
+		}
 		return duplicates;
 	}
 
@@ -1230,20 +1117,20 @@ public class DataManager {
 		IdentifiedDocInstance identifiedDocInstance = null;
 		try {
 			Connection conn = ConnectionManager.getConnection("getDocInstance");
-			
+
 			String query = "SELECT id, server, volume, path, name, extension, snapshot_deleted, digest from All_Document_Instance WHERE '\\\\' + server + '/' + volume + '/' + CASE WHEN path is null THEN '' ELSE path + '/' END + name =? AND snapshot_deleted IS NULL";
 			PreparedStatement stmt = conn.prepareStatement(query);
 			stmt.setString(1, address);
-			
-			ResultSet rs = stmt.executeQuery();				
-			
+
+			ResultSet rs = stmt.executeQuery();
+
 			if (rs.next()) {
 				identifiedDocInstance = new IdentifiedDocInstance();
 				identifiedDocInstance.setId(rs.getLong(1));
 				identifiedDocInstance.setServer(rs.getString(2) == null ? null : rs.getString(2).trim());
 				identifiedDocInstance.setVolume(rs.getString(3) == null ? null : rs.getString(3).trim());
 				identifiedDocInstance.setPath(rs.getString(4) == null ? null : rs.getString(4).trim());
-				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());	
+				identifiedDocInstance.setName(rs.getString(5) == null ? null : rs.getString(5).trim());
 				identifiedDocInstance.setExtension(rs.getString(6) == null ? null : rs.getString(6).trim());
 				identifiedDocInstance.setSnapshotDeleted(rs.getInt(7));
 				identifiedDocInstance.setDigest(rs.getString(8));
@@ -1255,57 +1142,50 @@ public class DataManager {
 						identifiedDocInstance.setCommencePath(commencePath);
 						break;
 					}
-					System.out.println(Util.getTimeStamp() + "No matching commence path: " + document.getName() + " " + identifiedDocInstance.getName());
+					System.out.println(Util.getTimeStamp() + "No matching commence path: " + document.getName() + " "
+							+ identifiedDocInstance.getName());
 				}
 			}
-		}
-		catch (SQLException e) {				
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getDocInstance");
 		}
-		
+
 		return identifiedDocInstance;
 	}
 
 	public static ArrayList<Team> getTeams() {
-		ArrayList<Team> teams = new ArrayList<Team>();		
-		try {	
-			Connection conn = ConnectionManager.getConnection("getTeams");	
-			String query = ""
-					+ "SELECT team.id, "
-					+ "       team.NAME, "
-					+ "       team.department "
-					+ "FROM   team "
+		ArrayList<Team> teams = new ArrayList<Team>();
+		try {
+			Connection conn = ConnectionManager.getConnection("getTeams");
+			String query = "" + "SELECT team.id, " + "       team.NAME, " + "       team.department " + "FROM   team "
 					+ "ORDER  BY team.department, team.name";
 
 			PreparedStatement stmt = conn.prepareStatement(query);
 			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {	
+			while (rs.next()) {
 				Team team = new Team();
 				team.setId(rs.getInt(1));
 				team.setName(rs.getString(2));
 				team.setDepartment(rs.getString(3));
 				teams.add(team);
-			}			
-		}
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			ConnectionManager.close("getTeams");
-		}		
+		}
 		return teams;
 	}
 
 	public static void saveSnapshotCount(int documentId) {
 		try {
 			Connection conn = ConnectionManager.getConnection("getTeams");
-			
-			for (int i=1; i<=LATEST_SNAPSHOT; i++) {
+
+			for (int i = 1; i <= LATEST_SNAPSHOT; i++) {
 				int fileCount = 0;
-				
+
 				String selectFileCountQuery = "SELECT count(*) FROM Identified_Document_Instance WHERE document_id = ? AND (snapshot = ? or (snapshot < ? and (snapshot_deleted IS NULL or snapshot_deleted > ?)))";
 				PreparedStatement selectFileCountStatment = conn.prepareStatement(selectFileCountQuery);
 				selectFileCountStatment.setInt(1, documentId);
@@ -1318,7 +1198,7 @@ public class DataManager {
 				}
 				selectFileCountStatment.close();
 				fileCountRs.close();
-				
+
 				String selectQuery = "SELECT * FROM Document_snapshot_count WHERE document_id = ? and snapshot = ?";
 				PreparedStatement selectStatment = conn.prepareStatement(selectQuery);
 				selectStatment.setInt(1, documentId);
@@ -1327,7 +1207,7 @@ public class DataManager {
 				boolean hasRecord = rs.next();
 				selectStatment.close();
 				rs.close();
-				if(hasRecord){
+				if (hasRecord) {
 					String updateQuery = "UPDATE Document_snapshot_count SET file_count = ? WHERE document_id = ? and snapshot = ?";
 					PreparedStatement updateStatement = conn.prepareStatement(updateQuery);
 					updateStatement.setInt(1, fileCount);
@@ -1346,7 +1226,7 @@ public class DataManager {
 					System.out.println("Insert Document_snapshot_count " + fileCount + " " + documentId + " " + i);
 					insertStatement.close();
 				}
-				
+
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1355,6 +1235,5 @@ public class DataManager {
 		}
 
 	}
-	
-	
+
 }
